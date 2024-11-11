@@ -1,12 +1,46 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Schematic Schemers</title>
-</head>
-<body>
-    <h1>Schematic Schemers</h1>
-    <h2>CSI 3335 Group Project</h2>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block body %}
+    <div class="container">
+    <h1>Welcome</h1>
+    <form id="auth-form" action="{{ url_for('login') }}" method="post">
+        <input type="text"
+               name="username"
+               placeholder="username"
+               class="input-field" />
+        <input type="password"
+               name="password"
+               placeholder="password"
+               class="input-field" />
+        <input type="submit"
+               value="Login"
+               class="btn btn-login"
+               onClick="setActionForm('login')" />
+        <input type="button"
+               value="Register"
+               class="btn btn-login"
+               onClick="setActionForm('register')" />
+
+    </form>
+    </div>
+
+
+    <script>
+    function setActionForm(action){
+        let form = document.getElementById("auth-form");
+        if (action == 'login') {
+            form.acton = "{{ url_for('login') }}";
+            form.method = 'post';
+            form.submit();
+
+        }
+        else if (action == "register"){
+            form.action = "{{ url_for('register') }}";
+            form.method = 'post';
+            form.submit();
+        }
+    }
+
+
+    </script>
+{% endblock %}

@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, redirect, session, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import text
 
 app = Flask(__name__)
 app.secret_key = "secret"
@@ -15,8 +14,8 @@ db = SQLAlchemy(app)
 class User(db.Model):
     # Class Variables
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(25), unique=True, nullable=False)
-    password_hash = db.Column(db.String(25), nullable=False)
+    username = db.Column(db.String(150), unique=True, nullable=False)
+    password_hash = db.Column(db.String(150), nullable=False)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -25,10 +24,6 @@ class User(db.Model):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
-
-
-
-
 
 
 
@@ -79,12 +74,11 @@ def dashboard():
 
 
 
-
-
-
-
-
 #Logout
+@app.route("/logout")
+def logout():
+    session.pop('username', None)
+    return redirect(url_for('home'))
 
 
 if __name__ == "__main__":

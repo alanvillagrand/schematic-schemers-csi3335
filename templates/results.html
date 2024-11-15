@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h2 {
+            color: #333;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        ul li {
+            margin: 5px 0;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h2>Search Results</h2>
+
+    {% if message %}
+        <p>{{ message }}</p>
+    {% endif %}
+
+    {% if results %}
+        <ul>
+            {% for player in results %}
+                <li>{{ player[0] }} {{ player[1] }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No results found for your search criteria.</p>
+    {% endif %}
+
+    <a href="/">Back</a>
+</body>
+</html>

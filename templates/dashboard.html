@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block body %}
+<div class="container">
+    <h1>Welcome, {{ username }}!</h1>
+    <p>Find players, stats, or league information based on your selections.</p>
+
+    <!-- Main Form -->
+    <form action="{{ url_for('search_players') }}" method="post" id="dynamicForm">
+        <div class="query-box">
+            <label for="dropdown1">Select Option 1:</label>
+            <select id="dropdown1" name="option1" onchange="handleDropdownChange('dropdown1', 'dynamicOptions1')" required>
+                <option value="" disabled selected>Select an option</option>
+                <option value="teams">Teams</option>
+                <option value="career statistic">Career Statistics</option>
+            </select>
+            <div id="dynamicOptions1" class="dynamic-options"></div>
+        </div>
+
+        <div class="query-box">
+            <label for="dropdown2">Select Option 2:</label>
+            <select id="dropdown2" name="option2" onchange="handleDropdownChange('dropdown2', 'dynamicOptions2')" required>
+                <option value="" disabled selected>Select an option</option>
+                <option value="teams">Teams</option>
+                <option value="career statistic">Career Statistics</option>
+
+            </select>
+            <div id="dynamicOptions2" class="dynamic-options"></div>
+        </div>
+
+        <!-- Submit button -->
+        <button type="submit" class="btn-submit">Submit Query</button>
+    </form>
+
+    <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
+</div>
+
+<!-- JavaScript for Dynamic Dropdowns -->
+<script>
+    // Predefined options for Teams, Leagues, and Stats
+
+    // Function to handle dropdown changes and generate new options dynamically
+    function handleDropdownChange(dropdownId, dynamicOptionsId) {
+        const dropdownValue = document.getElementById(dropdownId).value;
+        const dynamicOptionsDiv = document.getElementById(dynamicOptionsId);
+        dynamicOptionsDiv.innerHTML = ''; // Clear previous options
+
+        let options = [];
+        if (dropdownValue === 'teams') {
+            options = teams;
+        }
+        else if (dropdownValue === 'career statistic') {
+            options = careerStatistics
+        }
+
+        if (options.length > 0) {
+            const select = document.createElement('select');
+            select.name = `${dropdownId}_details`;
+            select.required = true;
+
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.disabled = true;
+            defaultOption.selected = true;
+            defaultOption.textContent = `Select a ${dropdownValue}`;
+            select.appendChild(defaultOption);
+
+            options.forEach(option => {
+                const opt = document.createElement('option');
+                opt.value = option;
+                opt.textContent = option;
+                select.appendChild(opt);
+            });
+
+            dynamicOptionsDiv.appendChild(select);
+        }
+    }
+</script>
+    <script src="{{ url_for('static', filename='teams.js') }}"></script>
+    <script src="{{ url_for('static', filename='careerStatistics.js') }}"></script>
+
+
+<!-- CSS for Dynamic Dropdowns -->
+<style>
+    .dynamic-options { margin-top: 10px; }
+    .query-box { margin-bottom: 20px; }
+</style>
+{% endblock %}

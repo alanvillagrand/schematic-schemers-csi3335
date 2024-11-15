@@ -1,0 +1,664 @@
+Index: app.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from flask import Flask, render_template, request, redirect, session, url_for\r\nfrom werkzeug.security import generate_password_hash, check_password_hash\r\nfrom flask_sqlalchemy import SQLAlchemy\r\n\r\napp = Flask(__name__)\r\napp.secret_key = \"secret\"\r\n\r\n#Configure SQL Alchemy\r\napp.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:Ninja123!@localhost/baseball'\r\napp.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False\r\ndb = SQLAlchemy(app)\r\n\r\n#Database Model\r\nclass User(db.Model):\r\n    # Class Variables\r\n    id = db.Column(db.Integer, primary_key=True)\r\n    username = db.Column(db.String(150), unique=True, nullable=False)\r\n    password_hash = db.Column(db.String(150), nullable=False)\r\n\r\n    def set_password(self, password):\r\n        self.password_hash = generate_password_hash(password)\r\n\r\n\r\n\r\n    def check_password(self, password):\r\n        return check_password_hash(self.password_hash, password)\r\n\r\n\r\n\r\n#Routes\r\n@app.route('/')\r\ndef home():\r\n    if \"username\" in session:\r\n        return redirect(url_for('dashboard'))\r\n    return render_template('index.html')\r\n\r\n#Login\r\n@app.route(\"/login\", methods=[\"POST\"])\r\ndef login():\r\n    #Collect info from the form\r\n    username = request.form['username']\r\n    password = request.form['password']\r\n    user = User.query.filter_by(username=username).first()\r\n    if user and user.check_password(password):\r\n        session['username'] = username\r\n        return redirect(url_for('dashboard'))\r\n    else:\r\n        return render_template('index.html', error=\"Invalid username or password\")\r\n\r\n#Register\r\n@app.route(\"/register\", methods=[\"POST\"])\r\ndef register():\r\n    username = request.form['username']\r\n    password = request.form['password']\r\n    user = User.query.filter_by(username=username).first()\r\n    if user:\r\n        return render_template(\"index.html\", error=\"Username already registered\")\r\n    else:\r\n        new_user = User(username=username)\r\n        new_user.set_password(password)\r\n        db.session.add(new_user)\r\n        db.session.commit()\r\n        session['username'] = username\r\n        return redirect(url_for('dashboard'))\r\n\r\n\r\n#Dashboard\r\n@app.route(\"/dashboard\")\r\ndef dashboard():\r\n    if \"username\" in session:\r\n        return render_template(\"dashboard.html\", username=session['username'])\r\n    return redirect(url_for('home'))\r\n\r\n\r\n\r\n\r\n#Logout\r\n@app.route(\"/logout\")\r\ndef logout():\r\n    session.pop('username', None)\r\n    return redirect(url_for('home'))\r\n\r\n\r\nif __name__ == \"__main__\":\r\n    with app.app_context():\r\n        db.create_all()\r\n    app.run(debug=True)
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app.py b/app.py
+--- a/app.py	(revision cbb12e0c9183161d68bd02d769336ba7f4e09588)
++++ b/app.py	(date 1731693872228)
+@@ -5,14 +5,13 @@
+ app = Flask(__name__)
+ app.secret_key = "secret"
+ 
+-#Configure SQL Alchemy
++# Configure SQLAlchemy
+ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:Ninja123!@localhost/baseball'
+ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+ db = SQLAlchemy(app)
+ 
+-#Database Model
++# Database Model
+ class User(db.Model):
+-    # Class Variables
+     id = db.Column(db.Integer, primary_key=True)
+     username = db.Column(db.String(150), unique=True, nullable=False)
+     password_hash = db.Column(db.String(150), nullable=False)
+@@ -20,34 +19,76 @@
+     def set_password(self, password):
+         self.password_hash = generate_password_hash(password)
+ 
+-
+-
+     def check_password(self, password):
+         return check_password_hash(self.password_hash, password)
+ 
++class Teams(db.Model):
++    __tablename__ = 'teams'
++    teams_ID = db.Column(db.Integer, primary_key=True)
++    teamID = db.Column(db.String(3), nullable=False)
++    yearID = db.Column(db.SmallInteger)
++    lgID = db.Column(db.String(2))
++    team_name = db.Column(db.String(50))
++
++class People(db.Model):
++    __tablename__ = 'people'
++
++    playerID = db.Column(db.String(9), primary_key=True)
++    birthYear = db.Column(db.Integer)
++    birthMonth = db.Column(db.Integer)
++    birthDay = db.Column(db.Integer)
++    birthCountry = db.Column(db.String(255))
++    birthState = db.Column(db.String(255))
++    birthCity = db.Column(db.String(255))
++    deathYear = db.Column(db.Integer)
++    deathMonth = db.Column(db.Integer)
++    deathDay = db.Column(db.Integer)
++    deathCountry = db.Column(db.String(255))
++    deathState = db.Column(db.String(255))
++    deathCity = db.Column(db.String(255))
++    nameFirst = db.Column(db.String(255))
++    nameLast = db.Column(db.String(255))
++    nameGiven = db.Column(db.String(255))
++    weight = db.Column(db.Integer)
++    height = db.Column(db.Integer)
++    bats = db.Column(db.String(255))
++    throws = db.Column(db.String(255))
++    debutDate = db.Column(db.Date)
++    finalGameDate = db.Column(db.Date)
++
++class Batting(db.Model):
++    __tablename__ = 'batting'
++    playerID = db.Column(db.String(9), db.ForeignKey('players.playerID'), primary_key=True)
++    teamID = db.Column(db.String(3), db.ForeignKey('teams.teamID'), primary_key=True)
++    # Other columns (e.g., at_bats, runs, etc.) can be added here as needed.
+ 
+ 
+-#Routes
++# Routes
+ @app.route('/')
+ def home():
+     if "username" in session:
+         return redirect(url_for('dashboard'))
+     return render_template('index.html')
+ 
+-#Login
++# Dashboard route
++@app.route("/dashboard")
++def dashboard():
++    if "username" in session:
++        return render_template("dashboard.html", username=session['username'])
++    return redirect(url_for('home'))
++
++# Login route
+ @app.route("/login", methods=["POST"])
+ def login():
+-    #Collect info from the form
+     username = request.form['username']
+     password = request.form['password']
+     user = User.query.filter_by(username=username).first()
+     if user and user.check_password(password):
+         session['username'] = username
+         return redirect(url_for('dashboard'))
+-    else:
+-        return render_template('index.html', error="Invalid username or password")
++    return render_template('index.html', error="Invalid username or password")
+ 
+-#Register
++# Register route
+ @app.route("/register", methods=["POST"])
+ def register():
+     username = request.form['username']
+@@ -55,33 +96,73 @@
+     user = User.query.filter_by(username=username).first()
+     if user:
+         return render_template("index.html", error="Username already registered")
+-    else:
+-        new_user = User(username=username)
+-        new_user.set_password(password)
+-        db.session.add(new_user)
+-        db.session.commit()
+-        session['username'] = username
+-        return redirect(url_for('dashboard'))
++    new_user = User(username=username)
++    new_user.set_password(password)
++    db.session.add(new_user)
++    db.session.commit()
++    session['username'] = username
++    return redirect(url_for('dashboard'))
+ 
+-
+-#Dashboard
+-@app.route("/dashboard")
+-def dashboard():
+-    if "username" in session:
+-        return render_template("dashboard.html", username=session['username'])
+-    return redirect(url_for('home'))
+-
+-
+-
+-
+-#Logout
++# Logout route
+ @app.route("/logout")
+ def logout():
+     session.pop('username', None)
+     return redirect(url_for('home'))
+ 
++# Search route to find players who played on both teams
++@app.route('/search', methods=['POST'])
++def search_players():
++    # Extract dropdown values
++    option1 = request.form.get('option1')
++    option1_details = request.form.get('dropdown1_details')
++    option2 = request.form.get('option2')
++    option2_details = request.form.get('dropdown2_details')
++
++    if not option1 or not option2:
++        return "Please select an option from both dropdowns.", 400
++
++    results = []
++
++    # Handle search logic based on selected options
++    if option1 == "teams" and option2 == "teams":
++        # Query players who played on both selected teams
++        results = (
++            db.session.query(People.nameFirst, People.nameLast)
++            .join(Batting, Batting.playerID == People.playerID)
++            .join(Teams, Teams.teamID == Batting.teamID)
++            .filter(Teams.team_name.in_([option1_details, option2_details]))
++            .group_by(People.playerID, People.nameFirst, People.nameLast)
++            .having(db.func.count(Teams.team_name.distinct()) == 2)
++            .all()
++        )
++    elif option1 == "cs" or option2 == "cs":
++        # Example: Query career statistics
++        # You may need to refine this based on the exact statistics you want to display
++        if option1 == "cs":
++            stat = option1_details
++        else:
++            stat = option2_details
++
++        # Mock query: Replace this with actual stat-based query logic
++        results = (
++            db.session.query(People.nameFirst, People.nameLast, Batting.stat_column)
++            .filter(Batting.stat_column >= stat)  # Replace `stat_column` with actual stat field
++            .all()
++        )
++    else:
++        return "Invalid selection or combination. Please try again.", 400
++
++    if results:
++        return render_template('results.html', results=results)
++    else:
++        return render_template(
++            'results.html',
++            results=[],
++            message="No matching results found for your query."
++        )
++
+ 
+ if __name__ == "__main__":
+     with app.app_context():
+         db.create_all()
+-    app.run(debug=True)
+\ No newline at end of file
++    app.run(debug=True)
+Index: static/teams.js
+===================================================================
+diff --git a/static/teams.js b/static/teams.js
+new file mode 100644
+--- /dev/null	(date 1731689286240)
++++ b/static/teams.js	(date 1731689286240)
+@@ -0,0 +1,143 @@
++// teams.js
++const teams = [
++    "Altoona Mountain City",
++    "Anaheim Angels",
++    "Arizona Diamondbacks",
++    "Atlanta Braves",
++    "Baltimore Canaries",
++    "Baltimore Marylands",
++    "Baltimore Monumentals",
++    "Baltimore Orioles",
++    "Baltimore Terrapins",
++    "Boston Americans",
++    "Boston Beaneaters",
++    "Boston Bees",
++    "Boston Braves",
++    "Boston Doves",
++    "Boston Red Caps",
++    "Boston Red Sox",
++    "Boston Red Stockings",
++    "Boston Reds",
++    "Boston Rustlers",
++    "Brooklyn Atlantics",
++    "Brooklyn Bridegrooms",
++    "Brooklyn Dodgers",
++    "Brooklyn Eckfords",
++    "Brooklyn Gladiators",
++    "Brooklyn Grays",
++    "Brooklyn Grooms",
++    "Brooklyn Robins",
++    "Brooklyn Superbas",
++    "Brooklyn Tip-Tops",
++    "Brooklyn Ward's Wonders",
++    "Buffalo Bisons",
++    "Buffalo Blues",
++    "Buffalo Buffeds",
++    "California Angels",
++    "Chicago Chi-Feds",
++    "Chicago Colts",
++    "Chicago Cubs",
++    "Chicago Orphans",
++    "Chicago Pirates",
++    "Chicago Whales",
++    "Chicago White Sox",
++    "Chicago White Stockings",
++    "Chicago/Pittsburgh (Union League)",
++    "Cincinnati Kelly's Killers",
++    "Cincinnati Outlaw Reds",
++    "Cincinnati Red Stockings",
++    "Cincinnati Redlegs",
++    "Cincinnati Reds",
++    "Cleveland Blues",
++    "Cleveland Bronchos",
++    "Cleveland Forest Citys",
++    "Cleveland Guardians",
++    "Cleveland Indians",
++    "Cleveland Infants",
++    "Cleveland Naps",
++    "Cleveland Spiders",
++    "Colorado Rockies",
++    "Columbus Buckeyes",
++    "Columbus Solons",
++    "Detroit Tigers",
++    "Detroit Wolverines",
++    "Elizabeth Resolutes",
++    "Florida Marlins",
++    "Fort Wayne Kekiongas",
++    "Hartford Dark Blues",
++    "Houston Astros",
++    "Houston Colt .45's",
++    "Indianapolis Blues",
++    "Indianapolis Hoosiers",
++    "Kansas City Athletics",
++    "Kansas City Cowboys",
++    "Kansas City Packers",
++    "Kansas City Royals",
++    "Keokuk Westerns",
++    "Los Angeles Angels",
++    "Los Angeles Angels of Anaheim",
++    "Los Angeles Dodgers",
++    "Louisville Colonels",
++    "Louisville Eclipse",
++    "Louisville Grays",
++    "Miami Marlins",
++    "Middletown Mansfields",
++    "Milwaukee Braves",
++    "Milwaukee Brewers",
++    "Milwaukee Grays",
++    "Minnesota Twins",
++    "Montreal Expos",
++    "New Haven Elm Citys",
++    "New York Giants",
++    "New York Gothams",
++    "New York Highlanders",
++    "New York Metropolitans",
++    "New York Mets",
++    "New York Mutuals",
++    "New York Yankees",
++    "Newark Pepper",
++    "Oakland Athletics",
++    "Philadelphia Athletics",
++    "Philadelphia Blue Jays",
++    "Philadelphia Centennials",
++    "Philadelphia Keystones",
++    "Philadelphia Phillies",
++    "Philadelphia Quakers",
++    "Philadelphia Whites",
++    "Pittsburg Alleghenys",
++    "Pittsburgh Burghers",
++    "Pittsburgh Pirates",
++    "Pittsburgh Rebels",
++    "Providence Grays",
++    "Richmond Virginians",
++    "Rochester Broncos",
++    "Rockford Forest Citys",
++    "San Diego Padres",
++    "San Francisco Giants",
++    "Seattle Mariners",
++    "Seattle Pilots",
++    "St. Louis Brown Stockings",
++    "St. Louis Browns",
++    "St. Louis Cardinals",
++    "St. Louis Maroons",
++    "St. Louis Perfectos",
++    "St. Louis Red Stockings",
++    "St. Louis Terriers",
++    "St. Paul White Caps",
++    "Syracuse Stars",
++    "Tampa Bay Devil Rays",
++    "Tampa Bay Rays",
++    "Texas Rangers",
++    "Toledo Blue Stockings",
++    "Toledo Maumees",
++    "Toronto Blue Jays",
++    "Troy Haymakers",
++    "Troy Trojans",
++    "Washington Blue Legs",
++    "Washington Nationals",
++    "Washington Olympics",
++    "Washington Senators",
++    "Washington Statesmen",
++    "Wilmington Quicksteps",
++    "Worcester Ruby Legs"
++];
+Index: static/careerStatistics.js
+===================================================================
+diff --git a/static/careerStatistics.js b/static/careerStatistics.js
+new file mode 100644
+--- /dev/null	(date 1731692473605)
++++ b/static/careerStatistics.js	(date 1731692473605)
+@@ -0,0 +1,14 @@
++// careerStatistics.js
++const careerStatistics = [
++    "300+ AVG Career Batting",
++    "200+ Wins Career Pitching",
++    "2000+ K Career Pitching",
++    "2000+ Hits Career Batting",
++    "300+ HR Career Batting",
++    "300+ Saves Career Pitching",
++    "300+ Wins Career Pitching",
++    "3000+ K Career Pitching",
++    "3000+ Hits Career Batting",
++    "40+ WAR Career (calculated)",
++    "≤ 3.00 ERA Career Pitching (calculated)"
++];
+Index: templates/results.html
+===================================================================
+diff --git a/templates/results.html b/templates/results.html
+new file mode 100644
+--- /dev/null	(date 1731694041977)
++++ b/templates/results.html	(date 1731694041977)
+@@ -0,0 +1,26 @@
++<!DOCTYPE html>
++<html lang="en">
++<head>
++    <meta charset="UTF-8">
++    <title>Search Results</title>
++</head>
++<body>
++    <h2>Search Results</h2>
++
++    {% if message %}
++        <p>{{ message }}</p>
++    {% endif %}
++
++    {% if results %}
++        <ul>
++            {% for player in results %}
++                <li>{{ player[0] }} {{ player[1] }}</li>
++            {% endfor %}
++        </ul>
++    {% else %}
++        <p>No results found for your search criteria.</p>
++    {% endif %}
++
++    <a href="/">Back</a>
++</body>
++</html>
+Index: templates/dashboard.html
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>{% extends \"base.html\" %}\r\n\r\n{% block body %}\r\n    <div class=\"container\">\r\n        <h1>Welcome, {{ username }}!</h1>\r\n        <p>Welcome to your Dashboard</p>\r\n\r\n        <!-- Query Input Boxes with Suggestions -->\r\n        <div class=\"query-box\">\r\n            <label for=\"query1\">Enter Query (e.g., .300+ AVG CareerBatting, 10+ HR SeasonBatting, All Star):</label>\r\n            <input type=\"text\" id=\"query1\" name=\"query1\" placeholder=\"Type a query (e.g., .300+ AVG CareerBatting)\" oninput=\"showSuggestions('query1')\" required>\r\n            <div id=\"suggestions1\" class=\"suggestions\"></div> <!-- Suggestions container -->\r\n        </div>\r\n\r\n        <div class=\"query-box\">\r\n            <label for=\"query2\">Enter Query (e.g., 10+ HR SeasonBatting, 300+ HR CareerBatting):</label>\r\n            <input type=\"text\" id=\"query2\" name=\"query2\" placeholder=\"Type a query (e.g., 10+ HR SeasonBatting)\" oninput=\"showSuggestions('query2')\" required>\r\n            <div id=\"suggestions2\" class=\"suggestions\"></div> <!-- Suggestions container -->\r\n        </div>\r\n\r\n        <!-- Button for user action (no backend interaction yet) -->\r\n        <button type=\"button\" class=\"btn-submit\" onclick=\"handleQuery()\">Submit Query</button>\r\n\r\n        <a href=\"{{ url_for('logout') }}\" class=\"btn-logout\">Logout</a>\r\n    </div>\r\n\r\n    <!-- JavaScript to handle user input and display live suggestions -->\r\n    <script>\r\n        // List of possible criteria for query matching\r\n        const criteria = [\r\n            \".300+ AVG CareerBatting\",\r\n            \".300+ AVG SeasonBatting\",\r\n            \"10+ HR SeasonBatting\",\r\n            \"10+ Win SeasonPitching\",\r\n            \"100+ RBI SeasonBatting\",\r\n            \"100+ Run SeasonBatting\",\r\n            \"20+ Win SeasonPitching\",\r\n            \"200+ Hits SeasonBatting\",\r\n            \"200+ K SeasonPitching\",\r\n            \"200+ Wins CareerPitching\",\r\n            \"2000+ K CareerPitching\",\r\n            \"2000+ Hits CareerBatting\",\r\n            \"30+ HR / 30+ SB SeasonBatting\",\r\n            \"30+ HR SeasonBatting\",\r\n            \"30+ SB Season\",\r\n            \"30+ Save SeasonPitching\",\r\n            \"300+ HR CareerBatting\",\r\n            \"300+ Save CareerPitching\",\r\n            \"300+ Wins CareerPitching\",\r\n            \"3000+ K CareerPitching\",\r\n            \"3000+ Hits CareerBatting\",\r\n            \"40+ 2B SeasonBatting\",\r\n            \"40+ HR SeasonBatting\",\r\n            \"40+ Save SeasonPitching\",\r\n            \"40+ WAR Career\",\r\n            \"500+ HR CareerBatting\",\r\n            \"6+ WAR Season\",\r\n            \"All Star\",\r\n            \"Born Outside US 50 States and DC\",\r\n            \"Cy Young\",\r\n            \"Designated Hitter min. 1 game\",\r\n            \"First Round Draft Pick\",\r\n            \"Gold Glove\",\r\n            \"Hall of Fame\",\r\n            \"MVP\",\r\n            \"Only One Team\",\r\n            \"Pitched min. 1 game\",\r\n            \"Played Catcher min. 1 game\",\r\n            \"Played Center Field min. 1 game\",\r\n            \"Played First Base min. 1 game\",\r\n            \"Played In Major Negro Lgs\",\r\n            \"Played Left Field min. 1 game\",\r\n            \"Played Outfield min. 1 game\",\r\n            \"Played Right Field min. 1 game\",\r\n            \"Played Second Base min. 1 game\",\r\n            \"Played Shortstop min. 1 game\",\r\n            \"Played Third Base min. 1 game\",\r\n            \"Rookie of the Year\",\r\n            \"Silver Slugger\",\r\n            \"Threw a No‑Hitter\",\r\n            \"World Series Champ WS Roster\",\r\n            \"≤ 3.00 ERA Career Pitching\",\r\n            \"≤ 3.00 ERA Season\",\r\n            \"Played on <team>\"\r\n        ];\r\n\r\n        // Function to show suggestions as the user types\r\n        function showSuggestions(inputId) {\r\n            const input = document.getElementById(inputId).value.toLowerCase();\r\n            const suggestionsDiv = document.getElementById('suggestions' + inputId.slice(-1)); // Corresponding suggestions div\r\n            suggestionsDiv.innerHTML = ''; // Clear previous suggestions\r\n\r\n            // If input is not empty, filter matching options\r\n            if (input) {\r\n                const matches = criteria.filter(option => option.toLowerCase().includes(input));\r\n                matches.forEach(match => {\r\n                    const suggestionItem = document.createElement('div');\r\n                    suggestionItem.classList.add('suggestion-item');\r\n                    suggestionItem.textContent = match;\r\n                    suggestionItem.onclick = () => selectSuggestion(inputId, match);\r\n                    suggestionsDiv.appendChild(suggestionItem);\r\n                });\r\n            }\r\n        }\r\n\r\n        // When a suggestion is clicked, fill the input with it\r\n        function selectSuggestion(inputId, suggestion) {\r\n            document.getElementById(inputId).value = suggestion;\r\n            document.getElementById('suggestions' + inputId.slice(-1)).innerHTML = ''; // Clear suggestions\r\n        }\r\n\r\n        // Handle the query submission (for demonstration purposes)\r\n        function handleQuery() {\r\n            const query1 = document.getElementById('query1').value.toLowerCase();\r\n            const query2 = document.getElementById('query2').value.toLowerCase();\r\n            let results = '';\r\n\r\n            // Handle the first query input\r\n            if (criteria.includes(query1)) {\r\n                results += `Query 1: Searching for ${query1}...<br>`;\r\n            } else {\r\n                results += `Query 1: Invalid query. Please type a valid query.<br>`;\r\n            }\r\n\r\n            // Handle the second query input\r\n            if (criteria.includes(query2)) {\r\n                results += `Query 2: Searching for ${query2}...<br>`;\r\n            } else {\r\n                results += `Query 2: Invalid query. Please type a valid query.<br>`;\r\n            }\r\n\r\n            // Display results\r\n            const resultsDiv = document.createElement('div');\r\n            resultsDiv.innerHTML = `<h2>Query Results:</h2><p>${results}</p>`;\r\n            document.body.appendChild(resultsDiv);\r\n        }\r\n    </script>\r\n\r\n    <!-- CSS for suggestions -->\r\n    <style>\r\n        .suggestions {\r\n            border: 1px solid #ccc;\r\n            max-height: 150px;\r\n            overflow-y: auto;\r\n            margin-top: 5px;\r\n            position: absolute;\r\n            width: 100%;\r\n            background-color: white;\r\n            z-index: 10;\r\n        }\r\n\r\n        .suggestion-item {\r\n            padding: 8px;\r\n            cursor: pointer;\r\n        }\r\n\r\n        .suggestion-item:hover {\r\n            background-color: #f0f0f0;\r\n        }\r\n\r\n        .query-box {\r\n            position: relative;\r\n            margin-bottom: 20px;\r\n        }\r\n    </style>\r\n\r\n{% endblock %}\r\n
+===================================================================
+diff --git a/templates/dashboard.html b/templates/dashboard.html
+--- a/templates/dashboard.html	(revision cbb12e0c9183161d68bd02d769336ba7f4e09588)
++++ b/templates/dashboard.html	(date 1731692303492)
+@@ -1,167 +1,98 @@
+ {% extends "base.html" %}
+ 
+ {% block body %}
+-    <div class="container">
+-        <h1>Welcome, {{ username }}!</h1>
+-        <p>Welcome to your Dashboard</p>
++<div class="container">
++    <h1>Welcome, {{ username }}!</h1>
++    <p>Find players, stats, or league information based on your selections.</p>
+ 
+-        <!-- Query Input Boxes with Suggestions -->
++    <!-- Main Form -->
++    <form action="{{ url_for('search_players') }}" method="post" id="dynamicForm">
+         <div class="query-box">
+-            <label for="query1">Enter Query (e.g., .300+ AVG CareerBatting, 10+ HR SeasonBatting, All Star):</label>
+-            <input type="text" id="query1" name="query1" placeholder="Type a query (e.g., .300+ AVG CareerBatting)" oninput="showSuggestions('query1')" required>
+-            <div id="suggestions1" class="suggestions"></div> <!-- Suggestions container -->
++            <label for="dropdown1">Select Option 1:</label>
++            <select id="dropdown1" name="option1" onchange="handleDropdownChange('dropdown1', 'dynamicOptions1')" required>
++                <option value="" disabled selected>Select an option</option>
++                <option value="teams">Teams</option>
++                <option value="leagues">Leagues</option>
++                <option value="awards">Awards</option>
++                <option value="pob">Place of Birth</option>
++                <option value="cs">Career Statistics</option>
++                <option value="ss">Seasonal Statistics</option>
++                <option value="positions">Positions Played</option>
++            </select>
++            <div id="dynamicOptions1" class="dynamic-options"></div>
+         </div>
+ 
+         <div class="query-box">
+-            <label for="query2">Enter Query (e.g., 10+ HR SeasonBatting, 300+ HR CareerBatting):</label>
+-            <input type="text" id="query2" name="query2" placeholder="Type a query (e.g., 10+ HR SeasonBatting)" oninput="showSuggestions('query2')" required>
+-            <div id="suggestions2" class="suggestions"></div> <!-- Suggestions container -->
++            <label for="dropdown2">Select Option 2:</label>
++            <select id="dropdown2" name="option2" onchange="handleDropdownChange('dropdown2', 'dynamicOptions2')" required>
++                <option value="" disabled selected>Select an option</option>
++                <option value="teams">Teams</option>
++                <option value="leagues">Leagues</option>
++                <option value="awards">Awards</option>
++                <option value="pob">Place of Birth</option>
++                <option value="cs">Career Statistics</option>
++                <option value="ss">Seasonal Statistics</option>
++                <option value="positions">Positions Played</option>
++            </select>
++            <div id="dynamicOptions2" class="dynamic-options"></div>
+         </div>
+ 
+-        <!-- Button for user action (no backend interaction yet) -->
+-        <button type="button" class="btn-submit" onclick="handleQuery()">Submit Query</button>
++        <!-- Submit button -->
++        <button type="submit" class="btn-submit">Submit Query</button>
++    </form>
+ 
+-        <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
+-    </div>
++    <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
++</div>
+ 
+-    <!-- JavaScript to handle user input and display live suggestions -->
+-    <script>
+-        // List of possible criteria for query matching
+-        const criteria = [
+-            ".300+ AVG CareerBatting",
+-            ".300+ AVG SeasonBatting",
+-            "10+ HR SeasonBatting",
+-            "10+ Win SeasonPitching",
+-            "100+ RBI SeasonBatting",
+-            "100+ Run SeasonBatting",
+-            "20+ Win SeasonPitching",
+-            "200+ Hits SeasonBatting",
+-            "200+ K SeasonPitching",
+-            "200+ Wins CareerPitching",
+-            "2000+ K CareerPitching",
+-            "2000+ Hits CareerBatting",
+-            "30+ HR / 30+ SB SeasonBatting",
+-            "30+ HR SeasonBatting",
+-            "30+ SB Season",
+-            "30+ Save SeasonPitching",
+-            "300+ HR CareerBatting",
+-            "300+ Save CareerPitching",
+-            "300+ Wins CareerPitching",
+-            "3000+ K CareerPitching",
+-            "3000+ Hits CareerBatting",
+-            "40+ 2B SeasonBatting",
+-            "40+ HR SeasonBatting",
+-            "40+ Save SeasonPitching",
+-            "40+ WAR Career",
+-            "500+ HR CareerBatting",
+-            "6+ WAR Season",
+-            "All Star",
+-            "Born Outside US 50 States and DC",
+-            "Cy Young",
+-            "Designated Hitter min. 1 game",
+-            "First Round Draft Pick",
+-            "Gold Glove",
+-            "Hall of Fame",
+-            "MVP",
+-            "Only One Team",
+-            "Pitched min. 1 game",
+-            "Played Catcher min. 1 game",
+-            "Played Center Field min. 1 game",
+-            "Played First Base min. 1 game",
+-            "Played In Major Negro Lgs",
+-            "Played Left Field min. 1 game",
+-            "Played Outfield min. 1 game",
+-            "Played Right Field min. 1 game",
+-            "Played Second Base min. 1 game",
+-            "Played Shortstop min. 1 game",
+-            "Played Third Base min. 1 game",
+-            "Rookie of the Year",
+-            "Silver Slugger",
+-            "Threw a No‑Hitter",
+-            "World Series Champ WS Roster",
+-            "≤ 3.00 ERA Career Pitching",
+-            "≤ 3.00 ERA Season",
+-            "Played on <team>"
+-        ];
++<!-- JavaScript for Dynamic Dropdowns -->
++<script>
++    // Predefined options for Teams, Leagues, and Stats
++    const leagues = ["American League", "National League"];
++    const stats = ["Batting Average", "Home Runs", "RBIs"];
+ 
+-        // Function to show suggestions as the user types
+-        function showSuggestions(inputId) {
+-            const input = document.getElementById(inputId).value.toLowerCase();
+-            const suggestionsDiv = document.getElementById('suggestions' + inputId.slice(-1)); // Corresponding suggestions div
+-            suggestionsDiv.innerHTML = ''; // Clear previous suggestions
++    // Function to handle dropdown changes and generate new options dynamically
++    function handleDropdownChange(dropdownId, dynamicOptionsId) {
++        const dropdownValue = document.getElementById(dropdownId).value;
++        const dynamicOptionsDiv = document.getElementById(dynamicOptionsId);
++        dynamicOptionsDiv.innerHTML = ''; // Clear previous options
+ 
+-            // If input is not empty, filter matching options
+-            if (input) {
+-                const matches = criteria.filter(option => option.toLowerCase().includes(input));
+-                matches.forEach(match => {
+-                    const suggestionItem = document.createElement('div');
+-                    suggestionItem.classList.add('suggestion-item');
+-                    suggestionItem.textContent = match;
+-                    suggestionItem.onclick = () => selectSuggestion(inputId, match);
+-                    suggestionsDiv.appendChild(suggestionItem);
+-                });
+-            }
++        let options = [];
++        if (dropdownValue === 'teams') {
++            options = teams;
++        } else if (dropdownValue === 'leagues') {
++            options = leagues;
++        } else if (dropdownValue === 'stats') {
++            options = stats;
+         }
+ 
+-        // When a suggestion is clicked, fill the input with it
+-        function selectSuggestion(inputId, suggestion) {
+-            document.getElementById(inputId).value = suggestion;
+-            document.getElementById('suggestions' + inputId.slice(-1)).innerHTML = ''; // Clear suggestions
+-        }
++        if (options.length > 0) {
++            const select = document.createElement('select');
++            select.name = `${dropdownId}_details`;
++            select.required = true;
+ 
+-        // Handle the query submission (for demonstration purposes)
+-        function handleQuery() {
+-            const query1 = document.getElementById('query1').value.toLowerCase();
+-            const query2 = document.getElementById('query2').value.toLowerCase();
+-            let results = '';
++            const defaultOption = document.createElement('option');
++            defaultOption.value = '';
++            defaultOption.disabled = true;
++            defaultOption.selected = true;
++            defaultOption.textContent = `Select a ${dropdownValue}`;
++            select.appendChild(defaultOption);
+ 
+-            // Handle the first query input
+-            if (criteria.includes(query1)) {
+-                results += `Query 1: Searching for ${query1}...<br>`;
+-            } else {
+-                results += `Query 1: Invalid query. Please type a valid query.<br>`;
+-            }
++            options.forEach(option => {
++                const opt = document.createElement('option');
++                opt.value = option;
++                opt.textContent = option;
++                select.appendChild(opt);
++            });
+ 
+-            // Handle the second query input
+-            if (criteria.includes(query2)) {
+-                results += `Query 2: Searching for ${query2}...<br>`;
+-            } else {
+-                results += `Query 2: Invalid query. Please type a valid query.<br>`;
+-            }
+-
+-            // Display results
+-            const resultsDiv = document.createElement('div');
+-            resultsDiv.innerHTML = `<h2>Query Results:</h2><p>${results}</p>`;
+-            document.body.appendChild(resultsDiv);
+-        }
+-    </script>
++            dynamicOptionsDiv.appendChild(select);
++        }
++    }
++</script>
++    <script src="{{ url_for('static', filename='teams.js') }}"></script>
+ 
+-    <!-- CSS for suggestions -->
+-    <style>
+-        .suggestions {
+-            border: 1px solid #ccc;
+-            max-height: 150px;
+-            overflow-y: auto;
+-            margin-top: 5px;
+-            position: absolute;
+-            width: 100%;
+-            background-color: white;
+-            z-index: 10;
+-        }
+-
+-        .suggestion-item {
+-            padding: 8px;
+-            cursor: pointer;
+-        }
+-
+-        .suggestion-item:hover {
+-            background-color: #f0f0f0;
+-        }
+-
+-        .query-box {
+-            position: relative;
+-            margin-bottom: 20px;
+-        }
+-    </style>
+-
++<!-- CSS for Dynamic Dropdowns -->
++<style>
++    .dynamic-options { margin-top: 10px; }
++    .query-box { margin-bottom: 20px; }
++</style>
+ {% endblock %}

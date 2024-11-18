@@ -141,3 +141,15 @@ const teams = [
     "Wilmington Quicksteps",
     "Worcester Ruby Legs"
 ];
+
+function populateTeamsDropdown() {
+    const dropdown = document.getElementById("teamsDropdown");
+    teams.forEach((team) => {
+        const option = document.createElement("option");
+        option.value = team;
+        option.textContent = team;
+        dropdown.appendChild(option);
+    });
+}
+
+document.addEventListener("DOMContentLoaded", populateTeamsDropdown);

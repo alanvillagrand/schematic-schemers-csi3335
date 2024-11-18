@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+<div class="container">
+    <h1>View team stats</h1>
+    <p>Select a team and year to view team statistic for that year</p>
+
+    <!-- Team stats form -->
+    <form action="" method="post" id="dynamicForm">
+        <!-- Select team -->
+         <div>
+            <label for="teamsDropdown">Team:</label>
+            <select name="team" id="teamsDropdown">
+                <option value="" disabled selected>Select a team</option>
+            </select>
+         </div>
+
+         <!-- Sekect year -->
+          <div>
+            <label for="yearsDropdown">Year:</label>
+            <select name="year" id="yearsDropdown">
+                <option value="" disabled selected>Select a year</option>
+            </select>
+          </div>
+
+        <button type="submit" class="btn-submit">View statistics</button>
+    </form>
+</div>
+
+<script src="{{ url_for('static', filename='teams.js')}}"></script>
+<script src="{{ url_for('static', filename='years.js')}}"></script>
+
+{% endblock %}

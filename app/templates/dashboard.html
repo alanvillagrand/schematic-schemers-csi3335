@@ -4,7 +4,7 @@
 <div class="container">
     <h1>Welcome, {{ username }}!</h1>
     <p>Find players, stats, or league information based on your selections.</p>
-    <a href="{{ url_for('main.team_stats') }}">Team stats</a>
+    <a href="{{ url_for('team.team_stats') }}">Team stats</a>
 
     <!-- Main Form -->
     <form action="{{ url_for('search.search_players') }}" method="post" id="dynamicForm">

@@ -14,9 +14,3 @@ def dashboard():
     if "username" in session:
         return render_template("dashboard.html", username=session['username'])
     return redirect(url_for('main.home'))
-
-@bp.route('/team_stats')
-def team_stats():
-    if "username" in session:
-        return render_template("team_stats.html")
-    return redirect(url_for('main.home'))

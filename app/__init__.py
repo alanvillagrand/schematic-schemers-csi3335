@@ -14,9 +14,10 @@ def create_app():
     db.init_app(app)
 
     # Register blueprints
-    from app.routes import auth_routes, main_routes, search_routes
+    from app.routes import auth_routes, main_routes, search_routes, team_routes
     app.register_blueprint(auth_routes)
     app.register_blueprint(main_routes)
     app.register_blueprint(search_routes)
+    app.register_blueprint(team_routes)
 
     return app

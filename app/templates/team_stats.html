@@ -3,32 +3,18 @@
 {% block body %}
 
 <div class="container">
-    <h1>View team stats</h1>
-    <p>Select a team and year to view team statistic for that year</p>
+    <h1>{{ team_name }}: {{ year }}</h1>
 
-    <!-- Team stats form -->
-    <form action="" method="post" id="dynamicForm">
-        <!-- Select team -->
-         <div>
-            <label for="teamsDropdown">Team:</label>
-            <select name="team" id="teamsDropdown">
-                <option value="" disabled selected>Select a team</option>
-            </select>
-         </div>
+    {% if team_info %}
+        <p><strong>Wins:</strong> {{ team_info.team_W }}</p>
+        <p><strong>Losses:</strong> {{ team_info.team_L }}</p>
+        <p><strong>Rank:</strong> {{ team_info.team_rank }}</p>
+        <p><strong>Stadium:</strong> {{ team_info.park_name }}</p>
+    {% else %}
+        <p>No data found for the selected team and year.</p>
+    {% endif %}
 
-         <!-- Sekect year -->
-          <div>
-            <label for="yearsDropdown">Year:</label>
-            <select name="year" id="yearsDropdown">
-                <option value="" disabled selected>Select a year</option>
-            </select>
-          </div>
-
-        <button type="submit" class="btn-submit">View statistics</button>
-    </form>
+    <a href="{{ url_for('team.team_stats') }}">Search again</a>
 </div>
-
-<script src="{{ url_for('static', filename='teams.js')}}"></script>
-<script src="{{ url_for('static', filename='years.js')}}"></script>
 
 {% endblock %}

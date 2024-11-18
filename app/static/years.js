@@ -1,5 +1,5 @@
 // Generate an array of years from 1871 to 2022
-const years = Array.from({ length: 2022 - 1871 + 1 }, (_, i) => 1871 + i);
+const years = Array.from({ length: 2022 - 1871 + 1 }, (_, i) => 2022 - i);
 
 // Function to populate a dropdown with years
 function populateYearsDropdown() {

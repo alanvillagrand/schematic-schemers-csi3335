@@ -6,7 +6,7 @@
     <p>Find players, stats, or league information based on your selections.</p>
 
     <!-- Main Form -->
-    <form action="{{ url_for('search_players') }}" method="post" id="dynamicForm">
+    <form action="{{ url_for('search.search_players') }}" method="post" id="dynamicForm">
         <div class="query-box">
             <label for="dropdown1">Select Option 1:</label>
             <select id="dropdown1" name="option1" onchange="handleDropdownChange('dropdown1', 'dynamicOptions1')" required>
@@ -32,7 +32,7 @@
         <button type="submit" class="btn-submit">Submit Query</button>
     </form>
 
-    <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
+    <a href="{{ url_for('auth.logout') }}" class="btn-logout">Logout</a>
 </div>
 
 <!-- JavaScript for Dynamic Dropdowns -->

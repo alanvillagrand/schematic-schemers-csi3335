@@ -1,0 +1,3 @@
+const seasonalStatisticsRBI = [
+    "100+"
+]

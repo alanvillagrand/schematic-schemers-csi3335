@@ -14,6 +14,7 @@
                 <option value="" disabled selected>Select an option</option>
                 <option value="teams">Teams</option>
                 <option value="career statistic">Career Statistics</option>
+                <option value="seasonal statistic">Seasonal Statistic</option>
                 <option value="awards">Awards</option>
                 <option value="positions">Positions</option>
             </select>
@@ -26,6 +27,7 @@
                 <option value="" disabled selected>Select an option</option>
                 <option value="teams">Teams</option>
                 <option value="career statistic">Career Statistics</option>
+                <option value="seasonal statistic">Seasonal Statistic</option>
                 <option value="awards">Awards</option>
                 <option value="positions">Positions</option>
             </select>
@@ -63,9 +65,12 @@
         else if (dropdownValue === 'positions'){
             createDropdown(dynamicOptionsDiv, positions, `${dropdownId}_details`, "Select a Position" );
         }
+        else if ( dropdownValue === 'seasonal statistic'){
+            createSeasonalStatsOptions(dynamicOptionsDiv, dropdownId)
+
+        }
     }
 
-    // Function to create additional fields for Career Statistics
     function createCareerStatsOptions(container, dropdownId) {
         const typeSelect = document.createElement('select');
         typeSelect.name = `${dropdownId}_type`;
@@ -110,8 +115,71 @@
             container.appendChild(statsContainer);
         });
     }
+    function createSeasonalStatsOptions(container, dropdownId) {
+        const statSelect = document.createElement('select');
+        statSelect.name = `${dropdownId}_details`;
+        statSelect.required = true;
+        statSelect.id = `${dropdownId}_details`;
 
-    // Helper function to create a dropdown dynamically
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.disabled = true;
+        defaultOption.selected = true;
+        defaultOption.textContent = "Select a Stat";
+        statSelect.appendChild(defaultOption);
+
+        seasonalStatistics.forEach(stat => {
+            const statOption = document.createElement('option');
+            statOption.value = stat;
+            statOption.textContent = stat;
+            statSelect.appendChild(statOption);
+        });
+
+        container.appendChild(statSelect);
+
+        // Add event listener for stat selection to generate specific options
+        statSelect.addEventListener('change', function () {
+            const selectedStat = statSelect.value;
+            const specificOptionsContainer = document.createElement('div');
+            specificOptionsContainer.id = `${dropdownId}_specific_options`;
+
+            // Clear existing options if they exist
+            const existingOptions = document.getElementById(`${dropdownId}_specific_options`);
+            if (existingOptions) existingOptions.remove();
+
+            // Based on selected stat, generate the specific ranges
+            let statOptions = [];
+            if (selectedStat === 'HR') {
+                statOptions = seasonalStatisticsHR;
+            }
+            else if (selectedStat === "Win") {
+                statOptions = seasonalStatisticsWin;
+            }
+            else if (selectedStat === "RBI"){
+                statOptions = seasonalStatisticsRBI;
+            }
+            else if (selectedStat === "Run"){
+                statOptions = seasonalStatisticsRun
+            }
+            else if (selectedStat === "Hits"){
+                statOptions = seasonalStatisticsHits
+            }
+            else if (selectedStat === "SB"){
+                statOptions = seasonalStatisticsSB
+            }
+
+            // Create dropdown for the selected stat's range options
+            createDropdown(
+                specificOptionsContainer,
+                statOptions,
+                `${dropdownId}_${selectedStat}_specific`,
+                `Select a ${selectedStat} Range`
+            );
+
+            container.appendChild(specificOptionsContainer);
+        });
+
+}
     function createDropdown(container, options, name, placeholder) {
         const select = document.createElement('select');
         select.name = name;
@@ -135,11 +203,17 @@
     }
 </script>
 
+    <script src="{{ url_for('static', filename='seasonalStatistics.js') }}"></script>
 <script src="{{ url_for('static', filename='positions.js') }}"></script>
 <script src="{{ url_for('static', filename='awards.js') }}"></script>
 <script src="{{ url_for('static', filename='teams.js') }}"></script>
 <script src="{{ url_for('static', filename='careerStatistics.js') }}"></script>
-
+<script src="{{ url_for('static', filename='seasonalStatisticsHR.js') }}"></script>
+<script src="{{ url_for('static', filename='seasonalStatisticsWin.js') }}"></script>
+    <script src="{{ url_for('static', filename='seasonalStatisticsRBI.js') }}"></script>
+    <script src="{{ url_for('static', filename='seasonalStatisticsRun.js') }}"></script>
+    <script src="{{ url_for('static', filename='seasonalStatisticsHits.js') }}"></script>
+    <script src="{{ url_for('static', filename='seasonalStatisticsSB.js') }}"></script>
 
 
 <!-- CSS for Dynamic Dropdowns -->

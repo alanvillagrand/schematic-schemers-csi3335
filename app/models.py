@@ -43,7 +43,7 @@ class Batting(db.Model):
     __tablename__ = 'batting'
     batting_ID = db.Column(db.Integer, primary_key=True, autoincrement=True)
     playerID = db.Column(db.String(9), db.ForeignKey('people.playerID'), nullable=False)
-    yearId = db.Column(db.SmallInteger, nullable=False)
+    yearID = db.Column(db.SmallInteger, nullable=False)
     teamID = db.Column(db.String(3), db.ForeignKey('teams.teamID'), nullable=False)
     stint = db.Column(db.SmallInteger, nullable=False)
     b_G = db.Column(db.SmallInteger)
@@ -115,3 +115,63 @@ class Teams(db.Model):
     team_PPF = db.Column(db.SmallInteger)
     team_projW = db.Column(db.SmallInteger)
     team_projL = db.Column(db.SmallInteger)
+
+class Awards(db.Model):
+    __tablename__ = 'awards'  # Table name in your database
+
+    awards_ID = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    awardID = db.Column(db.String(255), nullable=False)
+    yearID = db.Column(db.SmallInteger, nullable=False)
+    playerID = db.Column(db.String(9), db.ForeignKey('people.playerID'), nullable=False)
+    lgID = db.Column(db.CHAR(2), nullable=False)
+    tie = db.Column(db.String(1))
+    notes = db.Column(db.String(100))
+
+class Fielding(db.Model):
+    __tablename__ = 'fielding'  # Table name in your database
+
+    fielding_ID = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    playerID = db.Column(db.String(9), db.ForeignKey('people.playerID'), nullable=False)
+    yearID = db.Column(db.SmallInteger, nullable=False)
+    teamID = db.Column(db.String(3), db.ForeignKey('teams.teamID'), nullable=False)
+    stint = db.Column(db.SmallInteger, nullable=False)
+    position = db.Column(db.String(2), nullable=True)  # Position (e.g., SS, 2B)
+    f_G = db.Column(db.SmallInteger, nullable=True)  # Games
+    f_GS = db.Column(db.SmallInteger, nullable=True)  # Games Started
+    f_InnOuts = db.Column(db.SmallInteger, nullable=True)  # Innings Outs (1 out = 1/3 inning)
+    f_PO = db.Column(db.SmallInteger, nullable=True)  # Putouts
+    f_A = db.Column(db.SmallInteger, nullable=True)  # Assists
+    f_E = db.Column(db.SmallInteger, nullable=True)  # Errors
+    f_DP = db.Column(db.SmallInteger, nullable=True)  # Double Plays
+    f_PB = db.Column(db.SmallInteger, nullable=True)  # Passed Balls (Catchers)
+    f_WP = db.Column(db.SmallInteger, nullable=True)  # Wild Pitches (Catchers)
+    f_SB = db.Column(db.SmallInteger, nullable=True)  # Stolen Bases Allowed
+    f_CS = db.Column(db.SmallInteger, nullable=True)  # Caught Stealing
+    f_ZR = db.Column(db.Float, nullable=True)  # Zone Rating (defensive metric)
+
+
+class HallOfFame(db.Model):
+    __tablename__ = 'halloffame'
+
+    halloffame_ID = db.Column(db.Integer, primary_key=True, autoincrement=True)  # Auto-incremented ID
+    playerID = db.Column(db.String(9), db.ForeignKey('people.playerID'), nullable=False)  # Foreign key to People table
+    yearID = db.Column(db.SmallInteger, nullable=False)
+    votedBy = db.Column(db.String(64), nullable=False)
+    ballots = db.Column(db.SmallInteger)
+    needed = db.Column(db.SmallInteger)
+    votes = db.Column(db.SmallInteger)
+    inducted = db.Column(db.String(1))  # 'Y' or 'N'
+    category = db.Column(db.String(20))
+    note = db.Column(db.String(25))
+
+class AllStarFull(db.Model):
+    __tablename__ = 'allstarfull'
+
+    allstarfull_ID = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    playerID = db.Column(db.String(9), nullable=False, index=True)
+    lgID = db.Column(db.CHAR(2), nullable=False, index=True)
+    teamID = db.Column(db.CHAR(3), nullable=False)
+    yearID = db.Column(db.SmallInteger, nullable=False)
+    gameID = db.Column(db.String(12), nullable=True)
+    GP = db.Column(db.SmallInteger, nullable=True)
+    startingPos = db.Column(db.SmallInteger, nullable=True)

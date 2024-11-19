@@ -1,0 +1,3 @@
+const seasonalStatisticsRun = [
+    "100+"
+]

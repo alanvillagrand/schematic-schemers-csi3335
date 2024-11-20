@@ -1,0 +1,1 @@
+const seasonalStatisticsHR = ["10+", "30+", "40+"];

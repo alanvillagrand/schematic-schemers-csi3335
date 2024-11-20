@@ -17,6 +17,7 @@
                 <option value="seasonal statistic">Seasonal Statistic</option>
                 <option value="awards">Awards</option>
                 <option value="positions">Positions</option>
+                <option value="pob">Place of Birth</option>
             </select>
             <div id="dynamicOptions1" class="dynamic-options"></div>
         </div>
@@ -30,6 +31,7 @@
                 <option value="seasonal statistic">Seasonal Statistic</option>
                 <option value="awards">Awards</option>
                 <option value="positions">Positions</option>
+                <option value="pob">Place of Birth</option>
             </select>
             <div id="dynamicOptions2" class="dynamic-options"></div>
         </div>
@@ -67,6 +69,10 @@
         }
         else if ( dropdownValue === 'seasonal statistic'){
             createSeasonalStatsOptions(dynamicOptionsDiv, dropdownId)
+
+        }
+        else if (dropdownValue === "pob"){
+            createDropdown(dynamicOptionsDiv, placeOfBirth, `${dropdownId}_details`, "Select a Place of Birth")
 
         }
     }
@@ -167,6 +173,9 @@
             else if (selectedStat === "SB"){
                 statOptions = seasonalStatisticsSB
             }
+            else if (selectedStat === "SV"){
+                statOptions = seasonalStatisticsSV
+            }
 
             // Create dropdown for the selected stat's range options
             createDropdown(
@@ -214,6 +223,9 @@
     <script src="{{ url_for('static', filename='seasonalStatisticsRun.js') }}"></script>
     <script src="{{ url_for('static', filename='seasonalStatisticsHits.js') }}"></script>
     <script src="{{ url_for('static', filename='seasonalStatisticsSB.js') }}"></script>
+    <script src="{{ url_for('static', filename='seasonalStatisticsSV.js') }}"></script>
+    <script src="{{ url_for('static', filename='placeOfBirth.js') }}"></script>
+
 
 
 <!-- CSS for Dynamic Dropdowns -->

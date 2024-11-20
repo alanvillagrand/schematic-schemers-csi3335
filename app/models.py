@@ -185,7 +185,7 @@ class Appearances(db.Model):
 
     # Foreign Keys
     playerID = db.Column(db.String(9), db.ForeignKey('people.playerID'), nullable=False)
-    teamId = db.Column(db.String(3), db.ForeignKey('teams.teamID'), nullable=False)
+    teamID = db.Column(db.String(3), db.ForeignKey('teams.teamID'), nullable=False)
     yearID = db.Column(db.SmallInteger, nullable=False)
 
     # Games Played
@@ -206,3 +206,38 @@ class Appearances(db.Model):
     G_dh = db.Column(db.SmallInteger)  # Games played as a designated hitter
     G_ph = db.Column(db.SmallInteger)  # Games played as a pinch hitter
     G_pr = db.Column(db.SmallInteger)  # Games played as a pinch runner
+
+
+class Pitching(db.Model):
+    __tablename__ = 'pitching'
+
+    pitching_ID = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    playerID = db.Column(db.String(9), nullable=False, index=True)
+    yearID = db.Column(db.SmallInteger, nullable=False)
+    teamID = db.Column(db.CHAR(3), nullable=False, index=True)
+    stint = db.Column(db.SmallInteger, nullable=False)
+    p_W = db.Column(db.SmallInteger, nullable=True)
+    p_L = db.Column(db.SmallInteger, nullable=True)
+    p_G = db.Column(db.SmallInteger, nullable=True)
+    p_GS = db.Column(db.SmallInteger, nullable=True)
+    p_CG = db.Column(db.SmallInteger, nullable=True)
+    p_SHO = db.Column(db.SmallInteger, nullable=True)
+    p_SV = db.Column(db.SmallInteger, nullable=True)
+    p_IPOuts = db.Column(db.Integer, nullable=True)
+    p_H = db.Column(db.SmallInteger, nullable=True)
+    p_ER = db.Column(db.SmallInteger, nullable=True)
+    p_HR = db.Column(db.SmallInteger, nullable=True)
+    p_BB = db.Column(db.SmallInteger, nullable=True)
+    p_SO = db.Column(db.SmallInteger, nullable=True)
+    p_BAOpp = db.Column(db.Float, nullable=True)
+    p_ERA = db.Column(db.Float, nullable=True)
+    p_IBB = db.Column(db.SmallInteger, nullable=True)
+    p_WP = db.Column(db.SmallInteger, nullable=True)
+    p_HBP = db.Column(db.SmallInteger, nullable=True)
+    p_BK = db.Column(db.SmallInteger, nullable=True)
+    p_BFP = db.Column(db.SmallInteger, nullable=True)
+    p_GF = db.Column(db.SmallInteger, nullable=True)
+    p_R = db.Column(db.SmallInteger, nullable=True)
+    p_SH = db.Column(db.SmallInteger, nullable=True)
+    p_SF = db.Column(db.SmallInteger, nullable=True)
+    p_GIDP = db.Column(db.SmallInteger, nullable=True)

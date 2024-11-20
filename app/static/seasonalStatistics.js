@@ -5,6 +5,6 @@ const seasonalStatistics = [
     "Run",
     "Hits",
     "K",
-    "Save",
+    "SV",
     "SB"
 ];

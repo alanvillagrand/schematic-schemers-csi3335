@@ -1,27 +1,44 @@
 from flask import Blueprint, request, render_template
-from app.models import People, Batting, Teams, db, Fielding, Awards, HallOfFame, AllStarFull
+from sqlalchemy import func
+
+from app.models import People, Batting, Teams, db, Fielding, Awards, HallOfFame, AllStarFull, Appearances
 
 bp = Blueprint('search', __name__)
 
 
 def get_players_team_team(option1_details, option2_details):
     """
-    This function retrieves players who have played on both of the selected teams.
+    This function retrieves players who have played on both of the selected teams,
+    ordered by the total number of stints on the two teams (least to most).
 
     :param option1_details: Name of the first team.
     :param option2_details: Name of the second team.
     :return: List of players who have played for both teams.
     """
+    subquery = (
+        db.session.query(
+            Appearances.playerID,
+            db.func.count(Teams.team_name.distinct()).label("team_count"),
+            db.func.sum(Appearances.G_all).label("total_games")  # Using G_all for total games played
+        )
+        .join(Teams, Teams.teamID == Appearances.teamId)  # Join with Teams table based on teamId
+        .filter(Teams.team_name.in_([option1_details, option2_details]))  # Filter by both teams
+        .group_by(Appearances.playerID)  # Group by playerID to get distinct players
+        .having(db.func.count(Teams.team_name.distinct()) == 2)  # Ensure player played for both teams
+        .subquery()
+    )
+
     results = (
-        db.session.query(People.nameFirst, People.nameLast)
-        .join(Batting, Batting.playerID == People.playerID)
-        .join(Teams, Teams.teamID == Batting.teamID)
-        .filter(Teams.team_name.in_([option1_details, option2_details]))
-        .group_by(People.playerID)
-        .having(db.func.count(Teams.team_name.distinct()) == 2)
+        db.session.query(
+            People.nameFirst,
+            People.nameLast
+        )
+        .join(subquery, subquery.c.playerID == People.playerID)  # Join with the subquery on playerID
+        .order_by(subquery.c.total_games)  # Order by total games played (ascending)
         .all()
     )
     return results
+
 
 
 def get_players_award_team(award, team):
@@ -34,35 +51,72 @@ def get_players_award_team(award, team):
         "Gold Glove",
         "Cy Young Award",
         "Silver Slugger",
-        "Rookie of the Year Award",
+        "Rookie of the Year",
         "Most Valuable Player"
     ]
     if award in standard_awards:
+        # Subquery to calculate the total games played (G_all) for each player for the specified team
+        game_count = (
+            db.session.query(Appearances.playerID, db.func.sum(Appearances.G_all).label("total_games"))
+            .join(Teams, Teams.teamID == Appearances.teamId)  # Match Teams to Appearances
+            .filter(Teams.team_name == team)  # Filter for the specified team name
+            .group_by(Appearances.playerID)  # Group by playerID to calculate totals
+            .subquery()  # Create a subquery so we can reference it in the main query
+        )
+
+        # Main query to get players sorted by least games played for the team who won the specified award
         results = (
             db.session.query(People.nameFirst, People.nameLast)
-            .join(Batting, Batting.playerID == People.playerID)
-            .join(Teams, Teams.teamID == Batting.teamID)
-            .join(Awards, Awards.playerID == People.playerID)
-            .filter(Teams.team_name == team, Awards.awardID == award, Awards.yearID == Batting.yearID)
-            .distinct()
+            .join(game_count, game_count.c.playerID == People.playerID)  # Join with the game count subquery
+            .join(Appearances, Appearances.playerID == People.playerID)  # Join to ensure the player appeared for the team
+            .join(Teams, Teams.teamID == Appearances.teamId)  # Match Teams to filter by team
+            .join(Awards, Awards.playerID == People.playerID)  # Join with Awards to match the award
+            .filter(
+                Teams.team_name == team,  # Ensure they played for the specified team
+                Awards.awardID == award,  # Ensure the player won the specified award
+                Awards.yearID == Appearances.yearID  # Match the award year with the appearance year
+            )
+            .order_by(game_count.c.total_games.asc())  # Order by the least games played
+            .distinct()  # Ensure no duplicate rows
             .all()
         )
     elif award == "Hall of Fame":
+        game_count = (
+            db.session.query(Appearances.playerID, db.func.sum(Appearances.G_all).label("total_games"))
+            .join(Teams, Teams.teamID == Appearances.teamId)
+            .filter(Teams.team_name == team)  # Filter by the team name
+            .group_by(Appearances.playerID)  # Group by player ID to calculate totals
+            .subquery()
+        )
+
+        # Main query to retrieve Hall of Fame players, sorted by least games played for the team
         results = (
             db.session.query(People.nameFirst, People.nameLast)
-            .join(Batting, Batting.playerID == People.playerID)  # Join Batting for player stats
-            .join(Teams, Teams.teamID == Batting.teamID)  # Join Teams to filter by team
-            .join(HallOfFame, HallOfFame.playerID == People.playerID)  # Join HallOfFame for inducted players
-            .filter(Teams.team_name == team, HallOfFame.inducted == "Y")  # Filter by team and inducted status
-            .distinct()
+            .join(game_count, game_count.c.playerID == People.playerID)  # Link players to their game totals
+            .join(Appearances, Appearances.playerID == People.playerID)  # Ensure they played for the team
+            .join(Teams, Teams.teamID == Appearances.teamId)  # Join to filter by team
+            .join(HallOfFame, HallOfFame.playerID == People.playerID)  # Check Hall of Fame status
+            .filter(
+                Teams.team_name == team,  # Match the specified team
+                HallOfFame.inducted == "Y"  # Include only inducted players
+            )
+            .order_by(game_count.c.total_games.asc())  # Sort by the least games played
+            .distinct()  # Avoid duplicate players
             .all()
         )
     elif award == "All Star":
+        gp_count = (
+            db.session.query(AllStarFull.playerID, db.func.sum(AllStarFull.GP).label("total_games"))
+            .join(Teams, Teams.teamID == AllStarFull.teamID)
+            .filter(Teams.team_name == team)
+            .group_by(AllStarFull.playerID)
+            .subquery()
+        )
+
         results = (
             db.session.query(People.nameFirst, People.nameLast)
-            .join(AllStarFull, AllStarFull.playerID == People.playerID)  # Join with AllStarFull table
-            .join(Teams, Teams.teamID == AllStarFull.teamID)  # Join with Teams table
-            .filter(Teams.team_name == team)  # Filter by the selected team
+            .join(gp_count, gp_count.c.playerID == People.playerID)  # Join with the games played subquery
+            .order_by(gp_count.c.total_games.asc())  # Order by total games played, least games first
             .distinct()
             .all()
         )
@@ -73,17 +127,24 @@ def get_players_award_team(award, team):
 
 def get_players_position_team(position, team):
     """
-    This function retrieves players who played a specific position for a particular team.
+    This function retrieves players who played a specific position for a particular team,
+    ordered by the number of appearances in that position (from least to most).
+    It assumes the position is passed as a string like 'ss', '1b', etc.
 
-    :param position: The position the player played (e.g., 'SS' for shortstop).
+    :param position: The position the player played (e.g., 'ss' for shortstop).
     :param team: The name of the team.
-    :return: List of players who played the specified position for the given team.
+    :return: List of players who played the specified position for the given team, ordered by appearance count.
     """
+    # Construct the column name for the specified position (e.g., G_ss, G_1b)
+    position_column = f'G_{position.lower()}'
+
     results = (
         db.session.query(People.nameFirst, People.nameLast)
-        .join(Fielding, Fielding.playerID == People.playerID)
-        .join(Teams, Teams.teamID == Fielding.teamID)
-        .filter(Fielding.position == position, Teams.team_name == team, Fielding.f_G >= 1)  # Played at least 1 game
+        .join(Appearances, Appearances.playerID == People.playerID)
+        .join(Teams, Teams.teamID == Appearances.teamId)
+        .filter(Teams.team_name == team, getattr(Appearances, position_column) > 0)  # Player appeared at least once in the position
+        .group_by(People.playerID)  # Group by player to count their appearances
+        .order_by(func.sum(getattr(Appearances, position_column)))  # Order by appearance count (least to most)
         .distinct()
         .all()
     )

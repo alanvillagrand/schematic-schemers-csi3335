@@ -175,3 +175,34 @@ class AllStarFull(db.Model):
     gameID = db.Column(db.String(12), nullable=True)
     GP = db.Column(db.SmallInteger, nullable=True)
     startingPos = db.Column(db.SmallInteger, nullable=True)
+
+
+class Appearances(db.Model):
+    __tablename__ = 'appearances'
+
+    # Primary key
+    appearances_ID = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
+    # Foreign Keys
+    playerID = db.Column(db.String(9), db.ForeignKey('people.playerID'), nullable=False)
+    teamId = db.Column(db.String(3), db.ForeignKey('teams.teamID'), nullable=False)
+    yearID = db.Column(db.SmallInteger, nullable=False)
+
+    # Games Played
+    G_all = db.Column(db.SmallInteger)
+    GS = db.Column(db.SmallInteger)  # Games started
+    G_batting = db.Column(db.SmallInteger)  # Games played as a batter
+    G_defense = db.Column(db.SmallInteger)  # Games played in defense
+    G_p = db.Column(db.SmallInteger)  # Games played as a pitcher
+    G_c = db.Column(db.SmallInteger)  # Games played as a catcher
+    G_1b = db.Column(db.SmallInteger)  # Games played at first base
+    G_2b = db.Column(db.SmallInteger)  # Games played at second base
+    G_3b = db.Column(db.SmallInteger)  # Games played at third base
+    G_ss = db.Column(db.SmallInteger)  # Games played at shortstop
+    G_lf = db.Column(db.SmallInteger)  # Games played in left field
+    G_cf = db.Column(db.SmallInteger)  # Games played in center field
+    G_rf = db.Column(db.SmallInteger)  # Games played in right field
+    G_of = db.Column(db.SmallInteger)  # Games played in the outfield
+    G_dh = db.Column(db.SmallInteger)  # Games played as a designated hitter
+    G_ph = db.Column(db.SmallInteger)  # Games played as a pinch hitter
+    G_pr = db.Column(db.SmallInteger)  # Games played as a pinch runner

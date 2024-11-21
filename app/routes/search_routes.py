@@ -242,16 +242,68 @@ def get_players_seasonStatBatting_team(stat_column, team, stat_range):
     :param stat_range: The minimum value of the stat to filter players.
     :return: A list of tuples containing player names.
     """
+    batting_column = getattr(Batting, f"b_{stat_column}")
     return (
         db.session.query(People.nameFirst, People.nameLast)
         .join(Batting, Batting.playerID == People.playerID)  # Join Batting for player stats
         .join(Teams, Teams.teamID == Batting.teamID)  # Join Teams to filter by team
-        .filter(Teams.team_name == team, stat_column >= stat_range)  # Filter by team and stat range
+        .filter(Teams.team_name == team, batting_column >= stat_range)  # Filter by team and stat range
         .group_by(People.playerID)
         .order_by(db.func.sum(Batting.b_G).asc())
         .distinct()
         .all()
     )
+
+
+
+def get_players_seasonStatBatting_award(stat_column, award, stat_range):
+    """
+    Retrieves players who meet a specific statistical threshold and won a specific award.
+    The stat and the award do not need to be from the same season.
+
+    :param stat: The name of the statistical field (e.g., 'HR' for home runs).
+    :param value: The minimum value of the stat (e.g., 30 for 30+ home runs).
+    :param award: The name of the award (e.g., 'Most Valuable Player').
+    :return: List of players who match the criteria.
+    """
+
+    batting_column = getattr(Batting, f"b_{stat_column}")
+    results = (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Batting, Batting.playerID == People.playerID)
+        .join(Appearances, Appearances.playerID == People.playerID)  # Join to check stat
+        .join(Awards, Awards.playerID == People.playerID)  # Join to check awards
+        .filter(
+            batting_column >= stat_range,  # Check if the player achieved the minimum stat threshold
+            Awards.awardID == award  # Check if the player won the specified award
+        )
+        .group_by(People.playerID)  # Group by player to ensure distinct results
+        .order_by(db.func.sum(Batting.b_G).asc())
+        .distinct()
+        .all()
+    )
+
+    return results
+
+def get_players_seasonStatBatting_position(stat_column, position, stat_range):
+    # Construct the column name for the specified position (e.g., G_ss, G_1b)
+    position_column = f'G_{position.lower()}'
+    batting_column = getattr(Batting, f"b_{stat_column}")
+
+    results = (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Batting, Batting.playerID == People.playerID)
+        .join(Appearances, Appearances.playerID == People.playerID)
+        .join(Teams, Teams.teamID == Appearances.teamID)
+        .filter(
+            batting_column >= stat_range, getattr(Appearances, position_column) > 0 )
+        .group_by(People.playerID)  # Group by player ID to calculate total appearances
+        .order_by(func.sum(getattr(Appearances, position_column)))
+        .distinct()
+        .all()
+    )
+    return results
+
 
 
 
@@ -307,6 +359,38 @@ def search_players():
         award = option1_details if option1 == "awards" else option2_details
         results = get_players_award_position(award, position)
 
+    elif (option1 == "seasonal statistic" and option2 == "awards") or (option1 == "awards" and option2 == "seasonal statistic"):
+        if option1 == "awards":
+            award = option1_details  # option1 holds the award details
+            stat = option2_details  # option2 holds the stat details
+        else:
+            award = option2_details  # if option1 is not "award", then option2 must be "award"
+            stat = option1_details  # if option2 is "award", then option1 must be "seasonal statistic"
+
+        stat_range = request.form.get(f'dropdown2_{stat}_specific') if option1 == "awards" else request.form.get(
+            f'dropdown1_{stat}_specific')
+        stat_range = int(stat_range.replace('+', ''))
+
+        if stat == "HR" or stat == "RBI" or stat == "R" or stat == "H" or stat == "SB":
+            # Query for Home Runs (HR) greater than or equal to the selected range
+            results = get_players_seasonStatBatting_award(stat, award, stat_range)
+
+
+    elif (option1 == "seasonal statistic" and option2 == "positions") or (option1 == "positions" and option2 == "seasonal statistic"):
+        if option1 == "positions":
+            position = option1_details
+            stat = option2_details
+        else:
+            position = option2_details
+            stat = option1_details
+
+        stat_range = request.form.get(f'dropdown2_{stat}_specific') if option1 == "positions" else request.form.get(
+            f'dropdown1_{stat}_specific')
+        stat_range = int(stat_range.replace('+', ''))
+        if stat == "HR" or stat == "RBI" or stat == "R" or stat == "H" or stat == "SB":
+            # Query for Home Runs (HR) greater than or equal to the selected range
+            results = get_players_seasonStatBatting_position(stat, position, stat_range)
+
 
 
     elif (option1 == "teams" and option2 == "seasonal statistic") or (option1 == "seasonal statistic" and option2 == "teams"):
@@ -321,22 +405,10 @@ def search_players():
             f'dropdown1_{stat}_specific')
         stat_range = int(stat_range.replace('+', ''))
 
-
-        if stat == "HR":
+        if stat == "HR" or stat == "RBI" or stat == "R" or stat == "H" or stat == "SB":
             # Query for Home Runs (HR) greater than or equal to the selected range
-            results = get_players_seasonStatBatting_team(Batting.b_HR, team, stat_range)
+            results = get_players_seasonStatBatting_team(stat, team, stat_range)
 
-        elif stat == "RBI":
-            results = get_players_seasonStatBatting_team(Batting.b_RBI, team, stat_range)
-
-        elif stat == "Run":
-            results = get_players_seasonStatBatting_team(Batting.b_R, team, stat_range)
-
-        elif stat == "Hits":
-            results = get_players_seasonStatBatting_team(Batting.b_H, team, stat_range)
-
-        elif stat == "SB":
-            results = get_players_seasonStatBatting_team(Batting.b_SB, team, stat_range)
 
         elif stat == "SV":
             results = (

@@ -5,10 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0485066a-a959-4c52-ade2-6d2d13e46ffa" name="Changes" comment="improved algorithim for queries">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/schematic-schemers-csi3335.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/schematic-schemers-csi3335.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_11_15_2024_12_12_PM__Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_11_15_2024_12_12_PM__Changes_.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/routes/search_routes.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/search_routes.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/static/seasonalStatistics.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/seasonalStatistics.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/templates/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/dashboard.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -141,8 +141,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-PY-242.23726.102" />
-        <option value="bundled-python-sdk-5e1850174b45-399fe30bd8c1-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-242.23726.102" />
+        <option value="bundled-js-predefined-1d06a55b98c1-91d5c284f522-JavaScript-PY-241.15989.155" />
+        <option value="bundled-python-sdk-babbdf50b680-7c6932dee5e4-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-241.15989.155" />
       </set>
     </attachedChunks>
   </component>
@@ -173,6 +173,8 @@
       <workItem from="1732070078926" duration="5076000" />
       <workItem from="1732116511046" duration="13847000" />
       <workItem from="1732145170212" duration="10908000" />
+      <workItem from="1732246385006" duration="115000" />
+      <workItem from="1732246525122" duration="703000" />
     </task>
     <task id="LOCAL-00001" summary="Register Stuff">
       <option name="closed" value="true" />
@@ -261,8 +263,8 @@
     <option name="LAST_COMMIT_MESSAGE" value="improved algorithim for queries" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/schematic_schemers_csi3335$Flask__run_py_.coverage" NAME="Flask (run.py) Coverage Results" MODIFIED="1732247233728" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/schematic_schemers_csi3335$schematic_schemers_csi3335.coverage" NAME="schematic-schemers-csi3335 Coverage Results" MODIFIED="1731969534996" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
-    <SUITE FILE_PATH="coverage/schematic_schemers_csi3335$Flask__run_py_.coverage" NAME="Flask (run.py) Coverage Results" MODIFIED="1732156447398" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/schematic_schemers_csi3335$Flask__app_py_.coverage" NAME="Flask (app.py) Coverage Results" MODIFIED="1731968931883" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
   </component>
 </project>

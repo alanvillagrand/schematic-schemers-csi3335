@@ -2,6 +2,16 @@
 
 {% block body %}
 
+<style>
+table, th, td {
+    border: 1px solid black;
+}
+table.center {
+    margin-left: auto;
+    margin-right: auto;
+}
+</style>
+
 <div class="container">
     <h1>{{ year }} {{ team_name }}</h1>
 
@@ -21,15 +31,34 @@
         <table>
             <tr>
                 <th>Name</th>
+                <th>Age</th>
                 <th>G</th>
+                <th>PA</th>
                 <th>HR</th>
                 <th>SB</th>
+                <th>BB%</th>
+                <th>K%</th>
+                <th>ISO</th>
+                <th>BABIP</th>
+                <th>AVG</th>
+                <th>OBP</th>
+                <th>SLG</th>
+                <th>wOBA</th>
+                <!-- <th>wRC+</th> -->
+                <!-- <th>BsR</th> -->
+                <!-- <th>Off</th> -->
+                <!-- <th>Def</th> -->
+                <!-- <th>WAR</th> -->
             </tr>
             <tr>
                 {% for row in batting_info %}
                     <tr>
                         {% for col in row %}
-                        <td>{{ col }}</td>
+                            {% if col == None %}
+                                <td>0</td>
+                            {% else %}
+                                <td>{{ col }}</td>
+                            {% endif %}
                         {% endfor %}
                     </tr>
                 {% endfor %}

@@ -1,7 +1,7 @@
 from app.models import Teams, Batting, People, Pitching
 from sqlalchemy import func, literal, desc
 from sqlalchemy.sql import text
-from datetime import date
+from datetime import datetime
 from app import db
 
 # Calculations are taken form fangraphs.com and baseball-reference.com
@@ -52,11 +52,11 @@ def get_team_info(team_name, year):
     return Teams.query.filter_by(team_name=team_name, yearID=year).first()
 
 def get_batting_info(team_name, year):
-    current_date = date.today()
+    date = datetime.strptime(year + "-06-30", "%Y-%m-%d")
     results = (
         db.session.query(
             func.concat(People.nameFirst, ' ', People.nameLast),
-            (func.extract('year', current_date) - People.birthYear).label('age'),
+            (func.extract('year', date) - People.birthYear).label('age'),
             Batting.b_G,
             calculate_PA(),
             Batting.b_HR,
@@ -115,11 +115,11 @@ def calculate_FIP():
     return ((13*Pitching.p_HR) + (3*(Pitching.p_BB + Pitching.p_HBP)) - (2*Pitching.p_SO)) / calculate_IP() + constant
 
 def get_pitching_info(team_name, year):
-    current_date = date.today()
+    date = datetime.strptime(year + "-06-30", "%Y-%m-%d")
     results = (
         db.session.query(
             func.concat(People.nameFirst, ' ', People.nameLast),
-            (func.extract('year', current_date) - People.birthYear).label('age'),
+            (func.extract('year', date) - People.birthYear).label('age'),
             Pitching.p_G,
             func.round(calculate_IP(), 1),
             func.concat(func.round(calculate_K_percentage_pitching(), 1), literal('%')),

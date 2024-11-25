@@ -44,11 +44,11 @@ table.center {
                 <th>OBP</th>
                 <th>SLG</th>
                 <th>wOBA</th>
-                <!-- <th>wRC+</th> -->
-                <!-- <th>BsR</th> -->
-                <!-- <th>Off</th> -->
-                <!-- <th>Def</th> -->
-                <!-- <th>WAR</th> -->
+                <th>wRC+</th>
+                <th>BsR</th>
+                <th>Off</th>
+                <th>Def</th>
+                <th>WAR</th>
             </tr>
             <tr>
                 {% for row in batting_info %}
@@ -66,6 +66,46 @@ table.center {
         </table>
     {% else %}
         <p>No batting information found.</p>
+    {% endif %}
+
+    <!-- Pitching Information -->
+    <h2>Pitching Stats</h2>
+
+    {% if pitching_info %}
+        <table>
+            <tr>
+                <th>Name</th>
+                <th>Age</th>
+                <th>G</th>
+                <th>IP</th>
+                <th>K%</th>
+                <th>BB%</th>
+                <th>HR/9</th>
+                <th>BABIP</th>
+                <th>LOB%</th>
+                <th>GB%</th>
+                <th>HR/FB</th>
+                <th>ERA</th>
+                <th>FIP</th>
+                <th>xFIP</th>
+                <th>WAR</th>
+            </tr>
+            <tr>
+                {% for row in pitching_info %}
+                    <tr>
+                        {% for col in row %}
+                            {% if col == None %}
+                                <td>0</td>
+                            {% else %}
+                                <td>{{ col }}</td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tr>
+        </table>
+    {% else %}
+        <p>No pitching information found.</p>
     {% endif %}
 
     <a href="{{ url_for('team.team_stats') }}">Search again</a>

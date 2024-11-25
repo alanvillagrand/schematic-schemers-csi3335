@@ -5,5 +5,6 @@ const awards = [
     "Rookie of the Year",
     "Most Valuable Player",
     "Hall of Fame",
-    "All Star"
+    "All Star",
+    "World Series"
 ]

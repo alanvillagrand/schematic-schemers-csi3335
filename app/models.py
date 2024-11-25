@@ -241,3 +241,35 @@ class Pitching(db.Model):
     p_SH = db.Column(db.SmallInteger, nullable=True)
     p_SF = db.Column(db.SmallInteger, nullable=True)
     p_GIDP = db.Column(db.SmallInteger, nullable=True)
+
+class SeriesPost(db.Model):
+    __tablename__ = 'seriespost'
+
+    seriespost_ID = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    teamIDwinner = db.Column(db.CHAR(3), nullable=False, index=True)
+    teamIDloser = db.Column(db.CHAR(3), nullable=False, index=True)
+    yearID = db.Column(db.SmallInteger, nullable=False)
+    round = db.Column(db.String(5), nullable=False)
+    wins = db.Column(db.SmallInteger, nullable=True)
+    losses = db.Column(db.SmallInteger, nullable=True)
+    ties = db.Column(db.SmallInteger, nullable=True)
+
+
+class FieldingPost(db.Model):
+    __tablename__ = 'fieldingpost'
+
+    fieldingpost_ID = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    playerID = db.Column(db.String(9), nullable=False, index=True)  # Player ID
+    yearID = db.Column(db.SmallInteger, nullable=False)  # Year of the postseason
+    teamID = db.Column(db.CHAR(3), nullable=False, index=True)  # Team ID
+    round = db.Column(db.String(10), nullable=False)  # Postseason round
+    position = db.Column(db.String(2), nullable=True)  # Fielding position
+    f_G = db.Column(db.SmallInteger, nullable=True)  # Games played
+    f_GS = db.Column(db.SmallInteger, nullable=True)  # Games started
+    f_InnOuts = db.Column(db.SmallInteger, nullable=True)  # Innings played (outs recorded)
+    f_PO = db.Column(db.SmallInteger, nullable=True)  # Putouts
+    f_A = db.Column(db.SmallInteger, nullable=True)  # Assists
+    f_E = db.Column(db.SmallInteger, nullable=True)  # Errors
+    f_DP = db.Column(db.SmallInteger, nullable=True)  # Double plays
+    f_TP = db.Column(db.SmallInteger, nullable=True)  # Triple plays
+    f_PB = db.Column(db.SmallInteger, nullable=True)  # Passed balls (for catchers)

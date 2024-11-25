@@ -2,8 +2,18 @@
 
 {% block body %}
 
+<style>
+table, th, td {
+    border: 1px solid black;
+}
+table.center {
+    margin-left: auto;
+    margin-right: auto;
+}
+</style>
+
 <div class="container">
-    <h1>{{ team_name }}: {{ year }}</h1>
+    <h1>{{ year }} {{ team_name }}</h1>
 
     {% if team_info %}
         <p><strong>Wins:</strong> {{ team_info.team_W }}</p>
@@ -12,6 +22,50 @@
         <p><strong>Stadium:</strong> {{ team_info.park_name }}</p>
     {% else %}
         <p>No data found for the selected team and year.</p>
+    {% endif %}
+
+    <!-- Batting Information -->
+    <h2>Batting Stats</h2>
+
+    {% if batting_info %}
+        <table>
+            <tr>
+                <th>Name</th>
+                <th>Age</th>
+                <th>G</th>
+                <th>PA</th>
+                <th>HR</th>
+                <th>SB</th>
+                <th>BB%</th>
+                <th>K%</th>
+                <th>ISO</th>
+                <th>BABIP</th>
+                <th>AVG</th>
+                <th>OBP</th>
+                <th>SLG</th>
+                <th>wOBA</th>
+                <!-- <th>wRC+</th> -->
+                <!-- <th>BsR</th> -->
+                <!-- <th>Off</th> -->
+                <!-- <th>Def</th> -->
+                <!-- <th>WAR</th> -->
+            </tr>
+            <tr>
+                {% for row in batting_info %}
+                    <tr>
+                        {% for col in row %}
+                            {% if col == None %}
+                                <td>0</td>
+                            {% else %}
+                                <td>{{ col }}</td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tr>
+        </table>
+    {% else %}
+        <p>No batting information found.</p>
     {% endif %}
 
     <a href="{{ url_for('team.team_stats') }}">Search again</a>

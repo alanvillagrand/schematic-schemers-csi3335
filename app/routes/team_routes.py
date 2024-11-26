@@ -13,8 +13,14 @@ def team_stats():
 
             team_info = get_team_info(team_name, year)
             batting_info = get_batting_info(team_name, year)
+            pitching_info = get_pitching_info(team_name, year)
 
-            return render_template("team_stats.html", team_info=team_info, batting_info = batting_info, team_name=team_name, year=year)
+            return render_template("team_stats.html",
+                                   team_info=team_info,
+                                   batting_info=batting_info,
+                                   pitching_info=pitching_info,
+                                   team_name=team_name,
+                                   year=year)
 
         return render_template("team_form.html")
     return redirect(url_for('main.home'))

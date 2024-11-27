@@ -389,21 +389,25 @@ Queries for players career batting averages
 May later be changed to be one function that i replace the b_?? with
 """
 def get_players_careerBattingAVG_team(team, min_avg=0.300):
-    return (
+    batting_avg = (db.func.sum(Batting.b_H) / db.func.sum(Batting.b_AB)).label("career_avg")
+
+    results = (
         db.session.query(
             People.nameFirst,
             People.nameLast,
-            (db.func.sum(Batting.b_H) / db.func.sum(Batting.b_AB)).label("career_avg")
+            batting_avg
         )
         .join(Batting, Batting.playerID == People.playerID)
         .join(Teams, Teams.teamID == Batting.teamID)
         .filter(Teams.team_name == team)
         .group_by(People.playerID)
-        .having(db.func.sum(Batting.b_AB) > 0)  # Avoid division by zero
-        .filter((db.func.sum(Batting.b_H) / db.func.sum(Batting.b_AB)) >= min_avg)
-        .order_by(db.func.sum(Batting.b_H).desc())
+        .having(db.func.sum(Batting.b_AB) > 0)
+        .having(batting_avg >= min_avg)
+        .order_by(batting_avg.desc())
         .all()
     )
+
+    return results
 
 def get_players_careerWins_team(team, min_wins=200):
     return (
@@ -542,6 +546,7 @@ def search_players():
 
     """ Teams Queries """
     if option1 == "teams" and option2 == "teams":
+        print("In Teams Teams")
         # Query players who played on both selected teams
         results = get_players_team_team(option1_details, option2_details)
 
@@ -551,7 +556,8 @@ def search_players():
         team = option1_details if option1 == "teams" else option2_details
         results = get_players_position_team(position, team)
 
-    elif (option1 == "career statistics" and option2 == "teams") or (option1 == "teams" and option2 == "career statistics"):
+    elif (option1 == "career statistic" and option2 == "teams") or (option1 == "teams" and option2 == "career statistic"):
+        print("Here")
         # Extract career statistics and team details
         career_stat = option1_details if option1 == "career statistics" else option2_details
         team = option2_details if option1 == "career statistics" else option1_details

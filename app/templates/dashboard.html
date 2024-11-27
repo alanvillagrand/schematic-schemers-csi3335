@@ -176,6 +176,12 @@
             else if (selectedStat === "SV"){
                 statOptions = seasonalStatisticsSV
             }
+            else if (selectedStat === "AVG"){
+                statOptions = seasonalStatisticsAVG
+            }
+            else if (selectedStat === "SO"){
+                statOptions = seasonalStatisticsSO
+            }
 
             // Create dropdown for the selected stat's range options
             createDropdown(
@@ -225,6 +231,9 @@
     <script src="{{ url_for('static', filename='seasonalStatisticsSB.js') }}"></script>
     <script src="{{ url_for('static', filename='seasonalStatisticsSV.js') }}"></script>
     <script src="{{ url_for('static', filename='placeOfBirth.js') }}"></script>
+    <script src="{{ url_for('static', filename='seasonalStatisticsAVG.js') }}"></script>
+    <script src="{{ url_for('static', filename='seasonalStatisticsSO.js') }}"></script>
+
 
 
 

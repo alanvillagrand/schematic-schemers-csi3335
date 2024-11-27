@@ -273,3 +273,31 @@ class FieldingPost(db.Model):
     f_DP = db.Column(db.SmallInteger, nullable=True)  # Double plays
     f_TP = db.Column(db.SmallInteger, nullable=True)  # Triple plays
     f_PB = db.Column(db.SmallInteger, nullable=True)  # Passed balls (for catchers)
+
+
+
+class BattingPost(db.Model):
+    __tablename__ = 'battingpost'
+
+    battingpost_ID = db.Column(db.Integer, primary_key=True, autoincrement=True)  # Unique ID
+    playerID = db.Column(db.String(9), nullable=False, index=True)  # Player ID
+    yearId = db.Column(db.SmallInteger, nullable=False)  # Year of the postseason
+    teamID = db.Column(db.CHAR(3), nullable=False, index=True)  # Team ID
+    round = db.Column(db.String(10), nullable=False)  # Postseason round
+    b_G = db.Column(db.SmallInteger, nullable=True)  # Games played
+    b_AB = db.Column(db.SmallInteger, nullable=True)  # At-bats
+    b_R = db.Column(db.SmallInteger, nullable=True)  # Runs
+    b_H = db.Column(db.SmallInteger, nullable=True)  # Hits
+    b_2B = db.Column(db.SmallInteger, nullable=True)  # Doubles
+    b_3B = db.Column(db.SmallInteger, nullable=True)  # Triples
+    b_HR = db.Column(db.SmallInteger, nullable=True)  # Home runs
+    b_RBI = db.Column(db.SmallInteger, nullable=True)  # Runs batted in
+    b_SB = db.Column(db.SmallInteger, nullable=True)  # Stolen bases
+    b_CS = db.Column(db.SmallInteger, nullable=True)  # Caught stealing
+    b_BB = db.Column(db.SmallInteger, nullable=True)  # Walks
+    b_SO = db.Column(db.SmallInteger, nullable=True)  # Strikeouts
+    b_IBB = db.Column(db.SmallInteger, nullable=True)  # Intentional walks
+    b_HBP = db.Column(db.SmallInteger, nullable=True)  # Hit by pitch
+    b_SH = db.Column(db.SmallInteger, nullable=True)  # Sacrifice hits
+    b_SF = db.Column(db.SmallInteger, nullable=True)  # Sacrifice flies
+    b_GIDP = db.Column(db.SmallInteger, nullable=True)  # Grounded into double plays

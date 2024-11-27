@@ -1,6 +1,7 @@
 from . import db
 from werkzeug.security import generate_password_hash, check_password_hash
 
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
@@ -149,6 +150,7 @@ class Teams(db.Model):
     team_projW = db.Column(db.SmallInteger)
     team_projL = db.Column(db.SmallInteger)
 
+
 class Awards(db.Model):
     __tablename__ = 'awards'  # Table name in your database
 
@@ -159,6 +161,7 @@ class Awards(db.Model):
     lgID = db.Column(db.CHAR(2), nullable=False)
     tie = db.Column(db.String(1))
     notes = db.Column(db.String(100))
+
 
 class Fielding(db.Model):
     __tablename__ = 'fielding'  # Table name in your database
@@ -196,6 +199,7 @@ class HallOfFame(db.Model):
     inducted = db.Column(db.String(1))  # 'Y' or 'N'
     category = db.Column(db.String(20))
     note = db.Column(db.String(25))
+
 
 class AllStarFull(db.Model):
     __tablename__ = 'allstarfull'

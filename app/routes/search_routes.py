@@ -386,7 +386,7 @@ def get_players_seasonStatBatting_position(stat_column, position, stat_range):
 
 """
 Queries for players career batting averages
-May later be changed to be one function that i replace the b_?? with
+FINISHED except WAR of course
 """
 
 
@@ -534,8 +534,8 @@ queries for career stats and awards
 WAR and ERA NOT DONE
 """
 
+
 def get_players_careerBattingAVG_award(award, min_avg=0.300):
-    # Calculate the batting average as before
     batting_avg = (db.func.sum(Batting.b_H) / db.func.nullif(db.func.sum(Batting.b_AB), 0)).label("career_avg")
 
     results = (
@@ -545,7 +545,7 @@ def get_players_careerBattingAVG_award(award, min_avg=0.300):
             batting_avg
         )
         .join(Batting, Batting.playerID == People.playerID)
-        .join(Awards, Awards.playerID == People.playerID)
+        .join(Teams, Teams.teamID == Batting.teamID)
         .filter(Awards.awardID == award)
         .group_by(People.playerID, People.nameFirst, People.nameLast)
         .having(db.func.sum(Batting.b_AB) > 0)
@@ -559,16 +559,18 @@ def get_players_careerBattingAVG_award(award, min_avg=0.300):
 
 def get_players_career_batting_stat_award(award, stat_column, min_value=None, max_value=None):
     """
-    Get players' career batting statistics for a given award.
+    Queries players' career batting statistics and awards.
 
-    :param award: Award name to filter players by
-    :param stat_column: The batting statistic column to aggregate (e.g., 'b_H', 'b_HR', 'b_WAR')
-    :param min_value: Minimum value for filtering (e.g., 2000 for hits)
-    :param max_value: Maximum value for filtering
-    :return: List of players with their aggregated statistics
+    :param stat_column: The career batting statistic column to aggregate (e.g., 'b_H', 'b_HR')
+    :param award: The award the player must have won (e.g., 'Gold Glove', 'Most Valuable Player')
+    :param min_value: Minimum value for filtering the statistic
+    :param max_value: Maximum value for filtering the statistic
+    :return: List of players with their aggregated statistics who have won the specified award
     """
+    # Calculate the career statistic
     stat_sum = db.func.sum(getattr(Batting, stat_column)).label("career_stat")
 
+    # Base query to get players with their career stats
     query = (
         db.session.query(
             People.nameFirst,
@@ -577,32 +579,38 @@ def get_players_career_batting_stat_award(award, stat_column, min_value=None, ma
         )
         .join(Batting, Batting.playerID == People.playerID)
         .join(Awards, Awards.playerID == People.playerID)
-        .filter(Awards.awardID == award)
+        .filter(
+            Awards.awardID == award
+        )
         .group_by(People.playerID, People.nameFirst, People.nameLast)
     )
 
+    # Add bounds if provided
     if min_value is not None:
         query = query.having(stat_sum >= min_value)
     if max_value is not None:
         query = query.having(stat_sum <= max_value)
 
-    results = query.order_by(stat_sum.desc()).all()
+    # Order by the statistic descending
+    results = query.order_by(stat_sum.desc()).distinct().all()
 
     return results
 
 
 def get_players_career_pitching_stat_award(award, stat_column, min_value=None, max_value=None):
     """
-    Get players' career pitching statistics for a given award.
+    Queries players' career pitching statistics and awards.
 
-    :param award: Award name to filter players by
-    :param stat_column: The pitching statistic column to aggregate (e.g., 'p_W', 'p_SO', 'p_SV')
-    :param min_value: Minimum value for filtering (e.g., 200 for wins)
-    :param max_value: Maximum value for filtering (e.g., 3.00 for ERA)
-    :return: List of players with their aggregated statistics
+    :param stat_column: The career pitching statistic column to aggregate (e.g., 'p_W', 'p_SO')
+    :param award: The award the player must have won (e.g., 'Cy Young Award', 'Most Valuable Player')
+    :param min_value: Minimum value for filtering the statistic
+    :param max_value: Maximum value for filtering the statistic
+    :return: List of players with their aggregated statistics who have won the specified award
     """
+    # Calculate the career statistic
     stat_sum = db.func.sum(getattr(Pitching, stat_column)).label("career_stat")
 
+    # Base query to get players with their career stats
     query = (
         db.session.query(
             People.nameFirst,
@@ -611,16 +619,66 @@ def get_players_career_pitching_stat_award(award, stat_column, min_value=None, m
         )
         .join(Pitching, Pitching.playerID == People.playerID)
         .join(Awards, Awards.playerID == People.playerID)
-        .filter(Awards.awardID == award)
+        .filter(
+            Awards.awardID == award
+        )
         .group_by(People.playerID, People.nameFirst, People.nameLast)
     )
 
+    # Add bounds if provided
     if min_value is not None:
         query = query.having(stat_sum >= min_value)
     if max_value is not None:
         query = query.having(stat_sum <= max_value)
 
-    results = query.order_by(stat_sum.desc()).all()
+    # Order by the statistic descending
+    results = query.order_by(stat_sum.desc()).distinct().all()
+
+    return results
+
+
+"""
+currently not working too hard :/
+"""
+def get_players_career_war_award(award, min_war=40):
+    return (
+        # db.session.query(
+        #     People.nameFirst,
+        #     People.nameLast,
+        #     (db.func.sum(Batting.b_WAR) + db.func.sum(Pitching.p_WAR)).label("career_war")
+        # )
+        # .join(Batting, Batting.playerID == People.playerID)
+        # .join(Pitching, Pitching.playerID == People.playerID, isouter=True)
+        # .join(Teams, Teams.teamID == Batting.teamID)
+        # .filter(Teams.team_name == team)
+        # .group_by(People.playerID)
+        # .having(db.func.sum(Batting.b_WAR) + db.func.sum(Pitching.p_WAR) >= min_war)
+        # .order_by((db.func.sum(Batting.b_WAR) + db.func.sum(Pitching.p_WAR)).desc())
+        # .all()
+    )
+
+
+def get_players_career_era_award(award, max_era=3.00):
+    # Calculate the sum of ERA and count to get the average ERA
+    sum_era = db.func.sum(Pitching.p_ERA).label("sum_era")
+    count_era = db.func.count(Pitching.p_ERA).label("count_era")
+    avg_era = (sum_era / db.func.nullif(count_era, 0)).label("career_avg_era")
+
+    results = (
+        db.session.query(
+            People.nameFirst,
+            People.nameLast,
+            avg_era
+        )
+        .join(Pitching, Pitching.playerID == People.playerID)
+        .join(Appearances, Appearances.playerID == People.playerID)
+        .join(Awards, Awards.playerID == People.playerID)
+        .filter(Awards.awardID == award)
+        .group_by(People.playerID, People.nameFirst, People.nameLast)
+        .having(avg_era <= max_era)  # Only include players with avg ERA under 3.00
+        .order_by(avg_era.asc())
+        .all()
+    )
 
     return results
 
@@ -667,7 +725,7 @@ def search_players():
         results = get_players_position_team(position, team)
 
     elif (option1 == "career statistic" and option2 == "teams") or (option1 == "teams" and option2 == "career statistic"):
-        print("Here")
+        print("IN TEAMS CSTATS")
         # Extract career statistics and team details
         career_stat = option1_details if option1 == "career statistic" else option2_details
         team = option2_details if option1 == "career statistic" else option1_details
@@ -695,6 +753,37 @@ def search_players():
             results = get_players_career_war_team(team, 40)
         elif career_stat == "≤ 3.00 ERA Career Pitching (calculated)":
             results = get_players_career_era_team(team, 3.00)
+
+    # still not working moving past elif and to the last else statement
+    elif (option1 == "career statistic" and option2 == "awards") or (option1 == "awards" and option2 == "career statistic"):
+        print("IN AWARDS CSTATS")
+        # Extract the award and career statistic details
+        award = option1_details if option1 == "awards" else option2_details
+        career_stat = option1_details if option1 == "career statistic" else option2_details
+
+        # Handling different career statistics based on user input
+        if career_stat == "300+ AVG Career Batting":
+            results = get_players_careerBattingAVG_award(award, 0.300)
+        elif career_stat == "200+ Wins Career Pitching":
+            results = get_players_career_pitching_stat_award(award, stat_column="p_W", min_value=200)
+        elif career_stat == "2000+ K Career Pitching":
+            results = get_players_career_pitching_stat_award(award, stat_column="p_SO", min_value=2000)
+        elif career_stat == "2000+ Hits Career Batting":
+            results = get_players_career_batting_stat_award(award, stat_column="b_H", min_value=2000)
+        elif career_stat == "300+ HR Career Batting":
+            results = get_players_career_batting_stat_award(award, stat_column="b_HR", min_value=300)
+        elif career_stat == "300+ Saves Career Pitching":
+            results = get_players_career_pitching_stat_award(award, stat_column="p_SV", min_value=300)
+        elif career_stat == "300+ Wins Career Pitching":
+            results = get_players_career_pitching_stat_award(award, stat_column="p_W", min_value=300)
+        elif career_stat == "3000+ K Career Pitching":
+            results = get_players_career_pitching_stat_award(award, stat_column="p_SO", min_value=3000)
+        elif career_stat == "3000+ Hits Career Batting":
+            results = get_players_career_batting_stat_award(award, stat_column="b_H", min_value=3000)
+        elif career_stat == "40+ WAR Career (calculated)":
+            results = get_players_career_war_award(award, 40)
+        elif career_stat == "≤ 3.00 ERA Career Pitching (calculated)":
+            results = get_players_career_era_team(award, 3.00)
 
     elif (option1 == "awards" and option2 == "teams") or (option1 == "teams" and option2 == "awards"):
         # Extract the award and team details

@@ -436,6 +436,40 @@ def get_players_seasonStatPitching_team(stat_column, team, stat_range):
 
     )
 
+"""
+get_players_seasonStatPitching_seasonStatPitching
+queries for a player that has these 2 pitching stats. doesn't have to be in the same season
+takes in a both stats and their ranges
+algorithm orders it by least appearances in pitching p_G
+"""
+def get_players_seasonStatPitching_seasonStatPitching(stat_column1, stat_range1, stat_column2, stat_range2):
+    pitching_column1 = getattr(Pitching, f"p_{stat_column1}")
+    pitching_column2 = getattr(Pitching, f"p_{stat_column2}")
+
+    # Subqueries to check for each stat independently
+    stat1_subquery = (
+        db.session.query(Pitching.playerID)
+        .filter(pitching_column1 >= stat_range1)
+        .subquery()
+    )
+    stat2_subquery = (
+        db.session.query(Pitching.playerID)
+        .filter(pitching_column2 >= stat_range2)
+        .subquery()
+    )
+
+    # Main query: find players present in both subqueries
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Pitching, Pitching.playerID == People.playerID)
+        .join(stat1_subquery, stat1_subquery.c.playerID == People.playerID)
+        .join(stat2_subquery, stat2_subquery.c.playerID == People.playerID)
+        .order_by(db.func.sum(Pitching.p_G).asc())
+        .group_by(People.playerID)
+        .distinct()
+        .all()
+    )
+
 
 
 
@@ -454,7 +488,6 @@ def search_players():
     results = []
 
     if option1 == "teams" and option2 == "teams":
-        print("here in teams and teams")
         # Query players who played on both selected teams
         results = get_players_team_team(option1_details, option2_details)
 
@@ -605,13 +638,22 @@ def search_players():
             results = get_players_seasonStatBatting_team(stat, team, stat_range)
 
 
-        elif stat == "SV" or stat == "Win" or stat == "SO":
+        elif stat == "SV" or stat == "W" or stat == "SO":
             stat_range = int(stat_range.replace('+', ''))
             results = get_players_seasonStatPitching_team(stat, team, stat_range)
 
         elif stat == "AVG":
             stat_range = float(stat_range.replace('+', ''))
             results = get_players_seasonBattingAVG_team(stat_range, team)
+
+    elif option1 == "seasonal statistic" and option2 == "seasonal statistic":
+        stat1 = option1_details
+        stat2 = option2_details
+        stat_range1 = request.form.get(f'dropdown1_{stat1}_specific')
+        stat_range2 = request.form.get(f'dropdown2_{stat2}_specific')
+        stat_range1 = int(stat_range1.replace('+', ''))
+        stat_range2 = int(stat_range2.replace('+', ''))
+        results = get_players_seasonStatPitching_seasonStatPitching(stat1, stat_range1, stat2, stat_range2)
 
 
     elif (option1 == "pob" and option2 == "teams") or (option1 == "teams" and option2 == "pob"):

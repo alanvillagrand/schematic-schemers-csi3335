@@ -139,7 +139,7 @@ const teams = [
     "Washington Senators",
     "Washington Statesmen",
     "Wilmington Quicksteps",
-    "Worcester Ruby Legs"
+    "Worcester Ruby Legs",
 ];
 
 function populateTeamsDropdown() {

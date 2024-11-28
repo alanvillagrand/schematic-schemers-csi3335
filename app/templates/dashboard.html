@@ -77,50 +77,49 @@
         }
     }
 
-    function createCareerStatsOptions(container, dropdownId) {
-        const typeSelect = document.createElement('select');
-        typeSelect.name = `${dropdownId}_type`;
-        typeSelect.required = true;
-        typeSelect.id = `${dropdownId}_type`;
-
-        const defaultOption = document.createElement('option');
-        defaultOption.value = '';
-        defaultOption.disabled = true;
-        defaultOption.selected = true;
-        defaultOption.textContent = "Select Stat Type";
-        typeSelect.appendChild(defaultOption);
-
-        const pitchingOption = document.createElement('option');
-        pitchingOption.value = 'pitching';
-        pitchingOption.textContent = 'Pitching';
-        typeSelect.appendChild(pitchingOption);
-
-        const battingOption = document.createElement('option');
-        battingOption.value = 'batting';
-        battingOption.textContent = 'Batting';
-        typeSelect.appendChild(battingOption);
-
-        container.appendChild(typeSelect);
-
-        // Add event listener for type selection
-        typeSelect.addEventListener('change', function () {
-            const selectedType = typeSelect.value;
-            const statsContainer = document.createElement('div');
-            statsContainer.id = `${dropdownId}_stats`;
-
-            // Clear existing stats if they exist
-            const existingStats = document.getElementById(`${dropdownId}_stats`);
-            if (existingStats) existingStats.remove();
-
-            if (selectedType === 'batting') {
-                createDropdown(statsContainer, battingStatistics, `${dropdownId}_batting_stats`, "Select a Batting Stat");
-            } else if (selectedType === 'pitching') {
-                createDropdown(statsContainer, pitchingStatistics, `${dropdownId}_pitching_stats`, "Select a Pitching Stat");
-            }
-
-            container.appendChild(statsContainer);
-        });
-    }
+    {#function createCareerStatsOptions(container, dropdownId) {#}
+    {#    const typeSelect = document.createElement('select');#}
+    {#    typeSelect.name = `${dropdownId}_type`;#}
+    {#    typeSelect.required = true;#}
+    {#    typeSelect.id = `${dropdownId}_type`;#}
+    {##}
+    {#    const defaultOption = document.createElement('option');#}
+    {#    defaultOption.value = '';#}
+    {#    defaultOption.disabled = true;#}
+    {#    defaultOption.selected = true;#}
+    {#    defaultOption.textContent = "Select Stat Type";#}
+    {#    typeSelect.appendChild(defaultOption);#}
+    {##}
+    {#    const pitchingOption = document.createElement('option');#}
+    {#    pitchingOption.value = 'pitching';#}
+    {#    pitchingOption.textContent = 'Pitching';#}
+    {#    typeSelect.appendChild(pitchingOption);#}
+    {##}
+    {#    const battingOption = document.createElement('option');#}
+    {#    battingOption.value = 'batting';#}
+    {#    battingOption.textContent = 'Batting';#}
+    {#    typeSelect.appendChild(battingOption);#}
+    {##}
+    {#    container.appendChild(typeSelect);#}
+    {##}
+    {#    // Add event listener for type selection#}
+    {#    typeSelect.addEventListener('change', function () {#}
+    {#        const selectedType = typeSelect.value;#}
+    {#        const statsContainer = document.createElement('div');#}
+    {#        statsContainer.id = `${dropdownId}_stats`;#}
+    {##}
+    {#        // Clear existing stats if they exist#}
+    {#        const existingStats = document.getElementById(`${dropdownId}_stats`);#}
+    {#        if (existingStats) existingStats.remove();#}
+    {##}
+    {#        if (selectedType === 'batting') {#}
+    {#            createDropdown(statsContainer, battingStatistics, `${dropdownId}_batting_stats`, "Select a Batting Stat");#}
+    {#        } else if (selectedType === 'pitching') {#}
+    {#            createDropdown(statsContainer, pitchingStatistics, `${dropdownId}_pitching_stats`, "Select a Pitching Stat");#}
+    {#        }#}
+    {##}
+    {#        container.appendChild(statsContainer);#}
+    {#    });#}
     function createSeasonalStatsOptions(container, dropdownId) {
         const statSelect = document.createElement('select');
         statSelect.name = `${dropdownId}_details`;
@@ -222,12 +221,12 @@
 </script>
 
     <script src="{{ url_for('static', filename='seasonalStatistics.js') }}"></script>
-<script src="{{ url_for('static', filename='positions.js') }}"></script>
-<script src="{{ url_for('static', filename='awards.js') }}"></script>
-<script src="{{ url_for('static', filename='teams.js') }}"></script>
-<script src="{{ url_for('static', filename='careerStatistics.js') }}"></script>
-<script src="{{ url_for('static', filename='seasonalStatisticsHR.js') }}"></script>
-<script src="{{ url_for('static', filename='seasonalStatisticsWin.js') }}"></script>
+    <script src="{{ url_for('static', filename='positions.js') }}"></script>
+    <script src="{{ url_for('static', filename='awards.js') }}"></script>
+    <script src="{{ url_for('static', filename='teams.js') }}"></script>
+    <script src="{{ url_for('static', filename='careerStatistics.js') }}"></script>
+    <script src="{{ url_for('static', filename='seasonalStatisticsHR.js') }}"></script>
+    <script src="{{ url_for('static', filename='seasonalStatisticsWin.js') }}"></script>
     <script src="{{ url_for('static', filename='seasonalStatisticsRBI.js') }}"></script>
     <script src="{{ url_for('static', filename='seasonalStatisticsRun.js') }}"></script>
     <script src="{{ url_for('static', filename='seasonalStatisticsHits.js') }}"></script>

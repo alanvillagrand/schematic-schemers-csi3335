@@ -365,19 +365,16 @@ def get_players_seasonBattingAVG_team(stat_range, team):
 
 
 
+"""
+get_players_seasonStatBatting_stdAward
+queries for a player that has this batting stat and won this standard award. Does not have to be in the same season.
+takes in a award and stat_range, and stat_column
+algorithm orders it by least appearances in batting b_G
+"""
 def get_players_seasonStatBatting_stdAward(stat_column, award, stat_range):
-    """
-    Retrieves players who meet a specific statistical threshold and won a specific award.
-    The stat and the award do not need to be from the same season.
-
-    :param stat: The name of the statistical field (e.g., 'HR' for home runs).
-    :param value: The minimum value of the stat (e.g., 30 for 30+ home runs).
-    :param award: The name of the award (e.g., 'Most Valuable Player').
-    :return: List of players who match the criteria.
-    """
 
     batting_column = getattr(Batting, f"b_{stat_column}")
-    results = (
+    return (
         db.session.query(People.nameFirst, People.nameLast)
         .join(Batting, Batting.playerID == People.playerID)
         .join(Appearances, Appearances.playerID == People.playerID)  # Join to check stat
@@ -392,7 +389,6 @@ def get_players_seasonStatBatting_stdAward(stat_column, award, stat_range):
         .all()
     )
 
-    return results
 
 def get_players_seasonStatBatting_position(stat_column, position, stat_range):
     # Construct the column name for the specified position (e.g., G_ss, G_1b)
@@ -470,11 +466,56 @@ def get_players_seasonStatPitching_seasonStatPitching(stat_column1, stat_range1,
         .all()
     )
 
+"""
+get_players_seasonStatPitching_seasonStatBatting
+queries for a player that has this pitching stat and this batting stat.
+doesn't have to be in the same season
+algorithm orders it by least appearances in pitching p_G
+"""
+def get_players_seasonStatPitching_seasonStatBatting(pitching_column, pitching_range, batting_column, batting_range):
+    pitching_column1 = getattr(Pitching, f"p_{pitching_column}")
+    batting_column1 = getattr(Batting, f"b_{batting_column}")
+
+    # Subqueries to check for each stat independently
+    pitching_subquery = (
+        db.session.query(Pitching.playerID)
+        .filter(pitching_column1 >= pitching_range)
+        .subquery()
+    )
+    batting_subquery = (
+        db.session.query(Batting.playerID)
+        .filter(batting_column1 >= batting_range)
+        .subquery()
+    )
+
+    # Main query: find players present in both subqueries
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Pitching, Pitching.playerID == People.playerID)
+        .join(pitching_subquery, pitching_subquery.c.playerID == People.playerID)
+        .join(batting_subquery, batting_subquery.c.playerID == People.playerID)
+        .order_by(db.func.sum(Pitching.p_G).asc())
+        .group_by(People.playerID)
+        .distinct()
+        .all()
+    )
 
 
 
 @bp.route('/search_players', methods=['POST'])
 def search_players():
+    standard_seasonStatBatting = [
+        "HR",
+        "RBI",
+        "R",
+        "H",
+        "SB"
+    ]
+    standard_seasonStatPitching = [
+        "SV",
+        "W",
+        "SO"
+    ]
     # Extract dropdown values
     option1 = request.form.get('option1')
     option1_details = request.form.get('dropdown1_details')
@@ -653,7 +694,16 @@ def search_players():
         stat_range2 = request.form.get(f'dropdown2_{stat2}_specific')
         stat_range1 = int(stat_range1.replace('+', ''))
         stat_range2 = int(stat_range2.replace('+', ''))
-        results = get_players_seasonStatPitching_seasonStatPitching(stat1, stat_range1, stat2, stat_range2)
+
+        if stat1 in standard_seasonStatBatting and stat2 in standard_seasonStatBatting:
+            results = get_players_seasonStatPitching_seasonStatPitching(stat1, stat_range1, stat2, stat_range2)
+
+        elif (stat1 in standard_seasonStatBatting or stat1 in standard_seasonStatPitching) and (stat2 in standard_seasonStatBatting or stat2 in standard_seasonStatPitching):
+            if stat1 in standard_seasonStatBatting:
+                results = get_players_seasonStatPitching_seasonStatBatting(stat2, stat_range2, stat1, stat_range1)
+            else:
+                results = get_players_seasonStatPitching_seasonStatBatting(stat1, stat_range1, stat2, stat_range2)
+
 
 
     elif (option1 == "pob" and option2 == "teams") or (option1 == "teams" and option2 == "pob"):

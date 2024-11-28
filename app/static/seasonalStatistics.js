@@ -8,5 +8,6 @@ const seasonalStatistics = [
     "SV",
     "SB",
     "AVG",
-    "SO"
+    "SO",
+    "30+HR/30+SB"
 ];

@@ -362,6 +362,21 @@ def get_players_seasonBattingAVG_team(stat_range, team):
         .all()
     )
 
+def get_players_seasonBatting3030_team(team):
+    return(
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Batting, Batting.playerID == People.playerID)
+        .join(Teams, Teams.teamID == Batting.teamID)
+        .filter(Teams.team_name == team)
+        .filter(Batting.b_SB > 30)
+        .filter(Batting.b_HR > 30)
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Batting.b_G).asc())
+        .distinct()
+        .all()
+    )
+
+
 
 
 
@@ -632,6 +647,21 @@ def get_players_careerBattingAVG_award(award, min_avg=0.300):
     )
 
     return results
+
+def get_players_seasonStatPitching_stdAward(award, stat_column, stat_range):
+    pitching_column = getattr(Pitching, f"p_{stat_column}")
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Pitching, Pitching.playerID == People.playerID)
+        .join(Awards, Awards.playerID == People.playerID)
+        .filter(pitching_column >= stat_range)
+        .filter(Awards.awardID == award)
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Pitching.p_G).asc())
+        .distinct()
+        .all()
+
+    )
 
 """
 get_players_seasonStatPitching_seasonStatBatting
@@ -1305,6 +1335,10 @@ def search_players():
             results = get_players_seasonStatBatting_stdAward(stat, award, stat_range)
         elif stat in standard_seasonStatBatting and award == "World Series":
             results = get_players_seasonStatBatting_ws(stat, stat_range)
+        elif stat in standard_seasonStatPitching and award in standard_awards:
+            results = get_players_seasonStatPitching_stdAward(award, stat, stat_range)
+
+
 
 
 
@@ -1348,6 +1382,11 @@ def search_players():
         elif stat == "AVG":
             stat_range = float(stat_range.replace('+', ''))
             results = get_players_seasonBattingAVG_team(stat_range, team)
+
+        elif stat == "30+HR/30+SB":
+            results = get_players_seasonBatting3030_team(team)
+
+
 
     elif option1 == "seasonal statistic" and option2 == "seasonal statistic":
         stat1 = option1_details

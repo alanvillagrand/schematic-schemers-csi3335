@@ -416,6 +416,22 @@ takes in a team, stat, and stat_range
 algorithm orders it by least appearances in pitching p_G
 """
 
+def get_players_seasonStatPitching_team(stat_column, team, stat_range):
+    pitching_column = getattr(Pitching, f"p_{stat_column}")
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Pitching, Pitching.playerID == People.playerID)
+        .join(Teams, Teams.teamID == Pitching.teamID)
+        .filter(pitching_column >= stat_range)
+        .filter(Teams.team_name == team)
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Pitching.p_G).asc())
+        .distinct()
+        .all()
+
+
+    )
+
 
 def get_players_careerBattingAVG_team(team, min_avg=0.300):
     batting_avg = (db.func.sum(Batting.b_H) / db.func.nullif(db.func.sum(Batting.b_AB), 0)).label("career_avg")
@@ -472,6 +488,39 @@ def get_players_career_batting_stat_team(team, stat_column, min_value=None, max_
 
     return results
 
+"""
+get_players_seasonStatPitching_seasonStatPitching
+queries for a player that has these 2 pitching stats. doesn't have to be in the same season
+takes in a both stats and their ranges
+algorithm orders it by least appearances in pitching p_G
+"""
+def get_players_seasonStatPitching_seasonStatPitching(stat_column1, stat_range1, stat_column2, stat_range2):
+    pitching_column1 = getattr(Pitching, f"p_{stat_column1}")
+    pitching_column2 = getattr(Pitching, f"p_{stat_column2}")
+
+    # Subqueries to check for each stat independently
+    stat1_subquery = (
+        db.session.query(Pitching.playerID)
+        .filter(pitching_column1 >= stat_range1)
+        .subquery()
+    )
+    stat2_subquery = (
+        db.session.query(Pitching.playerID)
+        .filter(pitching_column2 >= stat_range2)
+        .subquery()
+    )
+
+    # Main query: find players present in both subqueries
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Pitching, Pitching.playerID == People.playerID)
+        .join(stat1_subquery, stat1_subquery.c.playerID == People.playerID)
+        .join(stat2_subquery, stat2_subquery.c.playerID == People.playerID)
+        .order_by(db.func.sum(Pitching.p_G).asc())
+        .group_by(People.playerID)
+        .distinct()
+        .all()
+    )
 
 def get_players_career_pitching_stat_team(team, stat_column, min_value=None, max_value=None):
     """
@@ -584,7 +633,39 @@ def get_players_careerBattingAVG_award(award, min_avg=0.300):
 
     return results
 
+"""
+get_players_seasonStatPitching_seasonStatBatting
+queries for a player that has this pitching stat and this batting stat.
+doesn't have to be in the same season
+algorithm orders it by least appearances in pitching p_G
+"""
+def get_players_seasonStatPitching_seasonStatBatting(pitching_column, pitching_range, batting_column, batting_range):
+    pitching_column1 = getattr(Pitching, f"p_{pitching_column}")
+    batting_column1 = getattr(Batting, f"b_{batting_column}")
 
+    # Subqueries to check for each stat independently
+    pitching_subquery = (
+        db.session.query(Pitching.playerID)
+        .filter(pitching_column1 >= pitching_range)
+        .subquery()
+    )
+    batting_subquery = (
+        db.session.query(Batting.playerID)
+        .filter(batting_column1 >= batting_range)
+        .subquery()
+    )
+
+    # Main query: find players present in both subqueries
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Pitching, Pitching.playerID == People.playerID)
+        .join(pitching_subquery, pitching_subquery.c.playerID == People.playerID)
+        .join(batting_subquery, batting_subquery.c.playerID == People.playerID)
+        .order_by(db.func.sum(Pitching.p_G).asc())
+        .group_by(People.playerID)
+        .distinct()
+        .all()
+    )
 def get_players_career_batting_stat_award(award, stat_column, min_value=None, max_value=None):
     """
     Queries players' career batting statistics and awards.
@@ -816,19 +897,11 @@ def get_players_career_era_position(position, max_era=3.00):
         .all()
     )
 
-"""
-get_players_seasonStatPitching_seasonStatBatting
-queries for a player that has this pitching stat and this batting stat.
-doesn't have to be in the same season
-algorithm orders it by least appearances in pitching p_G
-"""
-def get_players_seasonStatPitching_seasonStatBatting(pitching_column, pitching_range, batting_column, batting_range):
-    pitching_column1 = getattr(Pitching, f"p_{pitching_column}")
-    batting_column1 = getattr(Batting, f"b_{batting_column}")
 
 
 def get_players_careerBattingAVG_position(position, min_avg=0.300):
     batting_avg = (db.func.sum(Batting.b_H) / db.func.nullif(db.func.sum(Batting.b_AB), 0)).label("career_avg")
+
 
     results = (
         db.session.query(

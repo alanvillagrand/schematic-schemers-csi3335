@@ -491,7 +491,7 @@ def get_players_careerStatBatting_team(stat_column, team, stat_range):
         .join(Batting, Batting.playerID == People.playerID)  # Join Batting for player stats
         .join(Teams, Teams.teamID == Batting.teamID)  # Join Teams to filter by team
         .filter(Teams.team_name == team)
-        .groupBy(People.playerID)
+        .group_by(People.playerID)
         .order_by(db.func.sum(Batting.b_G).asc())
         .distinct()  # Ensure distinct players
         .all()
@@ -552,10 +552,41 @@ def get_players_careerStatPitching_hof(stat_column, stat_range):
         .join(Pitching, Pitching.playerID == People.playerID)
         .join(HallOfFame, HallOfFame.playerID == People.playerID )
         .filter(HallOfFame.inducted == "Y")
+        .group_by(People.playerID)
         .order_by(db.func.sum(Pitching.p_G).asc())
         .distinct()  # Ensure distinct players
         .all()
     )
+
+def get_players_careerStatPitching_stdAward(stat_column, award, stat_range):
+    pitching_column = getattr(Pitching, f"p_{stat_column}")
+    total_stat = db.func.sum(pitching_column).label("total_stat")
+
+    career_stats = (
+        db.session.query(
+            Pitching.playerID,
+            total_stat
+        )
+        .group_by(Pitching.playerID)
+        .having(total_stat > stat_range)
+        .subquery()
+    )
+
+    return (
+        db.session.query(
+            People.nameFirst,
+            People.nameLast,
+        )
+        .join(career_stats, career_stats.c.playerID == People.playerID)
+        .join(Pitching, Pitching.playerID == People.playerID)
+        .join(Awards, Awards.playerID == People.playerID)
+        .filter(Awards.awardID == award)
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Pitching.p_G).asc())
+        .distinct()  # Ensure distinct players
+        .all()
+    )
+
 
 
 
@@ -593,6 +624,37 @@ def get_players_seasonStatPitching_seasonStatPitching(stat_column1, stat_range1,
         .join(stat1_subquery, stat1_subquery.c.playerID == People.playerID)
         .join(stat2_subquery, stat2_subquery.c.playerID == People.playerID)
         .order_by(db.func.sum(Pitching.p_G).asc())
+        .group_by(People.playerID)
+        .distinct()
+        .all()
+    )
+
+
+def get_players_careerStatBatting_careerStatBatting(stat_column1, stat_range1, stat_column2, stat_range2):
+    batting_column1 = getattr(Batting, f"b_{stat_column1}")
+    batting_column2 = getattr(Batting, f"b_{stat_column2}")
+
+    # Subqueries to check for each stat independently
+    stat1_subquery = (
+        db.session.query(Batting.playerID)
+        .group_by(Batting.playerID)
+        .having(db.func.sum(batting_column1) >= stat_range1)
+        .subquery()
+    )
+    stat2_subquery = (
+        db.session.query(Batting.playerID)
+        .group_by(Batting.playerID)
+        .having(db.func.sum(batting_column2) >= stat_range2)
+        .subquery()
+    )
+
+    # Main query: find players present in both subqueries
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Batting, Batting.playerID == People.playerID)
+        .join(stat1_subquery, stat1_subquery.c.playerID == People.playerID)
+        .join(stat2_subquery, stat2_subquery.c.playerID == People.playerID)
+        .order_by(db.func.sum(Batting.b_G).asc())
         .group_by(People.playerID)
         .distinct()
         .all()
@@ -1257,6 +1319,28 @@ def search_players():
         team = option1_details if option1 == "teams" else option2_details
         results = get_players_position_team(position, team)
 
+    elif option1 == "career statistic" and option2 == "career statistic":
+        stat1 = option1_details
+        stat2 = option2_details
+        stat_range1 = request.form.get(f'dropdown1_{stat1}_specific')
+        stat_range2 = request.form.get(f'dropdown2_{stat2}_specific')
+
+        def convert_to_number(value):
+            value = value.replace('+', '')  # Remove the '+' if it exists
+            try:
+                if '.' in value:
+                    return float(value)  # Convert to float if it contains a decimal point
+                return int(value)  # Otherwise, convert to int
+            except ValueError:
+                raise ValueError(f"Invalid number format: {value}")
+
+        stat_range1 = convert_to_number(stat_range1)
+        stat_range2 = convert_to_number(stat_range2)
+
+        if stat1 in standard_careerStatBatting and stat2 in standard_careerStatBatting:
+            results = get_players_careerStatBatting_careerStatBatting(stat1, stat_range1, stat2, stat_range2)
+
+
     elif (option1 == "career statistic" and option2 == "teams") or (option1 == "teams" and option2 == "career statistic"):
         print("IN TEAMS CSTATS")
         # Extract career statistics and team details
@@ -1300,8 +1384,11 @@ def search_players():
         stat_range = int(stat_range.replace('+', ''))
 
         # Handling different career statistics based on user input
-        if award == "Hall of Fame":
+        if award == "Hall of Fame" and career_stat in standard_careerStatPitching:
             results = get_players_careerStatPitching_hof(career_stat, stat_range)
+        elif award in standard_awards and career_stat in standard_careerStatPitching:
+            results = get_players_careerStatPitching_stdAward(career_stat, award, stat_range)
+
 
     elif (option1 == "career statistic" and option2 == "positions") or (option1 == "positions" and option2 == "career statistic"):
         print("IN POSITION CSTATS")

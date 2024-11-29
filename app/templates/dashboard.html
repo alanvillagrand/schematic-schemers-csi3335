@@ -114,13 +114,13 @@
             if (selectedStat === 'HR') {
                 statOptions = careerStatisticsHR;
             } else if (selectedStat === "W") {
-                statOptions = seasonalStatisticsWin;
+                statOptions = careerStatisticsWin;
             } else if (selectedStat === "RBI") {
                 statOptions = seasonalStatisticsRBI;
             } else if (selectedStat === "R") {
                 statOptions = seasonalStatisticsRun
             } else if (selectedStat === "H") {
-                statOptions = seasonalStatisticsHits
+                statOptions = careerStatisticsHits
             } else if (selectedStat === "SB") {
                 statOptions = seasonalStatisticsSB
             } else if (selectedStat === "SV") {
@@ -257,6 +257,8 @@
     <script src="{{ url_for('static', filename='seasonalStatistics3030.js') }}"></script>
     <script src="{{ url_for('static', filename='careerStatisticsHR.js') }}"></script>
     <script src="{{ url_for('static', filename='careerStatisticsSO.js') }}"></script>
+    <script src="{{ url_for('static', filename='careerStatisticsWin.js') }}"></script>
+    <script src="{{ url_for('static', filename='careerStatisticsHits.js') }}"></script>
 
 
 

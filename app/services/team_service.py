@@ -1,5 +1,5 @@
-from app.models import Teams, Batting, People, Pitching
-from sqlalchemy import func, literal, desc
+from app.models import Teams, Batting, People, Pitching, LeagueStats, Fielding
+from sqlalchemy import func, literal, desc, select, and_, case
 from sqlalchemy.sql import text
 from datetime import datetime
 from app import db
@@ -43,15 +43,57 @@ def calculate_SLG():
     return (calculate_1B() + 2*Batting.b_2B + 3*Batting.b_3B + 4*Batting.b_HR) / Batting.b_AB
 
 # Weighted on-base average
-# I'm assuming that BB-IBB is the same as uBB
 def calculate_wOBA():
     return (.69*(Batting.b_BB - Batting.b_IBB) + .72*Batting.b_HBP + .89*calculate_1B() + 1.27*Batting.b_2B + 1.62*Batting.b_3B + 2.10*Batting.b_HR) \
     / (Batting.b_AB + Batting.b_BB - Batting.b_IBB + Batting.b_SF + Batting.b_HBP)
+
+# Wins above replacement
+def calculate_WAR(innings_played, position_multiplier):
+    wRAA = ((calculate_wOBA() - LeagueStats.wOBA) / LeagueStats.wOBA_scale) * calculate_PA()
+
+    # Can't find GDP rate anywhere so using 10% as it seems to be the average
+    lgGDPo = LeagueStats.GDP / 0.10
+    GDPo = Batting.b_GIDP / 0.13
+    lgRPO = LeagueStats.R / (3*LeagueStats.IP)
+    wGDP =  (((LeagueStats.GDP / lgGDPo) * GDPo) - Batting.b_GIDP) * lgRPO
+    lgwSB = (LeagueStats.SB * LeagueStats.runSB + LeagueStats.CS * LeagueStats.runCS) \
+        / (LeagueStats.b_1B + LeagueStats.BB + LeagueStats.HBP - LeagueStats.IBB)
+    wSB = ((Batting.b_SB * LeagueStats.runSB) + (Batting.b_CS * LeagueStats.runCS)) \
+        - (lgwSB * (calculate_1B() + Batting.b_BB + Batting.b_HBP - Batting.b_IBB))
+    BSR = wGDP + wSB
+
+    Rpos = (innings_played * position_multiplier) / 1350
+
+    RPW = ((9 * (LeagueStats.R / LeagueStats.IP)) * 1.5) + 3
+    RLR = ((0.235 * LeagueStats.W) * RPW * calculate_PA()) / LeagueStats.PA
+
+    return (wRAA + BSR + Rpos + RLR) / RPW
 
 def get_team_info(team_name, year):
     return Teams.query.filter_by(team_name=team_name, yearID=year).first()
 
 def get_batting_info(team_name, year):
+    fielding_subquery = (
+        db.session.query(Fielding.playerID, Fielding.yearID, Fielding.f_InnOuts, Fielding.position)
+        .filter(Fielding.yearID == year)
+        .subquery()
+    )
+
+    # Get position of player
+    position_multplier = case(
+        (fielding_subquery.c.position == "SS", 7),
+        (fielding_subquery.c.position == "2B", 3),
+        (fielding_subquery.c.position == "OF", 0),
+        (fielding_subquery.c.position == "C", 9),
+        (fielding_subquery.c.position == "1B", -9.5),
+        (fielding_subquery.c.position == "3B", 2),
+        (fielding_subquery.c.position == "P", 0),
+        (fielding_subquery.c.position == "LF", -7),
+        (fielding_subquery.c.position == "RF", -7),
+        (fielding_subquery.c.position == "CF", 2.5),
+        else_=0
+    )
+
     date = datetime.strptime(year + "-06-30", "%Y-%m-%d")
     results = (
         db.session.query(
@@ -71,12 +113,16 @@ def get_batting_info(team_name, year):
             func.round(calculate_wOBA(), 3),
             0, # wRC+
             0, # BsR
-            0, # Off
-            0, # Def
-            0 # WAR
+            position_multplier, # Off
+            fielding_subquery.c.f_InnOuts / 3, # Def
+            func.round(calculate_WAR((fielding_subquery.c.f_InnOuts / 3), position_multplier), 2)
         )
         .join(Batting, Batting.playerID == People.playerID)
+        .join(fielding_subquery, and_(
+            Batting.playerID == fielding_subquery.c.playerID,
+            Batting.yearID == fielding_subquery.c.yearID))
         .join(Teams, (Batting.teamID == Teams.teamID) & (Batting.yearID == Teams.yearID))
+        .join(LeagueStats, Batting.yearID == LeagueStats.yearID)
         .filter(Teams.team_name == team_name, Batting.yearID == year)
         .order_by(desc(Batting.b_G))
         .all()

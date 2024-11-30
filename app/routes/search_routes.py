@@ -421,7 +421,6 @@ algorithm orders it by least appearances in pitching p_G
 
 def get_players_seasonStatPitching_team(stat_column, team, stat_range):
     pitching_column = getattr(Pitching, f"p_{stat_column}")
-    print(pitching_column)
     return (
         db.session.query(People.nameFirst, People.nameLast)
         .join(Pitching, Pitching.playerID == People.playerID)
@@ -785,6 +784,21 @@ def get_players_seasonStatPitching_stdAward(award, stat_column, stat_range):
         .all()
 
     )
+
+def get_players_seasonStatPitching_allStar(stat_column, stat_range):
+    pitching_column = getattr(Pitching, f"p_{stat_column}")
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Pitching, Pitching.playerID == People.playerID)
+        .join(AllStarFull, AllStarFull.playerID == People.playerID)
+        .filter(AllStarFull.GP > 0)
+        .filter(pitching_column >= stat_range)
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Pitching.p_G).asc())
+        .distinct()
+        .all()
+    )
+
 
 """
 get_players_seasonStatPitching_seasonStatBatting
@@ -1507,6 +1521,8 @@ def search_players():
             results = get_players_seasonStatBatting_ws(stat, stat_range)
         elif stat in standard_seasonStatPitching and award in standard_awards:
             results = get_players_seasonStatPitching_stdAward(award, stat, stat_range)
+        elif stat in standard_seasonStatPitching and award == "All Star":
+            results = get_players_seasonStatPitching_allStar(stat, stat_range)
 
 
 
@@ -1540,13 +1556,12 @@ def search_players():
         stat_range = request.form.get(f'dropdown2_{stat}_specific') if option1 == "teams" else request.form.get(
             f'dropdown1_{stat}_specific')
 
-        if stat == "HR" or stat == "RBI" or stat == "R" or stat == "H" or stat == "SB":
+        if stat in standard_seasonStatBatting:
             stat_range = int(stat_range.replace('+', ''))
             results = get_players_seasonStatBatting_team(stat, team, stat_range)
 
 
-        elif stat == "SV" or stat == "W" or stat == "SO":
-            print("HERE SV")
+        elif stat in standard_seasonStatPitching:
             stat_range = int(stat_range.replace('+', ''))
             results = get_players_seasonStatPitching_team(stat, team, stat_range)
 

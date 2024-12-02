@@ -1,0 +1,3 @@
+careerStatisticsAVG = [
+    ".300+"
+]

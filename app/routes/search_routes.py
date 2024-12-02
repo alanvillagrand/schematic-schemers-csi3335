@@ -1044,6 +1044,31 @@ def get_players_seasonStatPitching_seasonStatAVG(pitching_column, pitching_range
         .all()
     )
 
+def get_players_seasonStatBatting_seasonStatAVG(batting_column, batting_range, avg_range):
+    batting_column1 = getattr(Batting, f"b_{batting_column}")
+    batting_subquery = (
+        db.session.query(Batting.playerID)
+        .filter(batting_column1 >= batting_range)
+        .subquery()
+    )
+    avg_subquery = (
+        db.session.query(Batting.playerID)
+        .filter((Batting.b_H/Batting.b_AB) >= avg_range)
+        .subquery()
+
+    )
+
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Batting, Batting.playerID == People.playerID)
+        .join(batting_subquery, batting_subquery.c.playerID == People.playerID)
+        .join(avg_subquery, avg_subquery.c.playerID == People.playerID)
+        .order_by(db.func.sum(Batting.b_G).asc())
+        .group_by(People.playerID)
+        .distinct()
+        .all()
+    )
+
 
 
 
@@ -1828,6 +1853,12 @@ def search_players():
                 results = get_players_seasonStatPitching_seasonStatAVG(stat1, stat_range1, stat_range2)
             else:
                 results = get_players_seasonStatPitching_seasonStatAVG(stat2, stat_range2, stat_range1)
+        elif (stat1 in standard_seasonStatBatting and stat2 == "AVG") or (stat1 == "AVG" and stat2 in standard_seasonStatBatting):
+            if stat1 in standard_seasonStatBatting:
+                results = get_players_seasonStatBatting_seasonStatAVG(stat1, stat_range1, stat_range2)
+            else:
+                results = get_players_seasonStatBatting_seasonStatAVG(stat2, stat_range2, stat_range1)
+
 
 
 

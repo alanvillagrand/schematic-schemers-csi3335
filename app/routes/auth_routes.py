@@ -5,17 +5,22 @@ bp = Blueprint('auth', __name__)
 
 @bp.route("/login", methods=["POST"])
 def login():
+    print("IN LOGIN")
     username = request.form['username']
     password = request.form['password']
+    print(username, password)
     user = User.query.filter_by(username=username).first()
     if user and user.check_password(password):
+        print("Here")
         session['username'] = username
         return redirect(url_for('main.dashboard'))
+    print("Failed login")
     return render_template('index.html', error="Invalid username or password")
 
 
 @bp.route("/register", methods=["POST"])
 def register():
+    print("IN REGISTER")
     username = request.form['username']
     password = request.form['password']
     user = User.query.filter_by(username=username).first()

@@ -1,6 +1,7 @@
 from . import db
 from werkzeug.security import generate_password_hash, check_password_hash
 
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
@@ -149,6 +150,7 @@ class Teams(db.Model):
     team_projW = db.Column(db.SmallInteger)
     team_projL = db.Column(db.SmallInteger)
 
+
 class Awards(db.Model):
     __tablename__ = 'awards'  # Table name in your database
 
@@ -159,6 +161,7 @@ class Awards(db.Model):
     lgID = db.Column(db.CHAR(2), nullable=False)
     tie = db.Column(db.String(1))
     notes = db.Column(db.String(100))
+
 
 class Fielding(db.Model):
     __tablename__ = 'fielding'  # Table name in your database
@@ -197,6 +200,7 @@ class HallOfFame(db.Model):
     category = db.Column(db.String(20))
     note = db.Column(db.String(25))
 
+
 class AllStarFull(db.Model):
     __tablename__ = 'allstarfull'
 
@@ -218,7 +222,7 @@ class Appearances(db.Model):
 
     # Foreign Keys
     playerID = db.Column(db.String(9), db.ForeignKey('people.playerID'), nullable=False)
-    teamId = db.Column(db.String(3), db.ForeignKey('teams.teamID'), nullable=False)
+    teamID = db.Column(db.String(3), db.ForeignKey('teams.teamID'), nullable=False)
     yearID = db.Column(db.SmallInteger, nullable=False)
 
     # Games Played
@@ -239,6 +243,72 @@ class Appearances(db.Model):
     G_dh = db.Column(db.SmallInteger)  # Games played as a designated hitter
     G_ph = db.Column(db.SmallInteger)  # Games played as a pinch hitter
     G_pr = db.Column(db.SmallInteger)  # Games played as a pinch runner
+
+# class Pitching(db.Model):
+#     __tablename__ = 'pitching'
+
+#     pitching_ID = db.Column(db.Integer, primary_key=True, autoincrement=True)
+#     playerID = db.Column(db.String(9), nullable=False, index=True)
+#     yearID = db.Column(db.SmallInteger, nullable=False)
+#     teamID = db.Column(db.CHAR(3), nullable=False, index=True)
+#     stint = db.Column(db.SmallInteger, nullable=False)
+#     p_W = db.Column(db.SmallInteger, nullable=True)
+#     p_L = db.Column(db.SmallInteger, nullable=True)
+#     p_G = db.Column(db.SmallInteger, nullable=True)
+#     p_GS = db.Column(db.SmallInteger, nullable=True)
+#     p_CG = db.Column(db.SmallInteger, nullable=True)
+#     p_SHO = db.Column(db.SmallInteger, nullable=True)
+#     p_SV = db.Column(db.SmallInteger, nullable=True)
+#     p_IPOuts = db.Column(db.Integer, nullable=True)
+#     p_H = db.Column(db.SmallInteger, nullable=True)
+#     p_ER = db.Column(db.SmallInteger, nullable=True)
+#     p_HR = db.Column(db.SmallInteger, nullable=True)
+#     p_BB = db.Column(db.SmallInteger, nullable=True)
+#     p_SO = db.Column(db.SmallInteger, nullable=True)
+#     p_BAOpp = db.Column(db.Float, nullable=True)
+#     p_ERA = db.Column(db.Float, nullable=True)
+#     p_IBB = db.Column(db.SmallInteger, nullable=True)
+#     p_WP = db.Column(db.SmallInteger, nullable=True)
+#     p_HBP = db.Column(db.SmallInteger, nullable=True)
+#     p_BK = db.Column(db.SmallInteger, nullable=True)
+#     p_BFP = db.Column(db.SmallInteger, nullable=True)
+#     p_GF = db.Column(db.SmallInteger, nullable=True)
+#     p_R = db.Column(db.SmallInteger, nullable=True)
+#     p_SH = db.Column(db.SmallInteger, nullable=True)
+#     p_SF = db.Column(db.SmallInteger, nullable=True)
+#     p_GIDP = db.Column(db.SmallInteger, nullable=True)
+
+class SeriesPost(db.Model):
+    __tablename__ = 'seriespost'
+
+    seriespost_ID = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    teamIDwinner = db.Column(db.CHAR(3), nullable=False, index=True)
+    teamIDloser = db.Column(db.CHAR(3), nullable=False, index=True)
+    yearID = db.Column(db.SmallInteger, nullable=False)
+    round = db.Column(db.String(5), nullable=False)
+    wins = db.Column(db.SmallInteger, nullable=True)
+    losses = db.Column(db.SmallInteger, nullable=True)
+    ties = db.Column(db.SmallInteger, nullable=True)
+
+
+class FieldingPost(db.Model):
+    __tablename__ = 'fieldingpost'
+
+    fieldingpost_ID = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    playerID = db.Column(db.String(9), nullable=False, index=True)  # Player ID
+    yearID = db.Column(db.SmallInteger, nullable=False)  # Year of the postseason
+    teamID = db.Column(db.CHAR(3), nullable=False, index=True)  # Team ID
+    round = db.Column(db.String(10), nullable=False)  # Postseason round
+    position = db.Column(db.String(2), nullable=True)  # Fielding position
+    f_G = db.Column(db.SmallInteger, nullable=True)  # Games played
+    f_GS = db.Column(db.SmallInteger, nullable=True)  # Games started
+    f_InnOuts = db.Column(db.SmallInteger, nullable=True)  # Innings played (outs recorded)
+    f_PO = db.Column(db.SmallInteger, nullable=True)  # Putouts
+    f_A = db.Column(db.SmallInteger, nullable=True)  # Assists
+    f_E = db.Column(db.SmallInteger, nullable=True)  # Errors
+    f_DP = db.Column(db.SmallInteger, nullable=True)  # Double plays
+    f_TP = db.Column(db.SmallInteger, nullable=True)  # Triple plays
+    f_PB = db.Column(db.SmallInteger, nullable=True)  # Passed balls (for catchers)
 
 class LeagueStats(db.Model):
     __tablename__ = 'league_stats'

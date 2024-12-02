@@ -1,6 +1,6 @@
 from app.models import Teams, Batting, People, Pitching, LeagueStats, Fielding
 from sqlalchemy import func, literal, desc, select, and_, case
-from sqlalchemy.sql import text
+from sqlalchemy.sql import over
 from datetime import datetime
 from app import db
 
@@ -44,8 +44,9 @@ def calculate_SLG():
 
 # Weighted on-base average
 def calculate_wOBA():
-    return (.69*(Batting.b_BB - Batting.b_IBB) + .72*Batting.b_HBP + .89*calculate_1B() + 1.27*Batting.b_2B + 1.62*Batting.b_3B + 2.10*Batting.b_HR) \
-    / (Batting.b_AB + Batting.b_BB - Batting.b_IBB + Batting.b_SF + Batting.b_HBP)
+    return (LeagueStats.wBB*(Batting.b_BB - Batting.b_IBB) + LeagueStats.wHBP*Batting.b_HBP + LeagueStats.w1B*calculate_1B()\
+             + LeagueStats.w2B*Batting.b_2B + LeagueStats.w3B*Batting.b_3B + LeagueStats.wHR*Batting.b_HR) \
+             / (Batting.b_AB + Batting.b_BB - Batting.b_IBB + Batting.b_SF + Batting.b_HBP)
 
 def calculate_wRC_plus():
     wRAA = ((calculate_wOBA() - LeagueStats.wOBA) / LeagueStats.wOBA_scale) * calculate_PA()
@@ -187,6 +188,40 @@ def get_pitching_info(team_name, year):
         .join(Pitching, Pitching.playerID == People.playerID)
         .join(Teams, (Pitching.teamID == Teams.teamID) & (Pitching.yearID == Teams.yearID))
         .filter(Teams.team_name == team_name, Pitching.yearID == year)
+        .all()
+    )
+    return results
+
+def get_position_info_playing_time(position, team_name, year):
+    subquery = func.sum(Fielding.f_InnOuts).over(
+        partition_by=Fielding.position
+    ).label("total_outs")
+
+    results = (
+        db.session.query(
+            func.concat(People.nameFirst, ' ', People.nameLast).label('name'),
+            func.concat(func.round((Fielding.f_InnOuts * 100.0 / subquery), 2), literal('%')).label('statistic')
+        )
+        .join(Fielding, Fielding.playerID == People.playerID)
+        .join(Teams, (Fielding.teamID == Teams.teamID) & (Fielding.yearID == Teams.yearID))
+        .filter(Teams.team_name == team_name, Fielding.yearID == year, Fielding.position == position)
+        .order_by(desc('statistic'))
+        .all()
+    )
+    return results
+
+def get_position_info_wOBA(position, team_name, year):
+    results = (
+        db.session.query(
+            func.concat(People.nameFirst, ' ', People.nameLast).label('name'),
+            func.round(calculate_wOBA(), 3).label('statistic')
+        )
+        .join(Batting, Batting.playerID == People.playerID)
+        .join(Teams, (Batting.teamID == Teams.teamID) & (Batting.yearID == Teams.yearID))
+        .join(LeagueStats, Batting.yearID == LeagueStats.yearID)
+        .join(Fielding, (Fielding.playerID == Batting.playerID) & (Fielding.teamID == Batting.teamID) & (Fielding.yearID == Batting.yearID))
+        .filter(Teams.team_name == team_name, Fielding.yearID == year, Fielding.position == position)
+        .order_by(desc('statistic'))
         .all()
     )
     return results

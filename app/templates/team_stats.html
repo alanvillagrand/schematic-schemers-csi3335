@@ -10,6 +10,30 @@ table.center {
     margin-left: auto;
     margin-right: auto;
 }
+.depth-chart {
+    display: grid;
+    grid-template-areas:
+        ". . _CF . ."
+        ". _LF . _RF ."
+        ". _SS . _2B ."
+        ". _3B . _1B ."
+        ". . _C . .";
+    grid-gap: 10px;
+    text-align: center;
+}
+.position-box {
+    border: 1px solid orange;
+    padding: 10px;
+    background-color: #f9f9f9;
+}
+._LF { grid-area: _LF; }
+._CF { grid-area: _CF; }
+._RF { grid-area: _RF; }
+._SS { grid-area: _SS; }
+._2B { grid-area: _2B; }
+._3B { grid-area: _3B; }
+._1B { grid-area: _1B; }
+._C { grid-area: _C; }
 </style>
 
 <div class="container">
@@ -106,6 +130,43 @@ table.center {
         </table>
     {% else %}
         <p>No pitching information found.</p>
+    {% endif %}
+
+    <!-- Depth Chart -->
+    <h2>Depth Chart</h2>
+
+    {% if position_info %}
+        <div style="margin-bottom: 20px;">
+            <label for="position-players-stats">Select projected stats displayed for Position Players:</label>
+            <select id="position-players-stats" name="position-players-stats">
+                <option value="playing-time">Playing Time</option>
+                <option value="batting-average">PA</option>
+                <option value="home-runs">WAR</option>
+                <option value="rbis">wOBA</option>
+            </select>
+        
+            <label for="pitchers-stats">Pitchers:</label>
+            <select id="pitchers-stats" name="pitchers-stats">
+                <option value="playing-time">Playing Time</option>
+                <option value="strikeouts">IP</option>
+                <option value="era">ERA</option>
+                <option value="wins">FIP</option>
+            </select>
+        </div>
+        <div class="depth-chart">
+            {% for position, players in position_info.items() %}
+            <div class="position-box _{{ position }}">
+                <strong>{{ position }}</strong>
+                <ul>
+                    {% for player in players %}
+                    <li>{{ player.name }}: {{ player.statistic }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No position data found.</p>
     {% endif %}
 
     <a href="{{ url_for('team.team_stats') }}">Search again</a>

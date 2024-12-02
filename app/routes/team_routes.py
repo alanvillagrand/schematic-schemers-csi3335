@@ -14,13 +14,25 @@ def team_stats():
             team_info = get_team_info(team_name, year)
             batting_info = get_batting_info(team_name, year)
             pitching_info = get_pitching_info(team_name, year)
+            position_info = {
+                "LF": get_position_info_playing_time('LF', team_name, year),
+                "CF": get_position_info_playing_time('CF', team_name, year),
+                "RF": get_position_info_playing_time('RF', team_name, year),
+                "SS": get_position_info_playing_time('SS', team_name, year),
+                "2B": get_position_info_playing_time('2B', team_name, year),
+                "3B": get_position_info_playing_time('3B', team_name, year),
+                "C": get_position_info_playing_time('C', team_name, year),
+                "1B": get_position_info_playing_time('1B', team_name, year),
+            }
+            print(position_info)
 
             return render_template("team_stats.html",
                                    team_info=team_info,
                                    batting_info=batting_info,
                                    pitching_info=pitching_info,
                                    team_name=team_name,
-                                   year=year)
+                                   year=year,
+                                   position_info=position_info)
 
         return render_template("team_form.html")
     return redirect(url_for('main.home'))

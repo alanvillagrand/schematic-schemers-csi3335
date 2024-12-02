@@ -436,26 +436,33 @@ def get_players_seasonStatPitching_team(stat_column, team, stat_range):
     )
 
 
-def get_players_careerBattingAVG_team(team, min_avg=0.300):
-    batting_avg = (db.func.sum(Batting.b_H) / db.func.nullif(db.func.sum(Batting.b_AB), 0)).label("career_avg")
+def get_players_careerBattingAVG_team(stat_range, team):
+    # Subquery: Get player IDs of players who played at least one game for the given team
+    played_for_team = (
+        db.session.query(Batting.playerID)
+        .join(Teams, Teams.teamID == Batting.teamID)
+        .filter(Teams.team_name == team)  # Use correct column for team name
+        .group_by(Batting.playerID)
+        .subquery()
+    )
 
-    results = (
+    # Main query: Calculate career batting average for players in the subquery
+    return (
         db.session.query(
             People.nameFirst,
-            People.nameLast,
-            batting_avg
+            People.nameLast  # Only select first and last name
         )
         .join(Batting, Batting.playerID == People.playerID)
-        .join(Teams, Teams.teamID == Batting.teamID)
-        .filter(Teams.team_name == team)
+        .filter(People.playerID.in_(played_for_team))  # Filter only players from the subquery
         .group_by(People.playerID, People.nameFirst, People.nameLast)
-        .having(db.func.sum(Batting.b_AB) > 0)
-        .having(batting_avg >= min_avg)
-        .order_by(batting_avg.desc())
+        .having(db.func.sum(Batting.b_AB) > 0)  # Ensure no division by zero
+        .having((db.func.sum(Batting.b_H) / db.func.sum(Batting.b_AB)) >= stat_range)  # Apply average filter
+        .order_by(db.func.sum(Batting.b_G).asc())  # Order by least games played
         .all()
     )
 
-    return results
+
+
 
 
 """
@@ -557,6 +564,37 @@ def get_players_careerStatPitching_hof(stat_column, stat_range):
         .all()
     )
 
+def get_players_careerStatbatting_allStar(stat_column, stat_range):
+    batting_column = getattr(Batting, f"b_{stat_column}")
+    total_stat = db.func.sum(batting_column).label("total_stat")
+
+    career_stats = (
+        db.session.query(
+            Batting.playerID,
+            total_stat
+        )
+        .group_by(Batting.playerID)
+        .having(total_stat > stat_range)
+        .subquery()
+    )
+
+    return (
+        db.session.query(
+            People.nameFirst,
+            People.nameLast,
+        )
+        .join(career_stats, career_stats.c.playerID == People.playerID)
+        .join(Batting, Batting.playerID == People.playerID)
+        .join(AllStarFull, AllStarFull.playerID == People.playerID)
+        .filter(AllStarFull.GP > 0)
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Batting.b_G).asc())
+        .distinct()  # Ensure distinct players
+        .all()
+    )
+
+
+
 def get_players_careerStatPitching_stdAward(stat_column, award, stat_range):
     pitching_column = getattr(Pitching, f"p_{stat_column}")
     total_stat = db.func.sum(pitching_column).label("total_stat")
@@ -623,6 +661,35 @@ def get_players_seasonStatPitching_seasonStatPitching(stat_column1, stat_range1,
         .join(stat1_subquery, stat1_subquery.c.playerID == People.playerID)
         .join(stat2_subquery, stat2_subquery.c.playerID == People.playerID)
         .order_by(db.func.sum(Pitching.p_G).asc())
+        .group_by(People.playerID)
+        .distinct()
+        .all()
+    )
+
+
+def get_players_seasonStatBatting_seasonStatBatting(stat_column1, stat_range1, stat_column2, stat_range2):
+    batting_column1 = getattr(Batting, f"b_{stat_column1}")
+    batting_column2 = getattr(Batting, f"b_{stat_column2}")
+
+    # Subqueries to check for each stat independently
+    stat1_subquery = (
+        db.session.query(Batting.playerID)
+        .filter(batting_column1 >= stat_range1)
+        .subquery()
+    )
+    stat2_subquery = (
+        db.session.query(Batting.playerID)
+        .filter(batting_column2 >= stat_range2)
+        .subquery()
+    )
+
+    # Main query: find players present in both subqueries
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Batting, Batting.playerID == People.playerID)
+        .join(stat1_subquery, stat1_subquery.c.playerID == People.playerID)
+        .join(stat2_subquery, stat2_subquery.c.playerID == People.playerID)
+        .order_by(db.func.sum(Batting.b_G).asc())
         .group_by(People.playerID)
         .distinct()
         .all()
@@ -795,6 +862,21 @@ def get_players_seasonStatPitching_allStar(stat_column, stat_range):
         .filter(pitching_column >= stat_range)
         .group_by(People.playerID)
         .order_by(db.func.sum(Pitching.p_G).asc())
+        .distinct()
+        .all()
+    )
+
+
+def get_players_seasonStatBatting_allStar(stat_column, stat_range):
+    batting_column = getattr(Batting, f"b_{stat_column}")
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Batting, Batting.playerID == People.playerID)
+        .join(AllStarFull, AllStarFull.playerID == People.playerID)
+        .filter(AllStarFull.GP > 0)
+        .filter(batting_column >= stat_range)
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Batting.b_G).asc())
         .distinct()
         .all()
     )
@@ -1362,11 +1444,19 @@ def search_players():
         team = option2_details if option1 == "career statistic" else option1_details
         stat_range = request.form.get(f'dropdown2_{career_stat}_specific') if option1 == "teams" else request.form.get(
             f'dropdown1_{career_stat}_specific')
-        stat_range = int(stat_range.replace('+', ''))
+        def convert_to_number(value):
+            value = value.replace('+', '')  # Remove the '+' if it exists
+            try:
+                if '.' in value:
+                    return float(value)  # Convert to float if it contains a decimal point
+                return int(value)  # Otherwise, convert to int
+            except ValueError:
+                raise ValueError(f"Invalid number format: {value}")
+        stat_range = convert_to_number(stat_range)
 
         # Handling different career statistics based on user input
-        if career_stat == "300+ AVG Career Batting":
-            results = get_players_careerBattingAVG_team(team, 0.300)
+        if career_stat == "AVG":
+            results = get_players_careerBattingAVG_team(stat_range, team)
         elif career_stat == "200+ Wins Career Pitching":
             results = get_players_career_pitching_stat_team(team, stat_column="p_W", min_value=200)
         elif career_stat == "2000+ K Career Pitching":
@@ -1402,6 +1492,8 @@ def search_players():
             results = get_players_careerStatPitching_hof(career_stat, stat_range)
         elif award in standard_awards and career_stat in standard_careerStatPitching:
             results = get_players_careerStatPitching_stdAward(career_stat, award, stat_range)
+        elif award == "Most Valuable Player" and career_stat in standard_careerStatBatting:
+
 
 
     elif (option1 == "career statistic" and option2 == "positions") or (option1 == "positions" and option2 == "career statistic"):
@@ -1519,6 +1611,8 @@ def search_players():
             results = get_players_seasonStatBatting_stdAward(stat, award, stat_range)
         elif stat in standard_seasonStatBatting and award == "World Series":
             results = get_players_seasonStatBatting_ws(stat, stat_range)
+        elif stat in standard_seasonStatBatting and award == "All Star":
+            results = get_players_seasonStatBatting_allStar(stat, stat_range)
         elif stat in standard_seasonStatPitching and award in standard_awards:
             results = get_players_seasonStatPitching_stdAward(award, stat, stat_range)
         elif stat in standard_seasonStatPitching and award == "All Star":
@@ -1593,7 +1687,7 @@ def search_players():
         stat_range2 = convert_to_number(stat_range2)
 
         if stat1 in standard_seasonStatBatting and stat2 in standard_seasonStatBatting:
-            results = get_players_seasonStatPitching_seasonStatPitching(stat1, stat_range1, stat2, stat_range2)
+            results = get_players_seasonStatBatting_seasonStatBatting(stat1, stat_range1, stat2, stat_range2)
 
         elif (stat1 in standard_seasonStatBatting or stat1 in standard_seasonStatPitching) and (stat2 in standard_seasonStatBatting or stat2 in standard_seasonStatPitching):
             if stat1 in standard_seasonStatBatting:

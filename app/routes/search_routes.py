@@ -689,15 +689,6 @@ queries for positions and career stats
 
 
 def get_players_career_batting_stat_position(position, stat_column, min_value=None, max_value=None):
-    """
-    Get players' career batting statistics for a given position.
-
-    :param position: Position to filter players by
-    :param stat_column: The batting statistic column to aggregate (e.g., 'b_H', 'b_HR', 'b_WAR')
-    :param min_value: Minimum value for filtering (e.g., 2000 for hits)
-    :param max_value: Maximum value for filtering
-    :return: List of players with their aggregated statistics
-    """
     stat_sum = db.func.sum(getattr(Batting, stat_column)).label("career_stat")
 
     query = (
@@ -723,15 +714,6 @@ def get_players_career_batting_stat_position(position, stat_column, min_value=No
 
 
 def get_players_career_pitching_stat_position(position, stat_column, min_value=None, max_value=None):
-    """
-    Get players' career pitching statistics for a given position.
-
-    :param position: Position to filter players by
-    :param stat_column: The pitching statistic column to aggregate (e.g., 'p_W', 'p_SO', 'p_SV')
-    :param min_value: Minimum value for filtering (e.g., 200 for wins)
-    :param max_value: Maximum value for filtering (e.g., 3.00 for ERA)
-    :return: List of players with their aggregated statistics
-    """
     # Use dynamic attribute access to reference the correct column
     stat_sum = db.func.sum(getattr(Pitching, stat_column)).label("career_stat")
 
@@ -761,13 +743,6 @@ def get_players_career_pitching_stat_position(position, stat_column, min_value=N
 
 
 def get_players_career_era_position(position, max_era=3.00):
-    """
-    Get players' career ERA for a given position.
-
-    :param position: Position to filter players by
-    :param max_era: Maximum ERA value for filtering (e.g., 3.00)
-    :return: List of players with their average ERA who played at the given position
-    """
     # Calculate the sum of ERA and count to get the average ERA
     sum_era = db.func.sum(Pitching.p_ERA).label("sum_era")
     count_era = db.func.count(Pitching.p_ERA).label("count_era")
@@ -823,14 +798,6 @@ queries for POB and career stats
 
 
 def get_players_career_batting_stat_pob(stat_column, min_value=None, max_value=None):
-    """
-    Get players' career batting statistics for those born outside the USA.
-
-    :param stat_column: The batting statistic column to aggregate (e.g., 'b_H', 'b_HR', 'b_WAR')
-    :param min_value: Minimum value for filtering (e.g., 2000 for hits)
-    :param max_value: Maximum value for filtering
-    :return: List of players with their aggregated statistics
-    """
     stat_sum = db.func.sum(getattr(Batting, stat_column)).label("career_stat")
 
     query = (

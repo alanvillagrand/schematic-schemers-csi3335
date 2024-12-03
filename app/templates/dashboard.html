@@ -121,22 +121,14 @@
                 statOptions = careerStatisticsHR;
             } else if (selectedStat === "W") {
                 statOptions = careerStatisticsWin;
-            } else if (selectedStat === "RBI") {
-                statOptions = seasonalStatisticsRBI;
-            } else if (selectedStat === "R") {
-                statOptions = seasonalStatisticsRun
             } else if (selectedStat === "H") {
                 statOptions = careerStatisticsHits
-            } else if (selectedStat === "SB") {
-                statOptions = seasonalStatisticsSB
             } else if (selectedStat === "SV") {
-                statOptions = seasonalStatisticsSV
+                statOptions = careerStatisticsSV
             } else if (selectedStat === "AVG") {
                 statOptions = careerStatisticsAVG
             } else if (selectedStat === "SO") {
                 statOptions = careerStatisticsSO
-            } else if (selectedStat === "30+HR/30+SB") {
-                statOptions = seasonalStatistics3030
             } else if (selectedStat === "ERA") {
                 statOptions = careerStatisticsERA
 
@@ -272,6 +264,7 @@
     <script src="{{ url_for('static', filename='draftPick.js') }}"></script>
     <script src="{{ url_for('static', filename='careerStatisticsERA.js') }}"></script>
     <script src="{{ url_for('static', filename='seasonalStatisticsERA.js') }}"></script>
+    <script src="{{ url_for('static', filename='careerStatisticsSV.js') }}"></script>
 
 
 

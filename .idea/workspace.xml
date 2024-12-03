@@ -5,16 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0485066a-a959-4c52-ade2-6d2d13e46ffa" name="Changes" comment="updated queries">
-      <change afterPath="$PROJECT_DIR$/app/static/careerStatisticsERA.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/static/draftPick.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/static/seasonalStatisticsERA.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/schematic-schemers-csi3335.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/schematic-schemers-csi3335.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/routes/search_routes.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/search_routes.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/static/careerStatistics.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/careerStatistics.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/static/seasonalStatistics.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/seasonalStatistics.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/templates/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/dashboard.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -403,7 +396,15 @@
       <option name="project" value="LOCAL" />
       <updated>1733246188707</updated>
     </task>
-    <option name="localTasksCounter" value="27" />
+    <task id="LOCAL-00027" summary="updated queries">
+      <option name="closed" value="true" />
+      <created>1733253466108</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1733253466108</updated>
+    </task>
+    <option name="localTasksCounter" value="28" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -429,7 +430,7 @@
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/schematic_schemers_csi3335$run_py.coverage" NAME="run.py Coverage Results" MODIFIED="1732570597630" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/schematic_schemers_csi3335$schematic_schemers_csi3335.coverage" NAME="schematic-schemers-csi3335 Coverage Results" MODIFIED="1732244108045" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
-    <SUITE FILE_PATH="coverage/schematic_schemers_csi3335$Flask__run_py_.coverage" NAME="Flask (run.py) Coverage Results" MODIFIED="1733253398791" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/schematic_schemers_csi3335$Flask__run_py_.coverage" NAME="Flask (run.py) Coverage Results" MODIFIED="1733260998949" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/schematic_schemers_csi3335$run.coverage" NAME="run Coverage Results" MODIFIED="1732663137355" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/schematic_schemers_csi3335$Flask__app_py_.coverage" NAME="Flask (app.py) Coverage Results" MODIFIED="1731968931883" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
   </component>

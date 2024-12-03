@@ -8,5 +8,6 @@ const positions = [
     "P",
     "LF",
     "RF",
-    "CF"
+    "CF",
+    "DH"
 ]

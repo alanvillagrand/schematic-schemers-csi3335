@@ -65,6 +65,26 @@ class Batting(db.Model):
     b_SF = db.Column(db.SmallInteger)
     b_GIDP = db.Column(db.SmallInteger)
 
+class AdvancedStats(db.Model):
+    __tablename__ = 'advanced_stats'
+
+    batting_advanced_ID = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    playerID = db.Column(db.String(9), db.ForeignKey('people.playerID'), nullable=False)
+    yearID = db.Column(db.SmallInteger, nullable=False)
+    teamID = db.Column(db.String(3), db.ForeignKey('teams.teamID'), nullable=False)
+    stint = db.Column(db.SmallInteger, nullable=False)
+    bat162 = db.Column(db.Double, nullable=True)
+    bsr162 = db.Column(db.Double, nullable=True)
+    fld162 = db.Column(db.Double, nullable=True)
+    pos162 = db.Column(db.Double, nullable=True)
+    def162 = db.Column(db.Double, nullable=True)
+    ref162 = db.Column(db.Double, nullable=True)
+    rep162 = db.Column(db.Double, nullable=True)
+    bwar162 = db.Column(db.Double, nullable=True)
+    br_pwar162 = db.Column(db.Double, nullable=True)
+    wRC_plus = db.Column(db.Double, nullable=True)
+    WAR162 = db.Column(db.Double, nullable=True)
+
 class Pitching(db.Model):
     __tablename__ = "pitching"
     

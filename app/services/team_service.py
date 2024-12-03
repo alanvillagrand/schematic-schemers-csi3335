@@ -1,4 +1,4 @@
-from app.models import Teams, Batting, People, Pitching, LeagueStats, Fielding
+from app.models import Teams, Batting, People, Pitching, LeagueStats, Fielding, AdvancedStats
 from sqlalchemy import func, literal, desc, select, and_, case
 from sqlalchemy.sql import over
 from datetime import datetime
@@ -86,6 +86,19 @@ def get_batting_info(team_name, year):
         .subquery()
     )
 
+    advanced_stats_subquery = (
+        db.session.query(AdvancedStats.playerID,
+                         AdvancedStats.yearID,
+                         AdvancedStats.bat162,
+                         AdvancedStats.bsr162,
+                         AdvancedStats.bwar162,
+                         AdvancedStats.def162,
+                         AdvancedStats.wRC_plus)
+        .filter(AdvancedStats.yearID == year)
+        .group_by(AdvancedStats.playerID)
+        .subquery()
+    )
+
     # Get position of player
     position_multplier = case(
         (fielding_subquery.c.position == "SS", 7),
@@ -118,13 +131,19 @@ def get_batting_info(team_name, year):
             func.round(calculate_OBP(), 3),
             func.round(calculate_SLG(), 3),
             func.round(calculate_wOBA(), 3),
-            func.round(calculate_BsR(), 2), # BsR
-            func.round(calculate_WAR((fielding_subquery.c.f_InnOuts / 3), position_multplier), 2).label('WAR')
+            func.round(advanced_stats_subquery.c.wRC_plus),
+            func.round(advanced_stats_subquery.c.bsr162, 2), # BsR
+            func.round(advanced_stats_subquery.c.bat162 + advanced_stats_subquery.c.bsr162, 1), # Off
+            func.round(advanced_stats_subquery.c.def162, 1), # Def
+            func.round(advanced_stats_subquery.c.bwar162, 2).label('WAR')
         )
         .join(Batting, Batting.playerID == People.playerID)
         .join(fielding_subquery, and_(
             Batting.playerID == fielding_subquery.c.playerID,
             Batting.yearID == fielding_subquery.c.yearID))
+        .join(advanced_stats_subquery, and_(
+            Batting.playerID == advanced_stats_subquery.c.playerID,
+            Batting.yearID == advanced_stats_subquery.c.yearID))
         .join(Teams, (Batting.teamID == Teams.teamID) & (Batting.yearID == Teams.yearID))
         .join(LeagueStats, Batting.yearID == LeagueStats.yearID)
         .filter(Teams.team_name == team_name, Batting.yearID == year)
@@ -197,15 +216,18 @@ def get_position_info_playing_time(position, team_name, year):
         partition_by=Fielding.position
     ).label("total_outs")
 
+    playing_time = func.round((Fielding.f_InnOuts * 100.0 / subquery), 2)
+
     results = (
         db.session.query(
             func.concat(People.nameFirst, ' ', People.nameLast).label('name'),
-            func.concat(func.round((Fielding.f_InnOuts * 100.0 / subquery), 2), literal('%')).label('statistic')
+            playing_time.label('playing_time'),
+            (func.concat(func.round(playing_time, 2), '%')).label('statistic')
         )
         .join(Fielding, Fielding.playerID == People.playerID)
         .join(Teams, (Fielding.teamID == Teams.teamID) & (Fielding.yearID == Teams.yearID))
         .filter(Teams.team_name == team_name, Fielding.yearID == year, Fielding.position == position)
-        .order_by(desc('statistic'))
+        .order_by(desc('playing_time'))
         .all()
     )
     return results

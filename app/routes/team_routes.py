@@ -24,7 +24,7 @@ def team_stats():
                 "C": get_position_info_playing_time('C', team_name, year),
                 "1B": get_position_info_playing_time('1B', team_name, year),
             }
-            print(position_info) # if games started = 0, relif pitcher
+            # if games started = 0, relif pitcher
 
             return render_template("team_stats.html",
                                    team_info=team_info,

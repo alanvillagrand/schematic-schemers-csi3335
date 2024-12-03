@@ -1,10 +1,13 @@
 const seasonalStatistics = [
     "HR",
-    "Win",
+    "W",
     "RBI",
     "R",
     "H",
     "K",
     "SV",
-    "SB"
+    "SB",
+    "AVG",
+    "SO",
+    "30+HR/30+SB"
 ];

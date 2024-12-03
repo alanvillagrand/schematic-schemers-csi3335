@@ -799,6 +799,34 @@ def get_players_careerStatPitching_allStar(stat_column, stat_range):
         .all()
     )
 
+def get_players_careerStatBatting_allStar(stat_column, stat_range):
+    batting_column = getattr(Batting, f"b_{stat_column}")
+    total_stat = db.func.sum(batting_column).label("total_stat")
+
+    career_stats = (
+        db.session.query(
+            Batting.playerID,
+            total_stat
+        )
+        .group_by(Batting.playerID)
+        .having(total_stat > stat_range)
+        .subquery()
+    )
+
+    return (
+        db.session.query(
+            People.nameFirst,
+            People.nameLast,
+        )
+        .join(career_stats, career_stats.c.playerID == People.playerID)
+        .join(AllStarFull, AllStarFull.playerID == People.playerID )
+        .filter(AllStarFull.GP > 0)
+        .group_by(People.playerID)
+        .order_by(db.func.sum(AllStarFull.GP).asc())
+        .distinct()
+        .all()
+    )
+
 def get_players_careerStatbatting_allStar(stat_column, stat_range):
     batting_column = getattr(Batting, f"b_{stat_column}")
     total_stat = db.func.sum(batting_column).label("total_stat")
@@ -1440,6 +1468,8 @@ def search_players():
             results = get_players_careerStatBatting_hof(career_stat, stat_range)
         elif award == "All Star" and career_stat in standard_careerStatPitching:
             results = get_players_careerStatPitching_allStar(career_stat, stat_range)
+        elif award == "All Star" and career_stat in standard_careerStatBatting:
+            results = get_players_careerStatBatting_allStar(career_stat, stat_range)
         elif award in standard_awards and career_stat in standard_careerStatPitching:
             results = get_players_careerStatPitching_stdAward(career_stat, award, stat_range)
         elif award in standard_awards and career_stat in standard_careerStatBatting:
@@ -1550,7 +1580,7 @@ def search_players():
 
         stat_range = request.form.get(f'dropdown2_{stat}_specific') if option1 == "positions" else request.form.get(
             f'dropdown1_{stat}_specific')
-        stat_range = int(stat_range.replace('+', ''))
+        stat_range = convert_to_number(stat_range)
         if stat in standard_seasonStatBatting:
             results = get_players_seasonStatBatting_position(stat, position, stat_range)
 

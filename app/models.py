@@ -127,6 +127,16 @@ class Awards(db.Model):
     tie = db.Column(db.String(1))
     notes = db.Column(db.String(100))
 
+class Drafts(db.Model):
+    __tablename__ = 'drafts'  # Table name in your database
+
+    draft_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    playerID = db.Column(db.String(9), db.ForeignKey('people.playerID'), nullable=False)
+    yearID = db.Column(db.SmallInteger)
+    draft_round = db.Column(db.SmallInteger)
+    draft_pick = db.Column(db.SmallInteger)
+
+
 class Fielding(db.Model):
     __tablename__ = 'fielding'  # Table name in your database
 

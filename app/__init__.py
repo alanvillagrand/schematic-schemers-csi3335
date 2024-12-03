@@ -8,7 +8,7 @@ def create_app():
     app.secret_key = "secret"
 
     # Config
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:Ninja123!@localhost/baseball'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:Ninja123!@localhost/baseball2'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     db.init_app(app)

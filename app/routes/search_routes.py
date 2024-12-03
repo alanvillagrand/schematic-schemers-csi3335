@@ -1551,8 +1551,7 @@ def search_players():
         stat_range = request.form.get(f'dropdown2_{stat}_specific') if option1 == "positions" else request.form.get(
             f'dropdown1_{stat}_specific')
         stat_range = int(stat_range.replace('+', ''))
-        if stat == "HR" or stat == "RBI" or stat == "R" or stat == "H" or stat == "SB":
-            # Query for Home Runs (HR) greater than or equal to the selected range
+        if stat in standard_seasonStatBatting:
             results = get_players_seasonStatBatting_position(stat, position, stat_range)
 
 
@@ -1604,15 +1603,7 @@ def search_players():
     elif (option1 == "positions" and option2 == "positions"):
         position1 = option1_details
         position2 = option2_details
-
         results = get_players_position_position(position1, position2)
-
-
-
-    elif (option1 == "positions" and option2 == "pob") or (option1 == "pob" and option2 == "positions"):
-        print("finish this")
-
-
 
     elif (option1 == "pob" and option2 == "positions") or (option1 == "positions" and option2 == "pob"):
         position = option1_details if option1 == "positions" else option2_details

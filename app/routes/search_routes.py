@@ -227,6 +227,21 @@ def get_players_hof_position(position):
             .all()
         )
 
+def get_players_position_position(position1, position2):
+    position_column1 = f'G_{position1.lower()}'
+    position_column2 = f'G_{position2.lower()}'
+
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Appearances, Appearances.playerID == People.playerID)
+        .filter(getattr(Appearances, position_column1) > 0)
+        .filter(getattr(Appearances, position_column2) > 0)
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Appearances.G_all).asc())
+        .distinct()
+        .all()
+    )
+
 
 """
 get_players_allstar_position
@@ -1059,6 +1074,20 @@ def get_players_seasonStatBatting_hof(stat_column, stat_range):
         .all()
     )
 
+def get_players_seasonStatPitching_hof(stat_column, stat_range):
+    pitching_column = getattr(Pitching, f"p_{stat_column}")
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Pitching, Pitching.playerID == People.playerID)
+        .join(HallOfFame, HallOfFame.playerID == People.playerID)
+        .filter(pitching_column >= stat_range)
+        .filter(HallOfFame.inducted == 'Y')
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Pitching.p_G).asc())
+        .distinct()
+        .all()
+    )
+
 
 
 """
@@ -1491,14 +1520,14 @@ def search_players():
 
         if stat in standard_seasonStatBatting and award in standard_awards :
             results = get_players_seasonStatBatting_stdAward(stat, award, stat_range)
+        elif stat in standard_seasonStatPitching and award in standard_awards:
+            results = get_players_seasonStatPitching_stdAward(award, stat, stat_range)
         elif stat in standard_seasonStatBatting and award == "World Series":
             results = get_players_seasonStatBatting_ws(stat, stat_range)
         elif stat in standard_seasonStatBatting and award == "All Star":
             results = get_players_seasonStatBatting_allStar(stat, stat_range)
         elif stat in standard_seasonStatPitching and award == "All Star":
             results = get_players_seasonStatPitching_allStar(stat, stat_range)
-        elif stat in standard_seasonStatPitching and award in standard_awards:
-            results = get_players_seasonStatPitching_stdAward(award, stat, stat_range)
         elif stat == "AVG" and award in standard_awards:
             results = get_players_seasonBattingAVG_stdAward(stat_range, award)
         elif stat == "AVG" and award == "All Star":
@@ -1507,6 +1536,8 @@ def search_players():
             results = get_players_seasonBattingAVG_hof(stat_range)
         elif stat in standard_seasonStatBatting and award == "Hall of Fame":
             results = get_players_seasonStatBatting_hof(stat, stat_range)
+        elif stat in standard_seasonStatPitching and award == "Hall of Fame":
+            results = get_players_seasonStatPitching_hof(stat, stat_range)
 
 
     elif (option1 == "seasonal statistic" and option2 == "positions") or (option1 == "positions" and option2 == "seasonal statistic"):
@@ -1568,6 +1599,13 @@ def search_players():
 
         if award in standard_awards:
             results = get_players_pob_stdAward(award)
+
+
+    elif (option1 == "positions" and option2 == "positions"):
+        position1 = option1_details
+        position2 = option2_details
+
+        results = get_players_position_position(position1, position2)
 
 
 

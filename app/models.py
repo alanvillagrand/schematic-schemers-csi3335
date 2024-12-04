@@ -1,7 +1,6 @@
 from . import db
 from werkzeug.security import generate_password_hash, check_password_hash
 
-
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
@@ -65,39 +64,6 @@ class Batting(db.Model):
     b_SF = db.Column(db.SmallInteger)
     b_GIDP = db.Column(db.SmallInteger)
 
-class Pitching(db.Model):
-    __tablename__ = "pitching"
-    
-    pitching_ID = db.Column(db.Integer, primary_key=True, autoincrement=True, nullable=False)
-    playerID = db.Column(db.String(9), db.ForeignKey('people.playerID'), nullable=False)
-    yearID = db.Column(db.SmallInteger, nullable=False)
-    teamID = db.Column(db.String(3), db.ForeignKey('teams.teamID'), nullable=False)
-    stint = db.Column(db.SmallInteger, nullable=False)
-    p_W = db.Column(db.SmallInteger, nullable=True)
-    p_L = db.Column(db.SmallInteger, nullable=True)
-    p_G = db.Column(db.SmallInteger, nullable=True)
-    p_GS = db.Column(db.SmallInteger, nullable=True)
-    p_CG = db.Column(db.SmallInteger, nullable=True)
-    p_SHO = db.Column(db.SmallInteger, nullable=True)
-    p_SV = db.Column(db.SmallInteger, nullable=True)
-    p_IPOuts = db.Column(db.Integer, nullable=True)
-    p_H = db.Column(db.SmallInteger, nullable=True) 
-    p_ER = db.Column(db.SmallInteger, nullable=True)
-    p_HR = db.Column(db.SmallInteger, nullable=True)
-    p_BB = db.Column(db.SmallInteger, nullable=True)
-    p_SO = db.Column(db.SmallInteger, nullable=True)
-    p_BAOpp = db.Column(db.Float, nullable=True)
-    p_ERA = db.Column(db.Float, nullable=True)
-    p_IBB = db.Column(db.SmallInteger, nullable=True)
-    p_WP = db.Column(db.SmallInteger, nullable=True)
-    p_HBP = db.Column(db.SmallInteger, nullable=True)
-    p_BK = db.Column(db.SmallInteger, nullable=True)
-    p_BFP = db.Column(db.SmallInteger, nullable=True)
-    p_GF = db.Column(db.SmallInteger, nullable=True)
-    p_R = db.Column(db.SmallInteger, nullable=True)
-    p_SH = db.Column(db.SmallInteger, nullable=True)
-    p_SF = db.Column(db.SmallInteger, nullable=True)
-    p_GIDP = db.Column(db.SmallInteger, nullable=True)
 
 class Teams(db.Model):
     __tablename__ = 'teams'
@@ -150,7 +116,6 @@ class Teams(db.Model):
     team_projW = db.Column(db.SmallInteger)
     team_projL = db.Column(db.SmallInteger)
 
-
 class Awards(db.Model):
     __tablename__ = 'awards'  # Table name in your database
 
@@ -161,7 +126,6 @@ class Awards(db.Model):
     lgID = db.Column(db.CHAR(2), nullable=False)
     tie = db.Column(db.String(1))
     notes = db.Column(db.String(100))
-
 
 class Fielding(db.Model):
     __tablename__ = 'fielding'  # Table name in your database
@@ -199,7 +163,6 @@ class HallOfFame(db.Model):
     inducted = db.Column(db.String(1))  # 'Y' or 'N'
     category = db.Column(db.String(20))
     note = db.Column(db.String(25))
-
 
 class AllStarFull(db.Model):
     __tablename__ = 'allstarfull'
@@ -244,39 +207,40 @@ class Appearances(db.Model):
     G_ph = db.Column(db.SmallInteger)  # Games played as a pinch hitter
     G_pr = db.Column(db.SmallInteger)  # Games played as a pinch runner
 
-# class Pitching(db.Model):
-#     __tablename__ = 'pitching'
 
-#     pitching_ID = db.Column(db.Integer, primary_key=True, autoincrement=True)
-#     playerID = db.Column(db.String(9), nullable=False, index=True)
-#     yearID = db.Column(db.SmallInteger, nullable=False)
-#     teamID = db.Column(db.CHAR(3), nullable=False, index=True)
-#     stint = db.Column(db.SmallInteger, nullable=False)
-#     p_W = db.Column(db.SmallInteger, nullable=True)
-#     p_L = db.Column(db.SmallInteger, nullable=True)
-#     p_G = db.Column(db.SmallInteger, nullable=True)
-#     p_GS = db.Column(db.SmallInteger, nullable=True)
-#     p_CG = db.Column(db.SmallInteger, nullable=True)
-#     p_SHO = db.Column(db.SmallInteger, nullable=True)
-#     p_SV = db.Column(db.SmallInteger, nullable=True)
-#     p_IPOuts = db.Column(db.Integer, nullable=True)
-#     p_H = db.Column(db.SmallInteger, nullable=True)
-#     p_ER = db.Column(db.SmallInteger, nullable=True)
-#     p_HR = db.Column(db.SmallInteger, nullable=True)
-#     p_BB = db.Column(db.SmallInteger, nullable=True)
-#     p_SO = db.Column(db.SmallInteger, nullable=True)
-#     p_BAOpp = db.Column(db.Float, nullable=True)
-#     p_ERA = db.Column(db.Float, nullable=True)
-#     p_IBB = db.Column(db.SmallInteger, nullable=True)
-#     p_WP = db.Column(db.SmallInteger, nullable=True)
-#     p_HBP = db.Column(db.SmallInteger, nullable=True)
-#     p_BK = db.Column(db.SmallInteger, nullable=True)
-#     p_BFP = db.Column(db.SmallInteger, nullable=True)
-#     p_GF = db.Column(db.SmallInteger, nullable=True)
-#     p_R = db.Column(db.SmallInteger, nullable=True)
-#     p_SH = db.Column(db.SmallInteger, nullable=True)
-#     p_SF = db.Column(db.SmallInteger, nullable=True)
-#     p_GIDP = db.Column(db.SmallInteger, nullable=True)
+class Pitching(db.Model):
+    __tablename__ = 'pitching'
+
+    pitching_ID = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    playerID = db.Column(db.String(9), nullable=False, index=True)
+    yearID = db.Column(db.SmallInteger, nullable=False)
+    teamID = db.Column(db.CHAR(3), nullable=False, index=True)
+    stint = db.Column(db.SmallInteger, nullable=False)
+    p_W = db.Column(db.SmallInteger, nullable=True)
+    p_L = db.Column(db.SmallInteger, nullable=True)
+    p_G = db.Column(db.SmallInteger, nullable=True)
+    p_GS = db.Column(db.SmallInteger, nullable=True)
+    p_CG = db.Column(db.SmallInteger, nullable=True)
+    p_SHO = db.Column(db.SmallInteger, nullable=True)
+    p_SV = db.Column(db.SmallInteger, nullable=True)
+    p_IPOuts = db.Column(db.Integer, nullable=True)
+    p_H = db.Column(db.SmallInteger, nullable=True)
+    p_ER = db.Column(db.SmallInteger, nullable=True)
+    p_HR = db.Column(db.SmallInteger, nullable=True)
+    p_BB = db.Column(db.SmallInteger, nullable=True)
+    p_SO = db.Column(db.SmallInteger, nullable=True)
+    p_BAOpp = db.Column(db.Float, nullable=True)
+    p_ERA = db.Column(db.Float, nullable=True)
+    p_IBB = db.Column(db.SmallInteger, nullable=True)
+    p_WP = db.Column(db.SmallInteger, nullable=True)
+    p_HBP = db.Column(db.SmallInteger, nullable=True)
+    p_BK = db.Column(db.SmallInteger, nullable=True)
+    p_BFP = db.Column(db.SmallInteger, nullable=True)
+    p_GF = db.Column(db.SmallInteger, nullable=True)
+    p_R = db.Column(db.SmallInteger, nullable=True)
+    p_SH = db.Column(db.SmallInteger, nullable=True)
+    p_SF = db.Column(db.SmallInteger, nullable=True)
+    p_GIDP = db.Column(db.SmallInteger, nullable=True)
 
 class SeriesPost(db.Model):
     __tablename__ = 'seriespost'
@@ -309,3 +273,31 @@ class FieldingPost(db.Model):
     f_DP = db.Column(db.SmallInteger, nullable=True)  # Double plays
     f_TP = db.Column(db.SmallInteger, nullable=True)  # Triple plays
     f_PB = db.Column(db.SmallInteger, nullable=True)  # Passed balls (for catchers)
+
+
+
+class BattingPost(db.Model):
+    __tablename__ = 'battingpost'
+
+    battingpost_ID = db.Column(db.Integer, primary_key=True, autoincrement=True)  # Unique ID
+    playerID = db.Column(db.String(9), nullable=False, index=True)  # Player ID
+    yearId = db.Column(db.SmallInteger, nullable=False)  # Year of the postseason
+    teamID = db.Column(db.CHAR(3), nullable=False, index=True)  # Team ID
+    round = db.Column(db.String(10), nullable=False)  # Postseason round
+    b_G = db.Column(db.SmallInteger, nullable=True)  # Games played
+    b_AB = db.Column(db.SmallInteger, nullable=True)  # At-bats
+    b_R = db.Column(db.SmallInteger, nullable=True)  # Runs
+    b_H = db.Column(db.SmallInteger, nullable=True)  # Hits
+    b_2B = db.Column(db.SmallInteger, nullable=True)  # Doubles
+    b_3B = db.Column(db.SmallInteger, nullable=True)  # Triples
+    b_HR = db.Column(db.SmallInteger, nullable=True)  # Home runs
+    b_RBI = db.Column(db.SmallInteger, nullable=True)  # Runs batted in
+    b_SB = db.Column(db.SmallInteger, nullable=True)  # Stolen bases
+    b_CS = db.Column(db.SmallInteger, nullable=True)  # Caught stealing
+    b_BB = db.Column(db.SmallInteger, nullable=True)  # Walks
+    b_SO = db.Column(db.SmallInteger, nullable=True)  # Strikeouts
+    b_IBB = db.Column(db.SmallInteger, nullable=True)  # Intentional walks
+    b_HBP = db.Column(db.SmallInteger, nullable=True)  # Hit by pitch
+    b_SH = db.Column(db.SmallInteger, nullable=True)  # Sacrifice hits
+    b_SF = db.Column(db.SmallInteger, nullable=True)  # Sacrifice flies
+    b_GIDP = db.Column(db.SmallInteger, nullable=True)  # Grounded into double plays

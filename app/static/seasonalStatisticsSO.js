@@ -1,0 +1,3 @@
+seasonalStatisticsSO = [
+    "200+"
+]

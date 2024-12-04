@@ -1895,6 +1895,44 @@ def get_players_careerPitchingERA_seasonStatBatting(season_column, season_range)
     )
 
 
+def get_players_careerPitchingERA_seasonBatting3030():
+
+    # Subquery for career stats
+    career_subquery = (
+        db.session.query(
+            Pitching.playerID  # Only return player IDs that meet the criteria
+        )
+        .group_by(Pitching.playerID)  # Group stats by player
+        .having(
+            (func.sum(Pitching.p_ER) / (func.sum(Pitching.p_IPOuts) / 3)) * 9 <= 3.00
+        )  # Weighted ERA <= 3.00
+        .subquery()
+    )
+
+    # Subquery for season stats
+    season_subquery = (
+        db.session.query(
+            Batting.playerID
+        )
+        .filter(Batting.b_SB >= 30)
+        .filter(Batting.b_HR >= 30)
+        .group_by(Batting.playerID)
+        .subquery()
+    )
+
+    # Main query to find players matching both criteria
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Pitching, Pitching.playerID == People.playerID)
+        .join(career_subquery, career_subquery.c.playerID == People.playerID)
+        .join(season_subquery, season_subquery.c.playerID == People.playerID)
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Pitching.p_G).asc())
+        .distinct()
+        .all()
+    )
+
+
 
 def get_players_careerPitchingERA_careerStatPitching(career_column, career_range):
     career_column1 = getattr(Pitching, f"p_{career_column}")
@@ -2053,6 +2091,43 @@ def get_players_careerBattingAVG_seasonStatBatting(season_column, season_range, 
     )
 
 
+def get_players_careerBattingAVG_seasonBatting3030(career_range):
+
+    # Subquery for career stats
+    career_subquery = (
+        db.session.query(
+            Batting.playerID  # Only return player IDs that meet the criteria
+        )
+        .group_by(Batting.playerID)  # Group stats by player
+        .having(db.func.sum(Batting.b_AB) > 0)
+        .having((db.func.sum(Batting.b_H)/ db.func.sum(Batting.b_AB)) >= career_range)
+        .subquery()
+    )
+
+    # Subquery for season stats
+    season_subquery = (
+        db.session.query(
+            Batting.playerID
+        )
+        .filter(Batting.b_SB >= 30)
+        .filter(Batting.b_HR >= 30)
+        .group_by(Batting.playerID)
+        .subquery()
+    )
+
+    # Main query to find players matching both criteria
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Batting, Batting.playerID == People.playerID)
+        .join(career_subquery, career_subquery.c.playerID == People.playerID)
+        .join(season_subquery, season_subquery.c.playerID == People.playerID)
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Batting.b_G).asc())
+        .distinct()
+        .all()
+    )
+
+
 
 def get_players_careerBattingAVG_seasonStatPitching(season_column, season_range, career_range):
     season_column1 = getattr(Pitching, f"p_{season_column}")
@@ -2135,6 +2210,42 @@ def get_players_careerStatBatting_seasonBatting3030(career_column, career_range)
             Batting.playerID  # Only return player IDs that meet the criteria
         )
         .group_by(Batting.playerID)  # Group stats by player
+        .having(db.func.sum(career_column1) > career_range)
+        .subquery()
+    )
+
+    # Subquery for season stats
+    season_subquery = (
+        db.session.query(
+            Batting.playerID
+        )
+        .filter(Batting.b_SB >= 30)
+        .filter(Batting.b_HR >= 30)
+        .group_by(Batting.playerID)
+        .subquery()
+    )
+
+    # Main query to find players matching both criteria
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Batting, Batting.playerID == People.playerID)
+        .join(career_subquery, career_subquery.c.playerID == People.playerID)
+        .join(season_subquery, season_subquery.c.playerID == People.playerID)
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Batting.b_G).asc())
+        .distinct()
+        .all()
+    )
+
+def get_players_careerStatPitching_seasonBatting3030(career_column, career_range):
+    career_column1 = getattr(Pitching, f"p_{career_column}")
+
+    # Subquery for career stats
+    career_subquery = (
+        db.session.query(
+            Pitching.playerID  # Only return player IDs that meet the criteria
+        )
+        .group_by(Pitching.playerID)  # Group stats by player
         .having(db.func.sum(career_column1) > career_range)
         .subquery()
     )
@@ -2474,8 +2585,14 @@ def search_players():
         elif career_stat == "ERA" and seasonal_stat in standard_seasonStatBatting:
             results = get_players_careerPitchingERA_seasonStatBatting(seasonal_stat, seasonal_range2)
 
+        elif career_stat == "ERA" and seasonal_stat == "30+HR/30+SB":
+            results = get_players_careerPitchingERA_seasonBatting3030()
+
         elif career_stat == "AVG" and seasonal_stat in standard_seasonStatBatting:
             results = get_players_careerBattingAVG_seasonStatBatting(seasonal_stat, seasonal_range2, career_range1)
+
+        elif career_stat == "AVG" and seasonal_stat == "30+HR/30+SB":
+            results = get_players_careerBattingAVG_seasonBatting3030(career_range1)
 
         elif career_stat == "AVG" and seasonal_stat in standard_seasonStatPitching:
             results = get_players_careerBattingAVG_seasonStatPitching(seasonal_stat, seasonal_range2, career_range1)
@@ -2485,6 +2602,10 @@ def search_players():
 
         elif career_stat in standard_careerStatBatting and seasonal_stat == "30+HR/30+SB":
             results = get_players_careerStatBatting_seasonBatting3030(career_stat, career_range1)
+
+        elif career_stat in standard_careerStatPitching and seasonal_stat == "30+HR/30+SB":
+            results = get_players_careerStatPitching_seasonBatting3030(career_stat, career_range1)
+
 
 
 

@@ -3,14 +3,10 @@
 {% block body %}
 
 <style>
-table, th, td {
-    border: 1px solid black;
+.container {
+    max-width: 80vw;
 }
-table.center {
-    margin-left: auto;
-    margin-right: auto;
-}
-.depth-chart {
+.depth-chart-position {
     display: grid;
     grid-template-areas:
         ". . _CF . ."
@@ -19,6 +15,12 @@ table.center {
         ". _3B . _1B ."
         ". . _C . .";
     grid-gap: 10px;
+    text-align: center;
+}
+.depth-chart-pitcher {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
     text-align: center;
 }
 .position-box {
@@ -30,6 +32,8 @@ table.center {
 ._CF { grid-area: _CF; }
 ._RF { grid-area: _RF; }
 ._SS { grid-area: _SS; }
+._RP { grid-area: _RP; }
+._SP { grid-area: _SP; }
 ._2B { grid-area: _2B; }
 ._3B { grid-area: _3B; }
 ._1B { grid-area: _1B; }
@@ -49,48 +53,50 @@ table.center {
     {% endif %}
 
     <!-- Batting Information -->
-    <h2>Batting Stats</h2>
+     <div>
+        <h2>Batting Stats</h2>
 
-    {% if batting_info %}
-        <table>
-            <tr>
-                <th>Name</th>
-                <th>Age</th>
-                <th>G</th>
-                <th>PA</th>
-                <th>HR</th>
-                <th>SB</th>
-                <th>BB%</th>
-                <th>K%</th>
-                <th>ISO</th>
-                <th>BABIP</th>
-                <th>AVG</th>
-                <th>OBP</th>
-                <th>SLG</th>
-                <th>wOBA</th>
-                <th>wRC+</th>
-                <th>BsR</th>
-                <th>Off</th>
-                <th>Def</th>
-                <th>WAR</th>
-            </tr>
-            <tr>
-                {% for row in batting_info %}
-                    <tr>
-                        {% for col in row %}
-                            {% if col == None %}
-                                <td>0</td>
-                            {% else %}
-                                <td>{{ col }}</td>
-                            {% endif %}
-                        {% endfor %}
-                    </tr>
-                {% endfor %}
-            </tr>
-        </table>
-    {% else %}
-        <p>No batting information found.</p>
-    {% endif %}
+        {% if batting_info %}
+            <table>
+                <tr>
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th>G</th>
+                    <th>PA</th>
+                    <th>HR</th>
+                    <th>SB</th>
+                    <th>BB%</th>
+                    <th>K%</th>
+                    <th>ISO</th>
+                    <th>BABIP</th>
+                    <th>AVG</th>
+                    <th>OBP</th>
+                    <th>SLG</th>
+                    <th>wOBA</th>
+                    <th>wRC+</th>
+                    <!-- <th>BsR</th> -->
+                    <!-- <th>Off</th> -->
+                    <!-- <th>Def</th> -->
+                    <th>WAR</th>
+                </tr>
+                <tr>
+                    {% for row in batting_info %}
+                        <tr>
+                            {% for col in row %}
+                                {% if col == None %}
+                                    <td class="stat">0</td>
+                                {% else %}
+                                    <td class="stat">{{ col }}</td>
+                                {% endif %}
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tr>
+            </table>
+        {% else %}
+            <p>No batting information found.</p>
+        {% endif %}
+     </div>
 
     <!-- Pitching Information -->
     <h2>Pitching Stats</h2>
@@ -107,11 +113,11 @@ table.center {
                 <th>HR/9</th>
                 <th>BABIP</th>
                 <th>LOB%</th>
-                <th>GB%</th>
-                <th>HR/FB</th>
+                <!-- <th>GB%</th> -->
+                <!-- <th>HR/FB</th> -->
                 <th>ERA</th>
                 <th>FIP</th>
-                <th>xFIP</th>
+                <!-- <th>xFIP</th> -->
                 <th>WAR</th>
             </tr>
             <tr>
@@ -119,9 +125,9 @@ table.center {
                     <tr>
                         {% for col in row %}
                             {% if col == None %}
-                                <td>0</td>
+                                <td class="stat">0</td>
                             {% else %}
-                                <td>{{ col }}</td>
+                                <td class="stat">{{ col }}</td>
                             {% endif %}
                         {% endfor %}
                     </tr>
@@ -135,16 +141,36 @@ table.center {
     <!-- Depth Chart -->
     <h2>Depth Chart</h2>
 
-    {% if position_info %}
+    {% if batting_position_info %}
         <div style="margin-bottom: 20px;">
-            <label for="position-players-stats">Select projected stats displayed for Position Players:</label>
+            <h3>Position players</h3>
+            <label for="position-players-stats">Select projected stats:</label>
             <select id="position-players-stats" name="position-players-stats">
                 <option value="playing-time">Playing Time</option>
                 <option value="batting-average">PA</option>
                 <option value="home-runs">WAR</option>
                 <option value="rbis">wOBA</option>
             </select>
-        
+        </div>
+        <div class="depth-chart-position">
+            {% for position, players in batting_position_info.items() %}
+            <div class="position-box _{{ position }}">
+                <strong>{{ position }}</strong>
+                <ul>
+                    {% for player in players %}
+                    <li>{{ player.name }}: {{ player.statistic }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No position data found.</p>
+    {% endif %}
+
+    {% if pitching_position_info %}
+        <div style="margin-bottom: 20px;">
+            <h3>Pitchers</h3>
             <label for="pitchers-stats">Pitchers:</label>
             <select id="pitchers-stats" name="pitchers-stats">
                 <option value="playing-time">Playing Time</option>
@@ -153,8 +179,8 @@ table.center {
                 <option value="wins">FIP</option>
             </select>
         </div>
-        <div class="depth-chart">
-            {% for position, players in position_info.items() %}
+        <div class="depth-chart-pitcher">
+            {% for position, players in pitching_position_info.items() %}
             <div class="position-box _{{ position }}">
                 <strong>{{ position }}</strong>
                 <ul>
@@ -171,5 +197,19 @@ table.center {
 
     <a href="{{ url_for('team.team_stats') }}">Search again</a>
 </div>
+
+<script>
+    document.getElementById('position-players-stats').addEventListener('change', function() {
+        const selectedValue = this.value;
+        console.log('Position Players stat selected:', selectedValue);
+        // Make an AJAX call or fetch to update the data
+    });
+
+    document.getElementById('pitchers-stats').addEventListener('change', function() {
+        const selectedValue = this.value;
+        console.log('Pitchers stat selected:', selectedValue);
+        // Make an AJAX call or fetch to update the data
+    });
+</script>
 
 {% endblock %}

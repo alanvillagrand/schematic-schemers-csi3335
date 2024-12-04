@@ -30,6 +30,44 @@ p {
     color: #7f8c8d;
 }
 
+table {
+    width: 80%;
+    margin: 20px auto;
+    border-collapse: collapse;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+}
+
+th, td {
+    padding: 12px 20px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #3498db;
+    color: white;
+    text-transform: uppercase;
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+tr:hover {
+    background-color: #eaf1fa;
+}
+
+td {
+    font-size: 14px;
+    color: #555;
+}
+
+.stat {
+    text-align: left;
+    font-weight: bold;
+}
+
 /* Links */
 a {
     display: inline-block;

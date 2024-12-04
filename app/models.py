@@ -301,3 +301,11 @@ class BattingPost(db.Model):
     b_SH = db.Column(db.SmallInteger, nullable=True)  # Sacrifice hits
     b_SF = db.Column(db.SmallInteger, nullable=True)  # Sacrifice flies
     b_GIDP = db.Column(db.SmallInteger, nullable=True)  # Grounded into double plays
+
+class ImmaculateGridTeams(db.Model):
+    __tablename__ = 'immaculategridteams'
+
+    ig_team_name = db.Column(db.String(50), nullable=False)
+    team_name = db.Column(db.String(50), nullable=False)
+    startYear = db.Column(db.SmallInteger, nullable=False)
+    endYear = db.Column(db.SmallInteger, nullable=False)

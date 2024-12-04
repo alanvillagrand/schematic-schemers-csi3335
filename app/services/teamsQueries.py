@@ -1,7 +1,5 @@
-
-"""
 from app.models import People, Batting, Teams, db, Fielding, Awards, HallOfFame, AllStarFull, Appearances, Pitching, \
-    SeriesPost, FieldingPost, BattingPost
+    SeriesPost, FieldingPost, BattingPost, ImmaculateGridTeams
 
 from sqlalchemy import func
 
@@ -13,30 +11,34 @@ get_players_team_team
 Queries a player that played for two different teams
 Takes in the two teams as parameters
 Algorithm uses the appearances table to get players with the least total appearances
-"""
+""" 
+
 def get_players_team_team(option1_details, option2_details):
 
     subquery = (
-        db.session.query(
-            Appearances.playerID,
-            db.func.count(Teams.team_name.distinct()).label("team_count"),
-            db.func.sum(Appearances.G_all).label("total_games")
-        )
-        .join(Teams, Teams.teamID == Appearances.teamID)
-        .filter(Teams.team_name.in_([option1_details, option2_details]))
-        .group_by(Appearances.playerID)
-        .having(db.func.count(Teams.team_name.distinct()) == 2)
-        .subquery()
+    db.session.query(
+        Appearances.playerID,
+        db.func.count(Teams.team_name.distinct()).label("team_count"),
+        db.func.sum(Appearances.G_all).label("total_games")
+    )
+    .join(Teams, Teams.teamID == Appearances.teamID)
+    .join(ImmaculateGridTeams, ImmaculateGridTeams.team_name == Teams.team_name)
+    .filter(Teams.yearID >= ImmaculateGridTeams.startYear)
+    .filter(Teams.yearID <= ImmaculateGridTeams.endYear or ImmaculateGridTeams.endYear is None)
+    .filter(ImmaculateGridTeams.ig_team_name.in_([option1_details, option2_details]))
+    .group_by(Appearances.playerID)
+    .having(db.func.count(ImmaculateGridTeams.ig_team_name.distinct()) == 2)
+    .subquery()
     )
 
     return (
-        db.session.query(
-            People.nameFirst,
-            People.nameLast
-        )
-        .join(subquery, subquery.c.playerID == People.playerID)
-        .order_by(subquery.c.total_games)
-        .all()
+    db.session.query(
+        People.nameFirst,
+        People.nameLast
+    )
+    .join(subquery, subquery.c.playerID == People.playerID)
+    .order_by(subquery.c.total_games)
+    .all()
     )
 
 

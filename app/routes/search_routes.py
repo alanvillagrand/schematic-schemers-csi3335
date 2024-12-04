@@ -280,7 +280,7 @@ def get_players_stdAward_stdAward(award1, award2):
     )
 
     # Main query to join with the People and Appearances tables, ordering by total appearances
-    results = (
+    return(
         db.session.query(People.nameFirst, People.nameLast)
         .join(awards_query, awards_query.c.playerID == People.playerID)
         .join(Appearances, Appearances.playerID == People.playerID)
@@ -290,7 +290,20 @@ def get_players_stdAward_stdAward(award1, award2):
         .all()
     )
 
-    return results
+
+def get_players_hof_stdAward(award):
+    return(
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Awards, Awards.playerID == People.playerID)
+        .join(HallOfFame, HallOfFame.playerID == People.playerID)
+        .join(Appearances, Appearances.playerID == People.playerID)
+        .filter(Awards.awardID == award)
+        .filter(HallOfFame.inducted == "Y")
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Appearances.G_all).asc())
+        .all()
+    )
+
 
 
 def get_players_pob_position(position):
@@ -1460,6 +1473,31 @@ def get_players_seasonStatPitching_seasonStatAVG(pitching_column, pitching_range
         .all()
     )
 
+def get_players_seasonPitchingERA_seasonStatPitching(pitching_column, pitching_range):
+    pitching_column1 = getattr(Pitching, f"p_{pitching_column}")
+    pitching_subquery = (
+        db.session.query(Pitching.playerID)
+        .filter(pitching_column1 >= pitching_range)
+        .subquery()
+    )
+    era_subquery = (
+        db.session.query(Pitching.playerID)
+        .filter(Pitching.p_ERA <= 3.00)
+        .subquery()
+
+    )
+
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Pitching, Pitching.playerID == People.playerID)
+        .join(pitching_subquery, pitching_subquery.c.playerID == People.playerID)
+        .join(era_subquery, era_subquery.c.playerID == People.playerID)
+        .order_by(db.func.sum(Pitching.p_G).asc())
+        .group_by(People.playerID)
+        .distinct()
+        .all()
+    )
+
 def get_players_seasonStatBatting_seasonStatAVG(batting_column, batting_range, avg_range):
     batting_column1 = getattr(Batting, f"b_{batting_column}")
     batting_subquery = (
@@ -1967,10 +2005,10 @@ def search_players():
         stat_range1 = request.form.get(f'dropdown1_{stat1}_specific')
         stat_range2 = request.form.get(f'dropdown2_{stat2}_specific')
 
-        if stat_range1 != "30+HR/30+SB":
+        if stat1 != "30+HR/30+SB" and stat1 != "ERA":
             stat_range1 = convert_to_number(stat_range1)
 
-        if stat_range2 != "30+HR/30+SB":
+        if stat2 != "30+HR/30+SB" and stat2 != "ERA":
             stat_range2 = convert_to_number(stat_range2)
 
         if stat1 in standard_seasonStatBatting and stat2 in standard_seasonStatBatting:
@@ -1997,6 +2035,12 @@ def search_players():
                 results = get_players_seasonStatBatting3030_seasonStatBatting(stat2, stat_range2)
             else:
                 results = get_players_seasonStatBatting3030_seasonStatBatting(stat1, stat_range1)
+        elif (stat1 in standard_seasonStatPitching and stat2 == "ERA") or (stat1 == "ERA" and stat2 in standard_seasonStatPitching):
+            if stat1 == "ERA":
+                results = get_players_seasonPitchingERA_seasonStatPitching(stat2, stat_range2)
+            else:
+                results= get_players_seasonPitchingERA_seasonStatPitching(stat1, stat_range1)
+
 
 
     elif (option1 == "seasonal statistic" and option2 == "awards") or (option1 == "awards" and option2 == "seasonal statistic"):
@@ -2088,6 +2132,12 @@ def search_players():
             results = get_players_stdAward_stdAward(option1_details, option2_details)
         if (option1_details == "All Star" and option2_details == "Hall of Fame") or (option1_details == "Hall of Fame" and option2_details == "All Star"):
             results = get_players_allStar_hof()
+        if (option1_details == "Hall of Fame" and option2_details in standard_awards) or (option1_details in standard_awards and option2_details == "Hall of Fame"):
+            if option1_details in standard_awards:
+                results = get_players_hof_stdAward(option1_details)
+            else:
+                results = get_players_hof_stdAward(option2_details)
+
 
 
 

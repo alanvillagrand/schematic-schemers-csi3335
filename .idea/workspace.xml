@@ -4,10 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0485066a-a959-4c52-ade2-6d2d13e46ffa" name="Changes" comment="ui changes to dashboard page as well as results page">
+    <list default="true" id="0485066a-a959-4c52-ade2-6d2d13e46ffa" name="Changes" comment="base html inlcudes home and view stats button. grids to results of searches with numbered people">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/base.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/templates/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/dashboard.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/index.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -278,7 +277,7 @@
       <workItem from="1732674458926" duration="7098000" />
       <workItem from="1732814551024" duration="43000" />
       <workItem from="1733171743698" duration="2208000" />
-      <workItem from="1733336679126" duration="9398000" />
+      <workItem from="1733336679126" duration="10110000" />
     </task>
     <task id="LOCAL-00001" summary="Register Stuff">
       <option name="closed" value="true" />
@@ -400,7 +399,15 @@
       <option name="project" value="LOCAL" />
       <updated>1733340715607</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="base html inlcudes home and view stats button. grids to results of searches with numbered people">
+      <option name="closed" value="true" />
+      <created>1733346327499</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1733346327499</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -425,10 +432,11 @@
     <MESSAGE value="_" />
     <MESSAGE value="pulling changes to sql" />
     <MESSAGE value="ui changes to dashboard page as well as results page" />
-    <option name="LAST_COMMIT_MESSAGE" value="ui changes to dashboard page as well as results page" />
+    <MESSAGE value="base html inlcudes home and view stats button. grids to results of searches with numbered people" />
+    <option name="LAST_COMMIT_MESSAGE" value="base html inlcudes home and view stats button. grids to results of searches with numbered people" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/schematic_schemers_csi3335$Flask__run_py_.coverage" NAME="Flask (run.py) Coverage Results" MODIFIED="1733345804995" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/schematic_schemers_csi3335$Flask__run_py_.coverage" NAME="Flask (run.py) Coverage Results" MODIFIED="1733346867883" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/schematic_schemers_csi3335$run_py.coverage" NAME="run.py Coverage Results" MODIFIED="1732570597630" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/schematic_schemers_csi3335$schematic_schemers_csi3335.coverage" NAME="schematic-schemers-csi3335 Coverage Results" MODIFIED="1731969534996" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/schematic_schemers_csi3335$run.coverage" NAME="run Coverage Results" MODIFIED="1732663137355" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />

@@ -1,45 +1,134 @@
-{% extends "base.html" %}
-
 {% block body %}
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+        <title>Authentication</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f0f0f0;
+                margin: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                flex-direction: column;
+            }
+            header {
+                background-color: #3b7a57;
+                color: white;
+                padding: 15px;
+                font-size: 2em;
+                text-align: center;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                z-index: 1000;
+            }
+            .container {
+                background-color: white;
+                padding: 40px;
+                border-radius: 10px;
+                box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+                text-align: center;
+                max-width: 400px;
+                width: 100%;
+                margin-top: 100px; /* Adjust margin to push form below header */
+            }
+            .tagline-box {
+                background-color: #ffffff;
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+                text-align: center;
+                max-width: 500px;
+                width: 100%;
+                margin-top: 20px;
+                color: #3b7a57;
+                font-weight: bold;
+            }
+            h1 {
+                color: #3b7a57;
+            }
+            .input-field {
+                width: calc(100% - 20px);
+                padding: 10px;
+                margin: 10px 0;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                font-size: 1em;
+            }
+            .btn {
+                width: 100%;
+                padding: 12px;
+                margin-top: 10px;
+                font-size: 1em;
+                color: white;
+                background-color: #3b7a57;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+            .btn:hover {
+                background-color: #2e5945;
+            }
+            .btn-register {
+                background-color: #007bff;
+            }
+            .btn-register:hover {
+                background-color: #0062cc;
+            }
+        </style>
+    </head>
+    <body>
+    <header>
+        Schematic Schemers
+    </header>
+
     <div class="container">
-    <h1>Welcome</h1>
-    <form id="auth-form" action="{{ url_for('auth.login') }}" method="post">
-        <input type="text"
-               name="username"
-               placeholder="username"
-               class="input-field" />
-        <input type="password"
-               name="password"
-               placeholder="password"
-               class="input-field" />
-        <input type="submit"
-               value="Login"
-               class="btn btn-login"
-               onClick="setActionForm('login')" />
-        <input type="button"
-               value="Register"
-               class="btn btn-login"
-               onClick="setActionForm('register')" />
-    </form>
+        <h1>Welcome</h1>
+        <form id="auth-form" action="{{ url_for('auth.login') }}" method="post">
+            <input type="text"
+                   name="username"
+                   placeholder="Username"
+                   class="input-field" required />
+            <input type="password"
+                   name="password"
+                   placeholder="Password"
+                   class="input-field" required />
+            <button type="button"
+                    class="btn"
+                    onclick="setActionForm('login')">Login</button>
+            <button type="button"
+                    class="btn btn-register"
+                    onclick="setActionForm('register')">Register</button>
+        </form>
     </div>
 
+    <div class="tagline-box">
+        Your one stop for the best scores on the immaculate grid and tons of information on your favorite team!
+    </div>
 
     <script>
-    function setActionForm(action){
-        let form = document.getElementById("auth-form");
-        if (action === 'login') {
-            form.acton = "{{ url_for('auth.login') }}";
-            form.method = 'post';
-            form.submit();
-
+        function setActionForm(action) {
+            let form = document.getElementById("auth-form");
+            if (action === 'login') {
+                form.action = "{{ url_for('auth.login') }}";
+                form.method = 'post';
+                form.submit();
+            } else if (action === "register") {
+                form.action = "{{ url_for('auth.register') }}";
+                form.method = 'post';
+                form.submit();
+            }
         }
-        else if (action === "register"){
-            form.action = "{{ url_for('auth.register') }}";
-            form.method = 'post';
-            form.submit();
-        }
-    }
-
-
     </script>
+    </body>
+    </html>
 {% endblock %}

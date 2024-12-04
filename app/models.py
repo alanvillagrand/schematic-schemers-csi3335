@@ -371,7 +371,7 @@ class AdvancedStats(db.Model):
     br_pwar162 = db.Column(db.Double, nullable=True)
     wRC_plus = db.Column(db.Double, nullable=True)
     WAR162 = db.Column(db.Double, nullable=True)
-    
+
 class ImmaculateGridTeams(db.Model):
     __tablename__ = 'immaculategridteams'
 

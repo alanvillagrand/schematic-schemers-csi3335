@@ -1,243 +1,242 @@
 {% extends "base.html" %}
 
 {% block body %}
-<div class="container">
-    <h1>Welcome, {{ username }}!</h1>
-    <p>Find players, stats, or league information based on your selections.</p>
-    <a href="{{ url_for('team.team_stats') }}">Team stats</a>
+    <div class="container">
+        <h1>Welcome, {{ username }}!</h1>
+        <p>Find players, stats, or league information based on your selections.</p>
 
-    <!-- Main Form -->
-    <form action="{{ url_for('search.search_players') }}" method="post" id="dynamicForm">
-        <div class="query-box">
-            <label for="dropdown1">Select Option 1:</label>
-            <select id="dropdown1" name="option1" onchange="handleDropdownChange('dropdown1', 'dynamicOptions1')" required>
-                <option value="" disabled selected>Select an option</option>
-                <option value="teams">Teams</option>
-                <option value="career statistic">Career Statistics</option>
-                <option value="seasonal statistic">Seasonal Statistic</option>
-                <option value="awards">Awards</option>
-                <option value="positions">Positions</option>
-                <option value="pob">Place of Birth</option>
-            </select>
-            <div id="dynamicOptions1" class="dynamic-options"></div>
-        </div>
+        <!-- Main Form -->
+        <form action="{{ url_for('search.search_players') }}" method="post" id="dynamicForm">
+            <div class="query-box">
+                <label for="dropdown1">Select Option 1:</label>
+                <select id="dropdown1" name="option1" onchange="handleDropdownChange('dropdown1', 'dynamicOptions1')" required>
+                    <option value="" disabled selected>Select an option</option>
+                    <option value="teams">Teams</option>
+                    <option value="career statistic">Career Statistics</option>
+                    <option value="seasonal statistic">Seasonal Statistic</option>
+                    <option value="awards">Awards</option>
+                    <option value="positions">Positions</option>
+                    <option value="pob">Place of Birth</option>
+                </select>
+                <div id="dynamicOptions1" class="dynamic-options"></div>
+            </div>
 
-        <div class="query-box">
-            <label for="dropdown2">Select Option 2:</label>
-            <select id="dropdown2" name="option2" onchange="handleDropdownChange('dropdown2', 'dynamicOptions2')" required>
-                <option value="" disabled selected>Select an option</option>
-                <option value="teams">Teams</option>
-                <option value="career statistic">Career Statistics</option>
-                <option value="seasonal statistic">Seasonal Statistic</option>
-                <option value="awards">Awards</option>
-                <option value="positions">Positions</option>
-                <option value="pob">Place of Birth</option>
-            </select>
-            <div id="dynamicOptions2" class="dynamic-options"></div>
-        </div>
+            <div class="query-box">
+                <label for="dropdown2">Select Option 2:</label>
+                <select id="dropdown2" name="option2" onchange="handleDropdownChange('dropdown2', 'dynamicOptions2')" required>
+                    <option value="" disabled selected>Select an option</option>
+                    <option value="teams">Teams</option>
+                    <option value="career statistic">Career Statistics</option>
+                    <option value="seasonal statistic">Seasonal Statistic</option>
+                    <option value="awards">Awards</option>
+                    <option value="positions">Positions</option>
+                    <option value="pob">Place of Birth</option>
+                </select>
+                <div id="dynamicOptions2" class="dynamic-options"></div>
+            </div>
 
-        <!-- Submit button -->
-        <button type="submit" class="btn-submit">Submit Query</button>
-    </form>
+            <!-- Submit button -->
+            <button type="submit" class="btn-submit">Submit Query</button>
+        </form>
 
-    <a href="{{ url_for('auth.logout') }}" class="btn-logout">Logout</a>
-</div>
+        <a href="{{ url_for('auth.logout') }}" class="btn-logout">Logout</a>
+    </div>
 
-<!-- JavaScript for Dynamic Dropdowns -->
-<script>
-    // Predefined option
-    const battingStatistics = ["Home Runs", "Batting Average", "RBIs"];
-    const pitchingStatistics = ["ERA", "Strikeouts", "Wins"];
+    <!-- JavaScript for Dynamic Dropdowns -->
+    <script>
+        // Predefined option
+        const battingStatistics = ["Home Runs", "Batting Average", "RBIs"];
+        const pitchingStatistics = ["ERA", "Strikeouts", "Wins"];
 
-    // Function to handle dropdown changes and generate new options dynamically
-    function handleDropdownChange(dropdownId, dynamicOptionsId) {
-        const dropdownValue = document.getElementById(dropdownId).value;
-        const dynamicOptionsDiv = document.getElementById(dynamicOptionsId);
-        dynamicOptionsDiv.innerHTML = ''; // Clear previous options
+        // Function to handle dropdown changes and generate new options dynamically
+        function handleDropdownChange(dropdownId, dynamicOptionsId) {
+            const dropdownValue = document.getElementById(dropdownId).value;
+            const dynamicOptionsDiv = document.getElementById(dynamicOptionsId);
+            dynamicOptionsDiv.innerHTML = ''; // Clear previous options
 
-        if (dropdownValue === 'teams') {
-            createDropdown(dynamicOptionsDiv, teams, `${dropdownId}_details`, "Select a Team");
-        }
-        else if (dropdownValue === 'career statistic') {
-            createCareerStatsOptions(dynamicOptionsDiv, dropdownId);
-        }
-        else if (dropdownValue === 'awards'){
-            createDropdown(dynamicOptionsDiv, awards, `${dropdownId}_details`, "Select a Award");
-        }
-        else if (dropdownValue === 'positions'){
-            createDropdown(dynamicOptionsDiv, positions, `${dropdownId}_details`, "Select a Position" );
-        }
-        else if ( dropdownValue === 'seasonal statistic'){
-            createSeasonalStatsOptions(dynamicOptionsDiv, dropdownId)
-
-        }
-        else if (dropdownValue === "pob"){
-            createDropdown(dynamicOptionsDiv, placeOfBirth, `${dropdownId}_details`, "Select a Place of Birth")
-
-        }
-    }
-
-    function createCareerStatsOptions(container, dropdownId) {
-        const statSelect = document.createElement('select');
-        statSelect.name = `${dropdownId}_details`;
-        statSelect.required = true;
-        statSelect.id = `${dropdownId}_details`;
-
-        const defaultOption = document.createElement('option');
-        defaultOption.value = '';
-        defaultOption.disabled = true;
-        defaultOption.selected = true;
-        defaultOption.textContent = "Select a Stat";
-        statSelect.appendChild(defaultOption);
-
-        careerStatistics.forEach(stat => {
-            const statOption = document.createElement('option');
-            statOption.value = stat;
-            statOption.textContent = stat;
-            statSelect.appendChild(statOption);
-        });
-
-        container.appendChild(statSelect);
-
-        // Add event listener for stat selection to generate specific options
-        statSelect.addEventListener('change', function () {
-            const selectedStat = statSelect.value;
-            const specificOptionsContainer = document.createElement('div');
-            specificOptionsContainer.id = `${dropdownId}_specific_options`;
-
-            // Clear existing options if they exist
-            const existingOptions = document.getElementById(`${dropdownId}_specific_options`);
-            if (existingOptions) existingOptions.remove();
-
-            // Based on selected stat, generate the specific ranges
-            let statOptions = [];
-            if (selectedStat === 'HR') {
-                statOptions = careerStatisticsHR;
-            } else if (selectedStat === "W") {
-                statOptions = careerStatisticsWin;
-            } else if (selectedStat === "RBI") {
-                statOptions = seasonalStatisticsRBI;
-            } else if (selectedStat === "R") {
-                statOptions = seasonalStatisticsRun
-            } else if (selectedStat === "H") {
-                statOptions = careerStatisticsHits
-            } else if (selectedStat === "SB") {
-                statOptions = seasonalStatisticsSB
-            } else if (selectedStat === "SV") {
-                statOptions = seasonalStatisticsSV
-            } else if (selectedStat === "AVG") {
-                statOptions = careerStatisticsAVG
-            } else if (selectedStat === "SO") {
-                statOptions = careerStatisticsSO
-            } else if (selectedStat === "30+HR/30+SB") {
-                statOptions = seasonalStatistics3030
+            if (dropdownValue === 'teams') {
+                createDropdown(dynamicOptionsDiv, teams, `${dropdownId}_details`, "Select a Team");
+            }
+            else if (dropdownValue === 'career statistic') {
+                createCareerStatsOptions(dynamicOptionsDiv, dropdownId);
+            }
+            else if (dropdownValue === 'awards'){
+                createDropdown(dynamicOptionsDiv, awards, `${dropdownId}_details`, "Select a Award");
+            }
+            else if (dropdownValue === 'positions'){
+                createDropdown(dynamicOptionsDiv, positions, `${dropdownId}_details`, "Select a Position" );
+            }
+            else if ( dropdownValue === 'seasonal statistic'){
+                createSeasonalStatsOptions(dynamicOptionsDiv, dropdownId)
 
             }
-
-            // Create dropdown for the selected stat's range options
-            createDropdown(
-                specificOptionsContainer,
-                statOptions,
-                `${dropdownId}_${selectedStat}_specific`,
-                `Select a ${selectedStat} Range`
-            );
-
-            container.appendChild(specificOptionsContainer);
-        });
-    }
-
-    function createSeasonalStatsOptions(container, dropdownId) {
-        const statSelect = document.createElement('select');
-        statSelect.name = `${dropdownId}_details`;
-        statSelect.required = true;
-        statSelect.id = `${dropdownId}_details`;
-
-        const defaultOption = document.createElement('option');
-        defaultOption.value = '';
-        defaultOption.disabled = true;
-        defaultOption.selected = true;
-        defaultOption.textContent = "Select a Stat";
-        statSelect.appendChild(defaultOption);
-
-        seasonalStatistics.forEach(stat => {
-            const statOption = document.createElement('option');
-            statOption.value = stat;
-            statOption.textContent = stat;
-            statSelect.appendChild(statOption);
-        });
-
-        container.appendChild(statSelect);
-
-        // Add event listener for stat selection to generate specific options
-        statSelect.addEventListener('change', function () {
-            const selectedStat = statSelect.value;
-            const specificOptionsContainer = document.createElement('div');
-            specificOptionsContainer.id = `${dropdownId}_specific_options`;
-
-            // Clear existing options if they exist
-            const existingOptions = document.getElementById(`${dropdownId}_specific_options`);
-            if (existingOptions) existingOptions.remove();
-
-            // Based on selected stat, generate the specific ranges
-            let statOptions = [];
-            if (selectedStat === 'HR') {
-                statOptions = seasonalStatisticsHR;
-            } else if (selectedStat === "W") {
-                statOptions = seasonalStatisticsWin;
-            } else if (selectedStat === "RBI") {
-                statOptions = seasonalStatisticsRBI;
-            } else if (selectedStat === "R") {
-                statOptions = seasonalStatisticsRun
-            } else if (selectedStat === "H") {
-                statOptions = seasonalStatisticsHits
-            } else if (selectedStat === "SB") {
-                statOptions = seasonalStatisticsSB
-            } else if (selectedStat === "SV") {
-                statOptions = seasonalStatisticsSV
-            } else if (selectedStat === "AVG") {
-                statOptions = seasonalStatisticsAVG
-            } else if (selectedStat === "SO") {
-                statOptions = seasonalStatisticsSO
-            } else if (selectedStat === "30+HR/30+SB") {
-                statOptions = seasonalStatistics3030
+            else if (dropdownValue === "pob"){
+                createDropdown(dynamicOptionsDiv, placeOfBirth, `${dropdownId}_details`, "Select a Place of Birth")
 
             }
+        }
 
-            // Create dropdown for the selected stat's range options
-            createDropdown(
-                specificOptionsContainer,
-                statOptions,
-                `${dropdownId}_${selectedStat}_specific`,
-                `Select a ${selectedStat} Range`
-            );
+        function createCareerStatsOptions(container, dropdownId) {
+            const statSelect = document.createElement('select');
+            statSelect.name = `${dropdownId}_details`;
+            statSelect.required = true;
+            statSelect.id = `${dropdownId}_details`;
 
-            container.appendChild(specificOptionsContainer);
-        });
-    }
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.disabled = true;
+            defaultOption.selected = true;
+            defaultOption.textContent = "Select a Stat";
+            statSelect.appendChild(defaultOption);
+
+            careerStatistics.forEach(stat => {
+                const statOption = document.createElement('option');
+                statOption.value = stat;
+                statOption.textContent = stat;
+                statSelect.appendChild(statOption);
+            });
+
+            container.appendChild(statSelect);
+
+            // Add event listener for stat selection to generate specific options
+            statSelect.addEventListener('change', function () {
+                const selectedStat = statSelect.value;
+                const specificOptionsContainer = document.createElement('div');
+                specificOptionsContainer.id = `${dropdownId}_specific_options`;
+
+                // Clear existing options if they exist
+                const existingOptions = document.getElementById(`${dropdownId}_specific_options`);
+                if (existingOptions) existingOptions.remove();
+
+                // Based on selected stat, generate the specific ranges
+                let statOptions = [];
+                if (selectedStat === 'HR') {
+                    statOptions = careerStatisticsHR;
+                } else if (selectedStat === "W") {
+                    statOptions = careerStatisticsWin;
+                } else if (selectedStat === "RBI") {
+                    statOptions = seasonalStatisticsRBI;
+                } else if (selectedStat === "R") {
+                    statOptions = seasonalStatisticsRun
+                } else if (selectedStat === "H") {
+                    statOptions = careerStatisticsHits
+                } else if (selectedStat === "SB") {
+                    statOptions = seasonalStatisticsSB
+                } else if (selectedStat === "SV") {
+                    statOptions = seasonalStatisticsSV
+                } else if (selectedStat === "AVG") {
+                    statOptions = careerStatisticsAVG
+                } else if (selectedStat === "SO") {
+                    statOptions = careerStatisticsSO
+                } else if (selectedStat === "30+HR/30+SB") {
+                    statOptions = seasonalStatistics3030
+
+                }
+
+                // Create dropdown for the selected stat's range options
+                createDropdown(
+                    specificOptionsContainer,
+                    statOptions,
+                    `${dropdownId}_${selectedStat}_specific`,
+                    `Select a ${selectedStat} Range`
+                );
+
+                container.appendChild(specificOptionsContainer);
+            });
+        }
+
+        function createSeasonalStatsOptions(container, dropdownId) {
+            const statSelect = document.createElement('select');
+            statSelect.name = `${dropdownId}_details`;
+            statSelect.required = true;
+            statSelect.id = `${dropdownId}_details`;
+
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.disabled = true;
+            defaultOption.selected = true;
+            defaultOption.textContent = "Select a Stat";
+            statSelect.appendChild(defaultOption);
+
+            seasonalStatistics.forEach(stat => {
+                const statOption = document.createElement('option');
+                statOption.value = stat;
+                statOption.textContent = stat;
+                statSelect.appendChild(statOption);
+            });
+
+            container.appendChild(statSelect);
+
+            // Add event listener for stat selection to generate specific options
+            statSelect.addEventListener('change', function () {
+                const selectedStat = statSelect.value;
+                const specificOptionsContainer = document.createElement('div');
+                specificOptionsContainer.id = `${dropdownId}_specific_options`;
+
+                // Clear existing options if they exist
+                const existingOptions = document.getElementById(`${dropdownId}_specific_options`);
+                if (existingOptions) existingOptions.remove();
+
+                // Based on selected stat, generate the specific ranges
+                let statOptions = [];
+                if (selectedStat === 'HR') {
+                    statOptions = seasonalStatisticsHR;
+                } else if (selectedStat === "W") {
+                    statOptions = seasonalStatisticsWin;
+                } else if (selectedStat === "RBI") {
+                    statOptions = seasonalStatisticsRBI;
+                } else if (selectedStat === "R") {
+                    statOptions = seasonalStatisticsRun
+                } else if (selectedStat === "H") {
+                    statOptions = seasonalStatisticsHits
+                } else if (selectedStat === "SB") {
+                    statOptions = seasonalStatisticsSB
+                } else if (selectedStat === "SV") {
+                    statOptions = seasonalStatisticsSV
+                } else if (selectedStat === "AVG") {
+                    statOptions = seasonalStatisticsAVG
+                } else if (selectedStat === "SO") {
+                    statOptions = seasonalStatisticsSO
+                } else if (selectedStat === "30+HR/30+SB") {
+                    statOptions = seasonalStatistics3030
+
+                }
+
+                // Create dropdown for the selected stat's range options
+                createDropdown(
+                    specificOptionsContainer,
+                    statOptions,
+                    `${dropdownId}_${selectedStat}_specific`,
+                    `Select a ${selectedStat} Range`
+                );
+
+                container.appendChild(specificOptionsContainer);
+            });
+        }
 
 
-    function createDropdown(container, options, name, placeholder) {
-        const select = document.createElement('select');
-        select.name = name;
-        select.required = true;
+        function createDropdown(container, options, name, placeholder) {
+            const select = document.createElement('select');
+            select.name = name;
+            select.required = true;
 
-        const defaultOption = document.createElement('option');
-        defaultOption.value = '';
-        defaultOption.disabled = true;
-        defaultOption.selected = true;
-        defaultOption.textContent = placeholder;
-        select.appendChild(defaultOption);
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.disabled = true;
+            defaultOption.selected = true;
+            defaultOption.textContent = placeholder;
+            select.appendChild(defaultOption);
 
-        options.forEach(option => {
-            const opt = document.createElement('option');
-            opt.value = option;
-            opt.textContent = option;
-            select.appendChild(opt);
-        });
+            options.forEach(option => {
+                const opt = document.createElement('option');
+                opt.value = option;
+                opt.textContent = option;
+                select.appendChild(opt);
+            });
 
-        container.appendChild(select);
-    }
-</script>
+            container.appendChild(select);
+        }
+    </script>
 
     <script src="{{ url_for('static', filename='seasonalStatistics.js') }}"></script>
     <script src="{{ url_for('static', filename='positions.js') }}"></script>
@@ -262,13 +261,45 @@
     <script src="{{ url_for('static', filename='careerStatisticsAVG.js') }}"></script>
 
 
+    <!-- CSS for Dynamic Dropdowns -->
+    <style>
+        .dynamic-options { margin-top: 10px; }
+        .query-box { margin-bottom: 20px; }
 
+        .top-options, .left-options {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .left-options {
+            flex-direction: column;
+            margin-right: 20px;
+        }
 
+        .query-box { margin-bottom: 20px; }
 
+        .grid-container-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            margin-top: 40px;
+        }
 
-<!-- CSS for Dynamic Dropdowns -->
-<style>
-    .dynamic-options { margin-top: 10px; }
-    .query-box { margin-bottom: 20px; }
-</style>
+        .grid-container {
+            display: inline-grid;
+            grid-template-columns: auto auto auto;
+            background-color: #3b7a57;
+            padding: 20px;
+        }
+
+        .grid-item {
+            background-color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(0, 0, 0, 0.8);
+            padding: 40px;
+            font-size: 35px;
+            text-align: center;
+            width: 125px;
+            height: 125px;
+        }
+    </style>
 {% endblock %}

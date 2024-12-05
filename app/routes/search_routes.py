@@ -3,6 +3,7 @@ from sqlalchemy import func
 
 from app.models import People, Batting, Teams, db, Fielding, Awards, HallOfFame, AllStarFull, Appearances, Pitching, \
     SeriesPost, FieldingPost, BattingPost
+from app.services import teamsQueries
 
 bp = Blueprint('search', __name__)
 
@@ -13,7 +14,6 @@ Takes in the two teams as parameters
 Algorithm uses the appearances table to get players with the least total appearances
 """
 def get_players_team_team(option1_details, option2_details):
-
     subquery = (
         db.session.query(
             Appearances.playerID,

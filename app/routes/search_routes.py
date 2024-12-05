@@ -829,6 +829,28 @@ def get_players_careerPitchingERA_allStar():
         .all()
     )
 
+def get_players_careerPitchingERA_stdAward(award):
+    in_stdAward = (
+        db.session.query(Awards.playerID)
+        .filter(Awards.awardID == award)
+        .group_by(Awards.playerID)
+        .subquery()
+    )
+
+    return (
+        db.session.query(
+            People.nameFirst,
+            People.nameLast  # Only select first and last name
+        )
+        .join(Pitching, Pitching.playerID == People.playerID)
+        .filter(People.playerID.in_(db.select(in_stdAward.c.playerID)))  # Filter only players from the subquery
+        .group_by(People.playerID)
+        .having((func.sum(Pitching.p_ER) / (func.sum(Pitching.p_IPOuts) / 3)) * 9 <= 3.00)
+        .order_by(db.func.sum(Pitching.p_G).asc())  # Order by least games played
+        .distinct()
+        .all()
+    )
+
 
 def get_players_careerBattingAVG_allStar(stat_range):
     in_allStar = (
@@ -900,6 +922,61 @@ def get_players_careerStatBatting_position(stat_column, stat_range, position):
         .distinct()
         .all()
 
+    )
+
+
+def get_players_careerStatPitching_position(stat_column, stat_range, position):
+    pitching_column = getattr(Pitching, f"p_{stat_column}")
+    total_stat = db.func.sum(pitching_column).label('total_stat')
+    position_column = f'G_{position.lower()}'
+
+    career_stats= (
+        db.session.query(
+            Pitching.playerID,
+            total_stat
+        )
+        .group_by(Pitching.playerID)
+        .having(total_stat > stat_range)
+        .subquery()
+    )
+
+    return (
+        db.session.query(
+            People.nameFirst,
+            People.nameLast
+        )
+        .join(career_stats, career_stats.c.playerID == People.playerID)
+        .join(Appearances, Appearances.playerID == People.playerID)
+        .filter(getattr(Appearances, position_column) > 0)
+        .group_by(People.playerID)
+        .order_by(db.func.sum(getattr(Appearances, position_column)).asc())
+        .distinct()
+        .all()
+
+    )
+
+def get_players_careerPitchingERA_position(position):
+    position_column = f'G_{position.lower()}'
+    plays_position = (
+        db.session.query(Appearances.playerID)
+        .filter(getattr(Appearances, position_column) > 0)
+        .group_by(Appearances.playerID)
+        .subquery()
+    )
+
+    return (
+        db.session.query(
+            People.nameFirst,
+            People.nameLast  # Only select first and last name
+        )
+        .join(Pitching, Pitching.playerID == People.playerID)
+        .join(Appearances, Appearances.playerID == People.playerID)
+        .filter(People.playerID.in_(db.select(plays_position.c.playerID)))  # Filter only players from the subquery
+        .group_by(People.playerID)
+        .having((func.sum(Pitching.p_ER) / (func.sum(Pitching.p_IPOuts) / 3)) * 9 <= 3.00)
+        .order_by(db.func.sum(getattr(Appearances, position_column)).asc())
+        .distinct()
+        .all()
     )
 
 def get_players_careerStatPitching_pob(stat_column, stat_range):
@@ -2903,26 +2980,39 @@ def search_players():
         # Handling different career statistics based on user input
         if award == "Hall of Fame" and career_stat in standard_careerStatPitching:
             results = get_players_careerStatPitching_hof(career_stat, stat_range)
+
         elif award == "Hall of Fame" and career_stat in standard_careerStatBatting:
             results = get_players_careerStatBatting_hof(career_stat, stat_range)
+
         elif award == "All Star" and career_stat in standard_careerStatPitching:
             results = get_players_careerStatPitching_allStar(career_stat, stat_range)
+
         elif award == "All Star" and career_stat in standard_careerStatBatting:
             results = get_players_careerStatBatting_allStar(career_stat, stat_range)
+
         elif award in standard_awards and career_stat in standard_careerStatPitching:
             results = get_players_careerStatPitching_stdAward(career_stat, award, stat_range)
+
         elif award in standard_awards and career_stat in standard_careerStatBatting:
             results = get_players_careerStatBatting_stdAward(career_stat, award, stat_range)
-        elif career_stat == "AVG" and award in standard_awards:
+
+        elif award in standard_awards and career_stat == "AVG":
             results = get_players_careerBattingAVG_stdAward(stat_range, award)
+
         elif career_stat == "AVG" and award == "Hall of Fame":
             results = get_players_careerBattingAVG_hof(stat_range)
+
         elif career_stat == "AVG" and award == "All Star":
             results = get_players_careerBattingAVG_allStar(stat_range)
+
         elif career_stat == "ERA" and award == "Hall of Fame":
             results = get_players_careerPitchingERA_hof()
+
         elif career_stat == "ERA" and award == "All Star":
             results = get_players_careerPitchingERA_allStar()
+
+        elif career_stat == "ERA" and award in standard_awards:
+            results = get_players_careerPitchingERA_stdAward(award)
 
 
 
@@ -2936,12 +3026,19 @@ def search_players():
         position = option2_details if option1 == "career statistic" else option1_details
         stat_range = request.form.get(f'dropdown2_{career_stat}_specific') if option1 == "positions" else request.form.get(
             f'dropdown1_{career_stat}_specific')
-        stat_range = convert_to_number(stat_range)
+
+        if career_stat != "ERA":
+            stat_range = convert_to_number(stat_range)
 
         if career_stat == "AVG":
             results = get_players_careerBattingAVG_position(stat_range, position)
-        if career_stat in standard_careerStatBatting:
+        elif career_stat in standard_careerStatBatting:
             results = get_players_careerStatBatting_position(career_stat, stat_range, position)
+        elif career_stat in standard_careerStatPitching:
+            results = get_players_careerStatPitching_position(career_stat, stat_range, position)
+        elif career_stat == "ERA":
+            results = get_players_careerPitchingERA_position(position)
+
 
 
     elif (option1 == "career statistic" and option2 == "pob") or (option1 == "pob" and option2 == "career statistic"):

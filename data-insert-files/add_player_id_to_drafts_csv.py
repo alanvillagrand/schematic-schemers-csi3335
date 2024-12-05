@@ -1,6 +1,6 @@
 import pandas as pd
 import pymysql
-import csi3335 as cfg  # Replace with your config module
+import csi3335f2024 as cfg  # Replace with your config module
 
 # Load the draft history CSV file
 df = pd.read_csv("mlb_draft_data.csv" , encoding='latin-1')

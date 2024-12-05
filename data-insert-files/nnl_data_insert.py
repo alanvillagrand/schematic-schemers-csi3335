@@ -1,6 +1,6 @@
 import pandas as pd
 import pymysql
-import csi3335 as cfg
+import csi3335f2024 as cfg
 import nls_teams as nls
 import sys
 

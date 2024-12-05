@@ -1,6 +1,6 @@
 import pandas as pd
 import pymysql
-import csi3335 as cfg
+import csi3335f2024 as cfg
 
 # Load the draft history CSV file
 draft_history_file = "mlb_draft_data.csv"  # Replace with your file path

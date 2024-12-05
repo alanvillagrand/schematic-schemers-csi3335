@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, session, url_for
 from flask_sqlalchemy import SQLAlchemy
+import csi3335f2024 as cfg
 
 from models.awards import Awards
 from models.batting import Batting
@@ -12,7 +13,8 @@ app = Flask(__name__)
 app.secret_key = "secret"
 
 #Configure SQL Alchemy
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:csi3335rocks@localhost/baseball'
+app.config['SQLALCHEMY_DATABASE_URI'] = (f'mysql+pymysql://{cfg.mysql['user']}:{cfg.mysql['password']}@'
+                                         f'{cfg.mysql['host']}/{cfg.mysql['database']}')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 

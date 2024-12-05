@@ -1008,6 +1008,36 @@ def get_players_careerStatPitching_pob(stat_column, stat_range):
 
     )
 
+
+def get_players_careerStatPitching_country(stat_column, stat_range, country):
+    pitching_column = getattr(Pitching, f"p_{stat_column}")
+    total_stat = db.func.sum(pitching_column).label('total_stat')
+
+    career_stats= (
+        db.session.query(
+            Pitching.playerID,
+            total_stat
+        )
+        .group_by(Pitching.playerID)
+        .having(total_stat > stat_range)
+        .subquery()
+    )
+
+    return (
+        db.session.query(
+            People.nameFirst,
+            People.nameLast
+        )
+        .join(career_stats, career_stats.c.playerID == People.playerID)
+        .join(Pitching, Pitching.playerID == People.playerID)
+        .filter(People.birthCountry == country)
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Pitching.p_G).asc())
+        .distinct()
+        .all()
+
+    )
+
 def get_players_careerStatBatting_pob(stat_column, stat_range):
     batting_column = getattr(Batting, f"b_{stat_column}")
     total_stat = db.func.sum(batting_column).label('total_stat')
@@ -1038,6 +1068,37 @@ def get_players_careerStatBatting_pob(stat_column, stat_range):
     )
 
 
+
+def get_players_careerStatBatting_country(stat_column, stat_range, country):
+    batting_column = getattr(Batting, f"b_{stat_column}")
+    total_stat = db.func.sum(batting_column).label('total_stat')
+
+    career_stats= (
+        db.session.query(
+            Batting.playerID,
+            total_stat
+        )
+        .group_by(Batting.playerID)
+        .having(total_stat > stat_range)
+        .subquery()
+    )
+
+    return (
+        db.session.query(
+            People.nameFirst,
+            People.nameLast
+        )
+        .join(career_stats, career_stats.c.playerID == People.playerID)
+        .join(Batting, Batting.playerID == People.playerID)
+        .filter(People.birthCountry == country)
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Batting.b_G).asc())
+        .distinct()
+        .all()
+
+    )
+
+
 def get_players_careerBattingAVG_pob(stat_range):
 
     career_stats= (
@@ -1058,6 +1119,34 @@ def get_players_careerBattingAVG_pob(stat_range):
         .join(career_stats, career_stats.c.playerID == People.playerID)
         .join(Batting, Batting.playerID == People.playerID)
         .filter(People.birthCountry != "USA")
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Batting.b_G).asc())
+        .distinct()
+        .all()
+
+    )
+
+
+def get_players_careerBattingAVG_country(stat_range, country):
+
+    career_stats= (
+        db.session.query(
+            Batting.playerID
+        )
+        .filter(Batting.b_AB > 0)
+        .group_by(Batting.playerID)
+        .having((db.func.sum(Batting.b_H) / db.func.sum(Batting.b_AB)) >= stat_range)
+        .subquery()
+    )
+
+    return (
+        db.session.query(
+            People.nameFirst,
+            People.nameLast
+        )
+        .join(career_stats, career_stats.c.playerID == People.playerID)
+        .join(Batting, Batting.playerID == People.playerID)
+        .filter(People.birthCountry == country)
         .group_by(People.playerID)
         .order_by(db.func.sum(Batting.b_G).asc())
         .distinct()
@@ -1095,6 +1184,36 @@ def get_players_careerPitchingERA_pob():
     )
 
 
+def get_players_careerPitchingERA_country(country):
+
+    career_stats= (
+        db.session.query(
+            Pitching.playerID
+        )
+        .filter(Pitching.p_IPOuts > 0)
+        .group_by(Pitching.playerID)
+        .having(
+            (func.sum(Pitching.p_ER) / (func.sum(Pitching.p_IPOuts) / 3)) * 9 <= 3.00
+        )  # Weighted ERA <= 3.00
+        .subquery()
+    )
+
+    return (
+        db.session.query(
+            People.nameFirst,
+            People.nameLast
+        )
+        .join(career_stats, career_stats.c.playerID == People.playerID)
+        .join(Pitching, Pitching.playerID == People.playerID)
+        .filter(People.birthCountry == country)
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Pitching.p_G).asc())
+        .distinct()
+        .all()
+
+    )
+
+
 
 def get_players_careerStatBatting_draftPick(stat_column, stat_range):
     batting_column = getattr(Batting, f"b_{stat_column}")
@@ -1121,6 +1240,96 @@ def get_players_careerStatBatting_draftPick(stat_column, stat_range):
         .filter(Drafts.draft_round == 1)
         .group_by(People.playerID)
         .order_by(db.func.sum(Batting.b_G).asc())
+        .distinct()
+        .all()
+
+    )
+
+def get_players_careerBattingAVG_draftPick(stat_range):
+
+    career_stats= (
+        db.session.query(
+            Batting.playerID,
+        )
+        .group_by(Batting.playerID)
+        .having(db.func.sum(Batting.b_AB) > 0)
+        .having((db.func.sum(Batting.b_H) / db.func.sum(Batting.b_AB)) >= stat_range)
+        .subquery()
+    )
+
+    return (
+        db.session.query(
+            People.nameFirst,
+            People.nameLast
+        )
+        .join(career_stats, career_stats.c.playerID == People.playerID)
+        .join(Batting, Batting.playerID == People.playerID)
+        .join(Drafts, Drafts.playerID == People.playerID)
+        .filter(Drafts.draft_round == 1)
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Batting.b_G).asc())
+        .distinct()
+        .all()
+
+    )
+
+
+def get_players_careerStatPitching_draftPick(stat_column, stat_range):
+    pitching_column = getattr(Pitching, f"p_{stat_column}")
+    total_stat = db.func.sum(pitching_column).label('total_stat')
+
+    career_stats= (
+        db.session.query(
+            Pitching.playerID
+        )
+        .group_by(Pitching.playerID)
+        .having(total_stat > stat_range)
+        .subquery()
+    )
+
+    return (
+        db.session.query(
+            People.nameFirst,
+            People.nameLast
+        )
+        .join(career_stats, career_stats.c.playerID == People.playerID)
+        .join(Pitching, Pitching.playerID == People.playerID)
+        .join(Drafts, Drafts.playerID == People.playerID)
+        .filter(Drafts.draft_round == 1)
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Pitching.p_G).asc())
+        .distinct()
+        .all()
+
+    )
+
+
+
+def get_players_careerPitchingERA_draftPick():
+
+    career_stats= (
+        db.session.query(
+            Pitching.playerID
+        )
+        .group_by(Pitching.playerID)
+        .having(db.func.sum(Pitching.p_IPOuts) > 0)
+        .having(
+            (func.sum(Pitching.p_ER) / (func.sum(Pitching.p_IPOuts) / 3)) * 9 <= 3.00
+        )
+        .subquery()
+    )
+
+    return (
+        db.session.query(
+            People.nameFirst,
+            People.nameLast
+        )
+        .join(career_stats, career_stats.c.playerID == People.playerID)
+        .join(Pitching, Pitching.playerID == People.playerID)
+        .join(Drafts, Drafts.playerID == People.playerID)
+        .filter(Drafts.draft_round == 1)
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Pitching.p_G).asc())
         .distinct()
         .all()
 
@@ -3124,6 +3333,19 @@ def search_players():
         if career_stat == "ERA" and pob == "Outside of USA":
             results = get_players_careerPitchingERA_pob()
 
+        if career_stat in standard_careerStatPitching and pob != "Outside of USA":
+            results = get_players_careerStatPitching_country(career_stat, stat_range, pob)
+
+        if career_stat in standard_careerStatBatting and pob != "Outside of USA":
+            results = get_players_careerStatBatting_country(career_stat, stat_range, pob)
+
+        if career_stat == "AVG" and pob != "Outside of USA":
+            results = get_players_careerBattingAVG_country(stat_range, pob)
+
+        if career_stat == "ERA" and pob != "Outside of USA":
+            results = get_players_careerPitchingERA_country(pob)
+
+
 
 
     elif (option1 == "career statistic" and option2 == "dp") or (option1 == "dp" and option2 == "career statistic"):
@@ -3133,6 +3355,15 @@ def search_players():
             f'dropdown1_{career_stat}_specific')
         if career_stat in standard_careerStatBatting:
             results = get_players_careerStatBatting_draftPick(career_stat, stat_range)
+
+        if career_stat in standard_careerStatPitching:
+            results = get_players_careerStatPitching_draftPick(career_stat, stat_range)
+
+        if career_stat == "AVG":
+            results = get_players_careerBattingAVG_draftPick(stat_range)
+
+        if career_stat == "ERA":
+            results = get_players_careerPitchingERA_draftPick()
 
 
 

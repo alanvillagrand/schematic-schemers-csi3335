@@ -6,6 +6,18 @@
 .container {
     max-width: 80vw;
 }
+.table-container {
+    margin: 20px auto;
+    width: 80%; /* Match the table's width */
+    text-align: left; /* Align title to the left */
+}
+
+.table-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333; /* Adjust color if needed */
+    margin-bottom: 10px; /* Add some space between the title and the table */
+}
 .depth-chart-position {
     display: grid;
     grid-template-areas:
@@ -53,10 +65,9 @@
     {% endif %}
 
     <!-- Batting Information -->
-     <div>
-        <h2>Batting Stats</h2>
-
-        {% if batting_info %}
+    {% if batting_info %}
+        <div class="table-container">
+            <h2 class="table-title">Batting Stats</h2>
             <table>
                 <tr>
                     <th>Name</th>
@@ -74,9 +85,6 @@
                     <th>SLG</th>
                     <th>wOBA</th>
                     <th>wRC+</th>
-                    <!-- <th>BsR</th> -->
-                    <!-- <th>Off</th> -->
-                    <!-- <th>Def</th> -->
                     <th>WAR</th>
                 </tr>
                 <tr>
@@ -93,47 +101,48 @@
                     {% endfor %}
                 </tr>
             </table>
-        {% else %}
-            <p>No batting information found.</p>
-        {% endif %}
-     </div>
+        </div>
+    {% else %}
+        <p>No batting information found.</p>
+    {% endif %}
 
     <!-- Pitching Information -->
-    <h2>Pitching Stats</h2>
-
     {% if pitching_info %}
-        <table>
-            <tr>
-                <th>Name</th>
-                <th>Age</th>
-                <th>G</th>
-                <th>IP</th>
-                <th>K%</th>
-                <th>BB%</th>
-                <th>HR/9</th>
-                <th>BABIP</th>
-                <th>LOB%</th>
-                <!-- <th>GB%</th> -->
-                <!-- <th>HR/FB</th> -->
-                <th>ERA</th>
-                <th>FIP</th>
-                <!-- <th>xFIP</th> -->
-                <th>WAR</th>
-            </tr>
-            <tr>
-                {% for row in pitching_info %}
-                    <tr>
-                        {% for col in row %}
-                            {% if col == None %}
-                                <td class="stat">0</td>
-                            {% else %}
-                                <td class="stat">{{ col }}</td>
-                            {% endif %}
-                        {% endfor %}
-                    </tr>
-                {% endfor %}
-            </tr>
-        </table>
+        <div class="table-container">
+            <h2 class="table-title">Pitching Stats</h2>
+            <table>
+                <tr>
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th>G</th>
+                    <th>IP</th>
+                    <th>K%</th>
+                    <th>BB%</th>
+                    <th>HR/9</th>
+                    <th>BABIP</th>
+                    <th>LOB%</th>
+                    <!-- <th>GB%</th> -->
+                    <!-- <th>HR/FB</th> -->
+                    <th>ERA</th>
+                    <th>FIP</th>
+                    <!-- <th>xFIP</th> -->
+                    <th>WAR</th>
+                </tr>
+                <tr>
+                    {% for row in pitching_info %}
+                        <tr>
+                            {% for col in row %}
+                                {% if col == None %}
+                                    <td class="stat">0</td>
+                                {% else %}
+                                    <td class="stat">{{ col }}</td>
+                                {% endif %}
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tr>
+            </table>
+        </div>
     {% else %}
         <p>No pitching information found.</p>
     {% endif %}
@@ -147,9 +156,10 @@
             <label for="position-players-stats">Select projected stats:</label>
             <select id="position-players-stats" name="position-players-stats">
                 <option value="playing-time">Playing Time</option>
-                <option value="batting-average">PA</option>
-                <option value="home-runs">WAR</option>
-                <option value="rbis">wOBA</option>
+                <!-- <option value="PA">PA</option> -->
+                <option value="WAR">WAR</option>
+                <option value="wRC_plus">wRC+</option>
+                <!-- <option value="wOBA">wOBA</option> -->
             </select>
         </div>
         <div class="depth-chart-position">
@@ -174,9 +184,9 @@
             <label for="pitchers-stats">Pitchers:</label>
             <select id="pitchers-stats" name="pitchers-stats">
                 <option value="playing-time">Playing Time</option>
-                <option value="strikeouts">IP</option>
-                <option value="era">ERA</option>
-                <option value="wins">FIP</option>
+                <option value="IP">IP</option>
+                <option value="ERA">ERA</option>
+                <option value="FIP">FIP</option>
             </select>
         </div>
         <div class="depth-chart-pitcher">
@@ -199,16 +209,50 @@
 </div>
 
 <script>
+    function updatePositionStats(category, statType, team_name, year) {
+        fetch(`{{ url_for('team.update_position_stats') }}?category=${category}&stat_type=${statType}&team_name=${team_name}&year=${year}`)
+            .then(response => response.json())
+            .then(data => {
+                const container = category === "position-players" 
+                    ? document.querySelector('.depth-chart-position') 
+                    : document.querySelector('.depth-chart-pitcher');
+                
+                container.innerHTML = '';
+
+                for (const [position, players] of Object.entries(data)) {
+                    const positionBox = document.createElement('div');
+                    positionBox.classList.add('position-box', `_${position}`);
+
+                    let positionHTML = `<strong>${position}</strong><ul>`;
+                    players.forEach(player => {
+                        positionHTML += `<li>${player.name}: ${player.statistic}</li>`;
+                    });
+                    positionHTML += '</ul>';
+
+                    positionBox.innerHTML = positionHTML;
+                    container.appendChild(positionBox);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching updated stats:', error);
+            });
+    }
     document.getElementById('position-players-stats').addEventListener('change', function() {
         const selectedValue = this.value;
         console.log('Position Players stat selected:', selectedValue);
-        // Make an AJAX call or fetch to update the data
+        const container = document.querySelector('.depth-chart-position');
+        container.innerHTML = '<p>Loading data...</p>';
+        updatePositionStats('position-players', selectedValue, "{{ team_name }}", "{{ year }}")
+        
     });
 
     document.getElementById('pitchers-stats').addEventListener('change', function() {
         const selectedValue = this.value;
         console.log('Pitchers stat selected:', selectedValue);
-        // Make an AJAX call or fetch to update the data
+        // const container = document.querySelector('.depth-chart-pitcher');
+        // container.innerHTML = '<p>Loading data...</p>';
+        updatePositionStats('pitchers', selectedValue, "{{ team_name }}", "{{ year }}")
+        
     });
 </script>
 

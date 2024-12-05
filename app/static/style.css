@@ -32,6 +32,7 @@ p {
 
 table {
     width: 80%;
+    max-width: 100%;
     margin: 20px auto;
     border-collapse: collapse;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -68,6 +69,36 @@ td {
     font-weight: bold;
 }
 
+/* Responsive styling for smaller screens */
+@media (max-width: 768px) {
+    table {
+        width: 95%;
+        font-size: 12px;
+    }
+
+    th, td {
+        padding: 8px 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    table {
+        width: 100%;
+        font-size: 10px;
+    }
+
+    th, td {
+        padding: 6px 8px;
+    }
+
+    th {
+        font-size: 12px;
+    }
+
+    td {
+        font-size: 10px;
+    }
+}
 /* Links */
 a {
     display: inline-block;

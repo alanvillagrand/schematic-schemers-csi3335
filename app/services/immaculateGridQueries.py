@@ -81,6 +81,77 @@ def get_players_seasonStatBatting_team(stat, team, stat_range):
     )
 
 
+def get_players_seasonPitchingERA_team(team):
+
+    team_subquery = played_on_team_subquery(team)
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Pitching, Pitching.playerID == People.playerID)
+        .join(team_subquery, and_(
+            team_subquery.c.playerID == Pitching.playerID,
+            team_subquery.c.teamID == Pitching.teamID,
+        ))
+        .filter(Pitching.p_ERA <= 3.00)
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Pitching.p_G).asc())
+        .distinct()
+        .all()
+    )
+
+
+def get_players_hof_team(team):
+    team_subquery = played_on_team_subquery(team)
+
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Appearances, Appearances.playerID == People.playerID)
+        .join(HallOfFame, HallOfFame.playerID == People.playerID)
+        .join(team_subquery, team_subquery.c.playerID == HallOfFame.playerID)
+        .filter(HallOfFame.inducted == 'Y')
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Appearances.G_all).asc())
+        .distinct()
+        .all()
+    )
+
+
+def get_players_position_team(position, team):
+    # Construct the column name for the specified position (e.g., G_ss, G_1b)
+    position_column = f'G_{position.lower()}'
+
+    team_subquery = played_on_team_subquery(team)
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Appearances, Appearances.playerID == People.playerID)
+        .join(team_subquery, and_(
+            team_subquery.c.playerID == Appearances.playerID,
+            team_subquery.c.teamID == Appearances.teamID,
+        ))
+        .filter(getattr(Appearances, position_column) > 0)
+        .group_by(People.playerID)
+        .order_by(db.func.sum(getattr(Appearances, position_column)).asc())
+        .distinct()
+        .all()
+    )
+
+
+def get_players_seasonBattingAVG_team(stat_range, team):
+    team_subquery = played_on_team_subquery(team)
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Batting, Batting.playerID == People.playerID)
+        .join(team_subquery, and_(
+            team_subquery.c.playerID == Batting.playerID,
+            team_subquery.c.teamID == Batting.teamID,
+        ))
+        .filter(Batting.b_AB > 0)
+        .filter((Batting.b_H / Batting.b_AB) >= stat_range)
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Batting.b_G).asc())
+        .distinct()
+        .all()
+    )
+
 """
 get_players_seasonStatPitching_team
 queries for a player that has this pitching stat and achieved it in a season with the team
@@ -105,25 +176,18 @@ def get_players_seasonStatPitching_team(stat_column, team, stat_range):
     )
 
 
-"""
-get_players_seasonBattingAVG_ws
-queries for a player that has this average stat and achieved it in a season
-while playing for the specific team
-takes in a team and stat_range
-algorithm orders it by least appearances in batting b_G
-"""
 
 
-def get_players_seasonBattingAVG_team(stat_range, team):
+def get_players_exclusive_to_team(team):
     team_subquery = played_on_team_subquery(team)
     return (
         db.session.query(People.nameFirst, People.nameLast)
-        .join(Batting, Batting.playerID == People.playerID)
-        .join(team_subquery, team_subquery.c.playerID == Batting.playerID)
-        .filter(Batting.b_AB > 0)
-        .filter((Batting.b_H / Batting.b_AB) >= stat_range)
+        .join(Appearances, Appearances.playerID == People.playerID)
+        .join(Teams, Teams.teamID == Appearances.teamID)
+        .join(team_subquery, team_subquery.c.playerID == People.playerID)
         .group_by(People.playerID)
-        .order_by(db.func.sum(Batting.b_G).asc())
+        .having(db.func.count(db.func.distinct(Teams.teamID)) == 1)
+        .order_by(db.func.sum(Appearances.G_all).asc())
         .distinct()
         .all()
     )
@@ -317,35 +381,9 @@ def get_players_stdAward_team(stdAward, team):
     )
 
 
-"""
-get_players_hof_team
-Queries a player that is in the hall of fame and played for a particular team (When paired with a team,
-the player must have played a major league game for the team in question)
-Takes in a team
-Algorithm uses the appearances table to get players with the least total appearances
-"""
 
 
-def get_players_hof_team(team):
-    team_subquery = played_on_team_subquery(team)
 
-    game_count = (
-        db.session.query(Appearances.playerID, db.func.sum(Appearances.G_all).label("total_games"))
-        .group_by(Appearances.playerID)
-        .subquery()
-    )
-
-    return (
-        db.session.query(People.nameFirst, People.nameLast)
-        .join(game_count, game_count.c.playerID == People.playerID)
-        .join(Appearances, Appearances.playerID == People.playerID)
-        .join(team_subquery, team_subquery.c.playerID == Appearances.playerID)
-        .join(HallOfFame, HallOfFame.playerID == People.playerID)
-        .filter(HallOfFame.inducted == "Y")
-        .order_by(game_count.c.total_games.asc())
-        .distinct()
-        .all()
-    )
 
 
 """
@@ -378,32 +416,7 @@ def get_players_allstar_team(team):
     )
 
 
-"""
-get_players_position_team
-Queries a player that played a particular position and played for a particular team
-Takes in a position and a team
-Algorithm uses the appearances table to get players with the least total appearances
-"""
 
-
-def get_players_position_team(position, team):
-    # Construct the column name for the specified position (e.g., G_ss, G_1b)
-    position_column = f'G_{position.lower()}'
-
-    return (
-        db.session.query(
-            People.nameFirst,
-            People.nameLast
-        )
-        .join(Appearances, Appearances.playerID == People.playerID)
-        .join(Teams, and_(Teams.teamID == Appearances.teamID, Teams.yearID == Appearances.yearID))
-        .join(ImmaculateGridTeams, ImmaculateGridTeams.team_name == Teams.team_name)
-        .filter(ImmaculateGridTeams.ig_team_name == team)
-        .filter(Teams.yearID >= ImmaculateGridTeams.startYear)
-        .filter(or_(ImmaculateGridTeams.endYear.is_(None), Teams.yearID <= ImmaculateGridTeams.endYear))
-        .filter(getattr(Appearances, position_column) > 0)
-        .all()
-    )
 
 
 """ currently not working"""

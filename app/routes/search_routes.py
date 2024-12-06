@@ -56,7 +56,7 @@ from app.services.immaculateGridQueries import get_players_team_team, get_player
     get_players_position_position, get_players_pob_position, get_players_country_position, \
     get_players_draftPick_country, get_players_draftPick_pob, get_players_draftPick_position, \
     get_players_stdAward_position, get_players_hof_position, get_players_allstar_position, \
-    get_players_careerPitchingERA_team
+    get_players_careerPitchingERA_team, get_players_exclusive_to_team, get_players_seasonPitchingERA_team
 
 bp = Blueprint('search', __name__)
 
@@ -120,7 +120,13 @@ def search_players():
 
     if option1 == "teams" and option2 == "teams":
         # Query players who played on both selected teams
-        results = get_players_team_team(option1_details, option2_details)
+        if option1_details != "Only One Team" and option2_details != "Only One Team":
+            results = get_players_team_team(option1_details, option2_details)
+
+        elif option1_details == "Only One Team":
+            results = get_players_exclusive_to_team(option2_details)
+        else:
+            results = get_players_exclusive_to_team(option1_details)
 
     elif (option1 == "career statistic" and option2 == "teams") or (option1 == "teams" and option2 == "career statistic"):
         print("IN TEAMS CSTATS")
@@ -154,21 +160,24 @@ def search_players():
         stat_range = request.form.get(f'dropdown2_{stat}_specific') if option1 == "teams" else request.form.get(
             f'dropdown1_{stat}_specific')
 
+        if stat != "ERA" and stat != "30+HR/30+SB":
+            stat_range = convert_to_number(stat_range)
+
         if stat in standard_seasonStatBatting:
-            stat_range = int(stat_range.replace('+', ''))
             results = get_players_seasonStatBatting_team(stat, team, stat_range)
 
 
         elif stat in standard_seasonStatPitching:
-            stat_range = int(stat_range.replace('+', ''))
             results = get_players_seasonStatPitching_team(stat, team, stat_range)
 
         elif stat == "AVG":
-            stat_range = float(stat_range.replace('+', ''))
             results = get_players_seasonBattingAVG_team(stat_range, team)
 
         elif stat == "30+HR/30+SB":
             results = get_players_seasonBatting3030_team(team)
+
+        elif stat == "ERA":
+            results = get_players_seasonPitchingERA_team(team)
 
 
     elif (option1 == "awards" and option2 == "teams") or (option1 == "teams" and option2 == "awards"):

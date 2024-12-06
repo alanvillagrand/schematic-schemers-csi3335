@@ -26,7 +26,7 @@ def join_subqueries(subquery1, subquery2):
 def played_on_team_subquery(option_details):
     subquery = (
         db.session.query(
-            Appearances.playerID,
+            Appearances.playerID, Appearances.yearID, Appearances.teamID
         )
         .join(Teams, and_(Teams.teamID == Appearances.teamID, Teams.yearID == Appearances.yearID))
         .join(ImmaculateGridTeams, ImmaculateGridTeams.team_name == Teams.team_name)
@@ -69,7 +69,10 @@ def get_players_seasonStatBatting_team(stat, team, stat_range):
     return (
         db.session.query(People.nameFirst, People.nameLast)
         .join(Batting, Batting.playerID == People.playerID)
-        .join(team_subquery, team_subquery.c.playerID == Batting.playerID)
+        .join(team_subquery, and_(
+            team_subquery.c.playerID == Batting.playerID,
+            team_subquery.c.teamID == Batting.teamID,
+        ))
         .filter(batting_column1 >= stat_range)
         .group_by(People.playerID)
         .order_by(db.func.sum(Batting.b_G).asc())
@@ -117,6 +120,7 @@ def get_players_seasonBattingAVG_team(stat_range, team):
         db.session.query(People.nameFirst, People.nameLast)
         .join(Batting, Batting.playerID == People.playerID)
         .join(team_subquery, team_subquery.c.playerID == Batting.playerID)
+        .filter(Batting.b_AB > 0)
         .filter((Batting.b_H / Batting.b_AB) >= stat_range)
         .group_by(People.playerID)
         .order_by(db.func.sum(Batting.b_G).asc())
@@ -215,7 +219,7 @@ def get_players_careerStatPitching_team(stat_column, team, stat_range):
     return (
         db.session.query(
             People.nameFirst,
-            People.nameLast,
+            People.nameLast
         )
         .join(career_stats, career_stats.c.playerID == People.playerID)
         .join(Pitching, Pitching.playerID == People.playerID)
@@ -748,6 +752,7 @@ def get_players_seasonBattingAVG_stdAward(stat_range, award):
         db.session.query(People.nameFirst, People.nameLast)
         .join(Batting, Batting.playerID == People.playerID)
         .join(Awards, Awards.playerID == People.playerID)
+        .filter(Batting.b_AB > 0)
         .filter((Batting.b_H/ Batting.b_AB) >= stat_range)  # Batting average of .300 or higher
         .filter(Awards.awardID == award)
         .group_by(People.playerID)
@@ -805,6 +810,7 @@ def get_players_seasonBattingAVG_allStar(stat_range):
         db.session.query(People.nameFirst, People.nameLast)
         .join(Batting, Batting.playerID == People.playerID)
         .join(AllStarFull, AllStarFull.playerID == People.playerID)
+        .filter(Batting.b_AB > 0)
         .filter((Batting.b_H/ Batting.b_AB) >= stat_range)  # Batting average of .300 or higher
         .filter(AllStarFull.GP > 0)
         .group_by(People.playerID)
@@ -818,6 +824,7 @@ def get_players_seasonBattingAVG_hof(stat_range):
         db.session.query(People.nameFirst, People.nameLast)
         .join(Batting, Batting.playerID == People.playerID)
         .join(HallOfFame, HallOfFame.playerID == People.playerID)
+        .filter(Batting.b_AB > 0)
         .filter((Batting.b_H/ Batting.b_AB) >= stat_range)  # Batting average of .300 or higher
         .filter(HallOfFame.inducted == 'Y')
         .group_by(People.playerID)
@@ -1043,6 +1050,7 @@ def get_players_seasonBattingAVG_position(position, stat_range):
         .join(Batting, Batting.playerID == People.playerID)
         .join(Appearances, Appearances.playerID == People.playerID)
         .join(Teams, Teams.teamID == Appearances.teamID)
+        .filter(Batting.b_AB > 0)
         .filter((Batting.b_H/Batting.b_AB) >= stat_range)
         .filter(getattr(Appearances, position_column) > 0 )
         .group_by(People.playerID)  # Group by player ID to calculate total appearances
@@ -1158,6 +1166,7 @@ def get_players_seasonBattingAVG_pob(stat_range):
     return (
         db.session.query(People.nameFirst, People.nameLast)
         .join(Batting, Batting.playerID == People.playerID)
+        .filter(Batting.b_AB > 0)
         .filter((Batting.b_H / Batting.b_AB) >= stat_range)
         .filter(People.birthCountry != "USA")
         .group_by(People.playerID)
@@ -1171,6 +1180,7 @@ def get_players_seasonBattingAVG_country(stat_range, country):
     return (
         db.session.query(People.nameFirst, People.nameLast)
         .join(Batting, Batting.playerID == People.playerID)
+        .filter(Batting.b_AB > 0)
         .filter((Batting.b_H / Batting.b_AB) >= stat_range)
         .filter(People.birthCountry == country)
         .group_by(People.playerID)
@@ -1290,6 +1300,7 @@ def get_players_careerPitchingERA_hof():
         .join(Pitching, Pitching.playerID == People.playerID)
         .filter(People.playerID.in_(db.select(in_hof.c.playerID)))  # Filter only players from the subquery
         .group_by(People.playerID)
+        .having(func.sum(Pitching.p_IPOuts) > 0)
         .having((func.sum(Pitching.p_ER) / (func.sum(Pitching.p_IPOuts) / 3)) * 9 <= 3.00)
         .order_by(db.func.sum(Pitching.p_G).asc())  # Order by least games played
         .distinct()
@@ -1313,6 +1324,7 @@ def get_players_careerPitchingERA_allStar():
         .join(Pitching, Pitching.playerID == People.playerID)
         .filter(People.playerID.in_(db.select(in_allStar.c.playerID)))  # Filter only players from the subquery
         .group_by(People.playerID)
+        .having(func.sum(Pitching.p_IPOuts) > 0)
         .having((func.sum(Pitching.p_ER) / (func.sum(Pitching.p_IPOuts) / 3)) * 9 <= 3.00)
         .order_by(db.func.sum(AllStarFull.GP).asc())  # Order by least games played
         .distinct()
@@ -1335,6 +1347,7 @@ def get_players_careerPitchingERA_stdAward(award):
         .join(Pitching, Pitching.playerID == People.playerID)
         .filter(People.playerID.in_(db.select(in_stdAward.c.playerID)))  # Filter only players from the subquery
         .group_by(People.playerID)
+        .having(func.sum(Pitching.p_IPOuts) > 0)
         .having((func.sum(Pitching.p_ER) / (func.sum(Pitching.p_IPOuts) / 3)) * 9 <= 3.00)
         .order_by(db.func.sum(Pitching.p_G).asc())  # Order by least games played
         .distinct()
@@ -1463,6 +1476,7 @@ def get_players_careerPitchingERA_position(position):
         .join(Appearances, Appearances.playerID == People.playerID)
         .filter(People.playerID.in_(db.select(plays_position.c.playerID)))  # Filter only players from the subquery
         .group_by(People.playerID)
+        .having(func.sum(Pitching.p_IPOuts) > 0)
         .having((func.sum(Pitching.p_ER) / (func.sum(Pitching.p_IPOuts) / 3)) * 9 <= 3.00)
         .order_by(db.func.sum(getattr(Appearances, position_column)).asc())
         .distinct()
@@ -1595,8 +1609,8 @@ def get_players_careerBattingAVG_pob(stat_range):
         db.session.query(
             Batting.playerID
         )
-        .filter(Batting.b_AB > 0)
         .group_by(Batting.playerID)
+        .having(db.func.sum(Batting.b_AB) > 0)
         .having((db.func.sum(Batting.b_H) / db.func.sum(Batting.b_AB)) >= stat_range)
         .subquery()
     )
@@ -1623,8 +1637,8 @@ def get_players_careerBattingAVG_country(stat_range, country):
         db.session.query(
             Batting.playerID
         )
-        .filter(Batting.b_AB > 0)
         .group_by(Batting.playerID)
+        .having(db.func.sum(Batting.b_AB) > 0)
         .having((db.func.sum(Batting.b_H) / db.func.sum(Batting.b_AB)) >= stat_range)
         .subquery()
     )
@@ -1652,6 +1666,7 @@ def get_players_careerPitchingERA_pob():
         )
         .filter(Pitching.p_IPOuts > 0)
         .group_by(Pitching.playerID)
+        .having(func.sum(Pitching.p_IPOuts) > 0)
         .having(
             (func.sum(Pitching.p_ER) / (func.sum(Pitching.p_IPOuts) / 3)) * 9 <= 3.00
         )  # Weighted ERA <= 3.00
@@ -1682,6 +1697,7 @@ def get_players_careerPitchingERA_country(country):
         )
         .filter(Pitching.p_IPOuts > 0)
         .group_by(Pitching.playerID)
+        .having(func.sum(Pitching.p_IPOuts) > 0)
         .having(
             (func.sum(Pitching.p_ER) / (func.sum(Pitching.p_IPOuts) / 3)) * 9 <= 3.00
         )  # Weighted ERA <= 3.00
@@ -2368,6 +2384,7 @@ def get_players_seasonStatPitching_seasonStatAVG(pitching_column, pitching_range
     )
     avg_subquery = (
         db.session.query(Batting.playerID)
+        .filter(Batting.b_AB > 0)
         .filter((Batting.b_H/Batting.b_AB) >= avg_range)
         .subquery()
 
@@ -2444,6 +2461,7 @@ def get_players_seasonStatBatting_seasonStatAVG(batting_column, batting_range, a
     )
     avg_subquery = (
         db.session.query(Batting.playerID)
+        .filter(Batting.b_AB > 0)
         .filter((Batting.b_H/Batting.b_AB) >= avg_range)
         .subquery()
 
@@ -2470,6 +2488,7 @@ def get_players_seasonBatting3030_seasonStatAVG(avg_range):
     )
     avg_subquery = (
         db.session.query(Batting.playerID)
+        .filter(Batting.b_AB > 0)
         .filter((Batting.b_H/Batting.b_AB) >= avg_range)
         .subquery()
 
@@ -2765,6 +2784,7 @@ def get_players_careerPitchingERA_seasonStatPitching(season_column, season_range
             Pitching.playerID  # Only return player IDs that meet the criteria
         )
         .group_by(Pitching.playerID)  # Group stats by player
+        .having(func.sum(Pitching.p_IPOuts) > 0)
         .having(
             (func.sum(Pitching.p_ER) / (func.sum(Pitching.p_IPOuts) / 3)) * 9 <= 3.00
         )  # Weighted ERA <= 3.00
@@ -2889,6 +2909,7 @@ def get_players_careerPitchingERA_seasonStatAVG(season_range):
         db.session.query(
             Batting.playerID
         )
+        .filter(Batting.b_AB > 0)
         .filter((Batting.b_H/ Batting.b_AB) >= season_range)
         .group_by(Batting.playerID)
         .subquery()
@@ -2994,6 +3015,7 @@ def get_players_careerPitchingERA_careerStatBatting(career_column, career_range)
             Pitching.playerID  # Only return player IDs that meet the criteria
         )
         .group_by(Pitching.playerID)  # Group stats by player
+        .having(func.sum(Pitching.p_IPOuts) > 0)
         .having(
             (func.sum(Pitching.p_ER) / (func.sum(Pitching.p_IPOuts) / 3)) * 9 <= 3.00
         )  # Weighted ERA <= 3.00
@@ -3034,6 +3056,7 @@ def get_players_careerPitchingERA_careerStatAVG(career_range):
         )
         .filter(Pitching.p_IPOUTS > 0)
         .group_by(Pitching.playerID)  # Group stats by player
+        .having(func.sum(Pitching.p_IPOuts) > 0)
         .having(
             (func.sum(Pitching.p_ER) / (func.sum(Pitching.p_IPOuts) / 3)) * 9 <= 3.00
         )  # Weighted ERA <= 3.00
@@ -3044,8 +3067,9 @@ def get_players_careerPitchingERA_careerStatAVG(career_range):
         db.session.query(
             Batting.playerID  # Only return player IDs that meet the criteria
         )
-        .filter(Batting.b_AB > 0)
+
         .group_by(Batting.playerID)  # Group stats by player
+        .having(db.func.sum(Batting.b_AB) > 0)
         .having(
             ((db.func.sum(Batting.b_H) / db.func.sum(Batting.b_AB)) >= career_range)
         )  # Weighted ERA <= 3.00
@@ -3268,6 +3292,7 @@ def get_players_careerStatBatting_seasonBattingAVG(career_column, career_range, 
         db.session.query(
             Batting.playerID
         )
+        .filter(Batting.b_AB > 0)
         .filter((Batting.b_H /Batting.b_AB) >= season_range)
         .group_by(Batting.playerID)
         .subquery()
@@ -3304,6 +3329,7 @@ def get_players_careerStatPitching_seasonBattingAVG(career_column, career_range,
         db.session.query(
             Batting.playerID
         )
+        .filter(Batting.b_AB > 0)
         .filter((Batting.b_H /Batting.b_AB) >= season_range)
         .group_by(Batting.playerID)
         .subquery()
@@ -3471,6 +3497,7 @@ def get_players_draftPick_seasonBattingAVG(season_range):
         db.session.query(People.nameFirst, People.nameLast)
         .join(Batting, Batting.playerID == People.playerID)
         .join(Drafts, Drafts.playerID == People.playerID)
+        .filter(Batting.b_AB > 0)
         .filter((Batting.b_H / Batting.b_AB) >= season_range)
         .filter(Drafts.draft_round == 1)
         .group_by(People.playerID)

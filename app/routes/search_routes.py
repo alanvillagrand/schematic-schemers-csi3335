@@ -3277,6 +3277,17 @@ def get_players_draftPick_seasonStatPitching(season_column, season_range):
         .order_by(db.func.sum(Pitching.p_G).asc())
     )
 
+def get_players_draftPick_seasonPitchingERA():
+    return(
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Pitching, Pitching.playerID == People.playerID)
+        .join(Drafts, Drafts.playerID == People.playerID)
+        .filter(Pitching.p_ERA <= 3.00)
+        .filter(Drafts.draft_round == 1)
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Pitching.p_G).asc())
+    )
+
 def get_players_draftPick_seasonStatBatting(season_column, season_range):
     season_column1 = getattr(Batting, f"b_{season_column}")
     return(
@@ -3295,6 +3306,18 @@ def get_players_draftPick_seasonBattingAVG(season_range):
         .join(Batting, Batting.playerID == People.playerID)
         .join(Drafts, Drafts.playerID == People.playerID)
         .filter((Batting.b_H / Batting.b_AB) >= season_range)
+        .filter(Drafts.draft_round == 1)
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Batting.b_G).asc())
+    )
+
+def get_players_draftPick_seasonBatting3030():
+    return(
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Batting, Batting.playerID == People.playerID)
+        .join(Drafts, Drafts.playerID == People.playerID)
+        .filter(Batting.b_SB >= 30)
+        .filter(Batting.b_HR >= 30)
         .filter(Drafts.draft_round == 1)
         .group_by(People.playerID)
         .order_by(db.func.sum(Batting.b_G).asc())
@@ -3910,7 +3933,8 @@ def search_players():
         stat = option1_details if option1 == "seasonal statistic" else option2_details
         stat_range = request.form.get(f'dropdown2_{stat}_specific') if option1 == "dp" else request.form.get(
             f'dropdown1_{stat}_specific')
-        stat_range = convert_to_number(stat_range)
+        if stat != "ERA" and stat != "30+HR/30+SB":
+            stat_range = convert_to_number(stat_range)
 
         if stat in standard_seasonStatPitching:
             results = get_players_draftPick_seasonStatPitching(stat, stat_range)
@@ -3918,11 +3942,10 @@ def search_players():
             results = get_players_draftPick_seasonStatBatting(stat, stat_range)
         elif stat == "AVG":
             results = get_players_draftPick_seasonBattingAVG(stat_range)
-
-
-
-
-
+        elif stat == "ERA":
+            results = get_players_draftPick_seasonPitchingERA()
+        elif stat == "30+HR/30+SB":
+            results = get_players_draftPick_seasonBatting3030()
 
 
 

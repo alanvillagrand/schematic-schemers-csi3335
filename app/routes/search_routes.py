@@ -55,7 +55,8 @@ from app.services.immaculateGridQueries import get_players_team_team, get_player
     get_players_draftPick_hof, get_players_draftPick_allStar, get_players_draftPick_stdAward, \
     get_players_position_position, get_players_pob_position, get_players_country_position, \
     get_players_draftPick_country, get_players_draftPick_pob, get_players_draftPick_position, \
-    get_players_stdAward_position, get_players_hof_position, get_players_allstar_position
+    get_players_stdAward_position, get_players_hof_position, get_players_allstar_position, \
+    get_players_careerPitchingERA_team
 
 bp = Blueprint('search', __name__)
 
@@ -128,8 +129,8 @@ def search_players():
         team = option2_details if option1 == "career statistic" else option1_details
         stat_range = request.form.get(f'dropdown2_{career_stat}_specific') if option1 == "teams" else request.form.get(
             f'dropdown1_{career_stat}_specific')
-
-        stat_range = convert_to_number(stat_range)
+        if career_stat != "ERA":
+            stat_range = convert_to_number(stat_range)
 
         # Handling different career statistics based on user input
         if career_stat == "AVG":
@@ -137,8 +138,10 @@ def search_players():
         elif career_stat in standard_careerStatBatting:
             results = get_players_careerStatBatting_team(career_stat, team, stat_range)
         elif career_stat in standard_careerStatPitching:
-            print("Harrison Here")
             results = get_players_careerStatPitching_team(career_stat, team, stat_range)
+        elif career_stat == "ERA":
+            results = get_players_careerPitchingERA_team(team)
+
 
     elif (option1 == "teams" and option2 == "seasonal statistic") or (option1 == "seasonal statistic" and option2 == "teams"):
         if option1 == "teams":

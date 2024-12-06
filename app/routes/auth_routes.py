@@ -20,8 +20,8 @@ def login():
     if user and user.check_password(password):
         session['username'] = username
         return redirect(url_for('main.dashboard'))
-
-    return render_template('index.html', error="Invalid username or password")
+    else:
+        return render_template('index.html', error="Invalid username or password")
 
 
 @bp.route("/register", methods=["POST"])

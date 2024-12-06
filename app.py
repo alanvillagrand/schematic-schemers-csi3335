@@ -150,7 +150,6 @@ def search_players():
             message="No matching results found for your query."
         )
 
-
 #Logout
 @app.route("/logout")
 def logout():

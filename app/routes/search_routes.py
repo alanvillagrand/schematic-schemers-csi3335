@@ -333,6 +333,21 @@ def get_players_pob_position(position):
         .all()
     )
 
+def get_players_country_position(position, country):
+    # Construct the column name for the specified position (e.g., G_ss, G_1b)
+    position_column = f'G_{position.lower()}'
+
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Appearances, Appearances.playerID == People.playerID)
+        .filter(
+            People.birthCountry == country, getattr(Appearances, position_column) > 0 )
+        .group_by(People.playerID)  # Group by player ID to calculate total appearances
+        .order_by(func.sum(getattr(Appearances, position_column)))
+        .distinct()
+        .all()
+    )
+
 def get_players_draftPick_position(position):
     position_column = f'G_{position.lower()}'
 
@@ -3335,6 +3350,18 @@ def get_players_draftPick_allStar():
         .order_by(db.func.sum(AllStarFull.GP).asc())
     )
 
+def get_players_draftPick_stdAward(award):
+    return(
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Appearances, Appearances.playerID == People.playerID)
+        .join(Awards, Awards.playerID == People.playerID)
+        .join(Drafts, Drafts.playerID == People.playerID)
+        .filter(Awards.awardID == award)
+        .filter(Drafts.draft_round == 1)
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Appearances.G_all).asc())
+    )
+
 def get_players_draftPick_seasonStatPitching(season_column, season_range):
     season_column1 = getattr(Pitching, f"p_{season_column}")
     return(
@@ -3392,6 +3419,30 @@ def get_players_draftPick_seasonBatting3030():
         .group_by(People.playerID)
         .order_by(db.func.sum(Batting.b_G).asc())
     )
+
+def get_players_draftPick_pob():
+    return(
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Drafts, Drafts.playerID == People.playerID)
+        .join(Appearances, Appearances.playerID == People.playerID)
+        .filter(Drafts.draft_round == 1)
+        .filter(People.birthCountry != "USA")
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Appearances.G_all).asc())
+    )
+
+
+def get_players_draftPick_country(country):
+    return(
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Drafts, Drafts.playerID == People.playerID)
+        .join(Appearances, Appearances.playerID == People.playerID)
+        .filter(Drafts.draft_round == 1)
+        .filter(People.birthCountry == country)
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Appearances.G_all).asc())
+    )
+
 
 
 
@@ -4085,6 +4136,8 @@ def search_players():
             results = get_players_draftPick_hof()
         elif award == "All Star":
             results = get_players_draftPick_allStar()
+        elif award in standard_awards:
+            results = get_players_draftPick_stdAward(award)
 
 
     elif (option1 == "positions" and option2 == "positions"):
@@ -4094,11 +4147,23 @@ def search_players():
 
     elif (option1 == "pob" and option2 == "positions") or (option1 == "positions" and option2 == "pob"):
         position = option1_details if option1 == "positions" else option2_details
-        results = get_players_pob_position(position)
+        pob = option2_details if option1 == "positions" else option1_details
+        if pob == "Outside of USA":
+            results = get_players_pob_position(position)
+        else:
+            results = get_players_country_position(position, pob)
+
 
     elif (option1 == "dp" and option2 == "positions") or (option1 == "positions" and option2 == "dp"):
         position = option1_details if option1 == "positions" else option2_details
         results = get_players_draftPick_position(position)
+
+    elif (option1 == "dp" and option2 == "pob") or (option1 == "pob" and option2 == "dp"):
+        pob = option1_details if option1 == "pob" else option2_details
+        if pob == "Outside of USA":
+            results = get_players_draftPick_pob()
+        else:
+            results = get_players_draftPick_country(pob)
 
 
 

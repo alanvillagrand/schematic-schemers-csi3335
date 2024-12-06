@@ -789,6 +789,20 @@ def get_players_seasonStatBatting_pob(stat_column, stat_range):
         .all()
     )
 
+def get_players_seasonStatBatting_country(stat_column, stat_range, country):
+    batting_column = getattr(Batting, f"b_{stat_column}")
+
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Batting, Batting.playerID == People.playerID)
+        .filter(batting_column >= stat_range)
+        .filter(People.birthCountry == country)
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Batting.b_G).asc())
+        .distinct()
+        .all()
+    )
+
 def get_players_seasonStatPitching_pob(stat_column, stat_range):
     pitching_column = getattr(Pitching, f"p_{stat_column}")
 
@@ -803,6 +817,20 @@ def get_players_seasonStatPitching_pob(stat_column, stat_range):
         .all()
     )
 
+def get_players_seasonStatPitching_country(stat_column, stat_range, country):
+    pitching_column = getattr(Pitching, f"p_{stat_column}")
+
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Pitching, Pitching.playerID == People.playerID)
+        .filter(pitching_column >= stat_range)
+        .filter(People.birthCountry == country)
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Pitching.p_G).asc())
+        .distinct()
+        .all()
+    )
+
 def get_players_seasonPitchingERA_pob():
 
     return (
@@ -810,6 +838,19 @@ def get_players_seasonPitchingERA_pob():
         .join(Pitching, Pitching.playerID == People.playerID)
         .filter(Pitching.p_ERA <= 3.00)
         .filter(People.birthCountry != "USA")
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Pitching.p_G).asc())
+        .distinct()
+        .all()
+    )
+
+def get_players_seasonPitchingERA_country(country):
+
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Pitching, Pitching.playerID == People.playerID)
+        .filter(Pitching.p_ERA <= 3.00)
+        .filter(People.birthCountry == country)
         .group_by(People.playerID)
         .order_by(db.func.sum(Pitching.p_G).asc())
         .distinct()
@@ -830,6 +871,19 @@ def get_players_seasonBattingAVG_pob(stat_range):
         .all()
     )
 
+def get_players_seasonBattingAVG_country(stat_range, country):
+
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Batting, Batting.playerID == People.playerID)
+        .filter((Batting.b_H / Batting.b_AB) >= stat_range)
+        .filter(People.birthCountry == country)
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Batting.b_G).asc())
+        .distinct()
+        .all()
+    )
+
 
 def get_players_seasonBatting3030_pob():
 
@@ -839,6 +893,20 @@ def get_players_seasonBatting3030_pob():
         .filter(Batting.b_SB >= 30)
         .filter(Batting.b_HR >= 30)
         .filter(People.birthCountry != "USA")
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Batting.b_G).asc())
+        .distinct()
+        .all()
+    )
+
+def get_players_seasonBatting3030_country(country):
+
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Batting, Batting.playerID == People.playerID)
+        .filter(Batting.b_SB >= 30)
+        .filter(Batting.b_HR >= 30)
+        .filter(People.birthCountry == country)
         .group_by(People.playerID)
         .order_by(db.func.sum(Batting.b_G).asc())
         .distinct()
@@ -3810,22 +3878,33 @@ def search_players():
 
     elif (option1 == "seasonal statistic" and option2 == "pob") or (option1 == "pob" and option2 == "seasonal statistic"):
         stat = option1_details if option1 == "seasonal statistic" else option2_details
+        pob = option2_details if option1 == "seasonal statistic" else option1_details
         stat_range = request.form.get(f'dropdown2_{stat}_specific') if option1 == "pob" else request.form.get(
             f'dropdown1_{stat}_specific')
         if stat != "ERA" and stat != "30+HR/30+SB":
             stat_range = convert_to_number(stat_range)
 
-        if stat in standard_seasonStatBatting:
+        if stat in standard_seasonStatBatting and pob == "Outside of USA":
             results = get_players_seasonStatBatting_pob(stat, stat_range)
-        elif stat in standard_seasonStatPitching:
+        elif stat in standard_seasonStatPitching and pob == "Outside of USA":
             results = get_players_seasonStatPitching_pob(stat, stat_range)
-        elif stat == "ERA":
+        elif stat == "ERA" and pob == "Outside of USA":
             results = get_players_seasonPitchingERA_pob()
-        elif stat == "AVG":
+        elif stat == "AVG" and pob == "Outside of USA":
             results = get_players_seasonBattingAVG_pob(stat_range)
-        elif stat == "30+HR/30+SB":
+        elif stat == "30+HR/30+SB" and pob == "Outside of USA":
             results = get_players_seasonBatting3030_pob()
-        
+        elif stat in standard_seasonStatBatting and pob != "Outside of USA":
+            results = get_players_seasonStatBatting_country(stat, stat_range, pob)
+        elif stat in standard_seasonStatPitching and pob != "Outside of USA":
+            results = get_players_seasonStatPitching_country(stat, stat_range, pob)
+        elif stat == "AVG" and pob != "Outside of USA":
+            results = get_players_seasonBattingAVG_country(stat_range, pob)
+        elif stat == "ERA" and pob != "Outside of USA":
+            results = get_players_seasonPitchingERA_country(pob)
+        elif stat == "30+HR/30+SB" and pob != "Outside of USA":
+            results = get_players_seasonBatting3030_country(pob)
+
 
     elif (option1 == "seasonal statistic" and option2 == "dp") or (option1 == "dp" and option2 == "seasonal statistic"):
         stat = option1_details if option1 == "seasonal statistic" else option2_details

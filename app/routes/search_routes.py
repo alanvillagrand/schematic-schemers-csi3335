@@ -2,7 +2,7 @@ from flask import Blueprint, request, render_template
 from sqlalchemy import func
 
 from app.models import People, Batting, Teams, db, Fielding, Awards, HallOfFame, AllStarFull, Appearances, Pitching, \
-    SeriesPost, FieldingPost, BattingPost, Drafts
+    SeriesPost, FieldingPost, BattingPost, Drafts, AdvancedStats
 
 bp = Blueprint('search', __name__)
 
@@ -362,11 +362,37 @@ def get_players_pob_hof():
         .all()
     )
 
+def get_players_country_hof(country):
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Appearances, Appearances.playerID == People.playerID)
+        .join(HallOfFame, HallOfFame.playerID == People.playerID)
+        .filter(People.birthCountry == country)
+        .filter(HallOfFame.inducted == "Y")
+        .group_by(People.playerID)
+        .order_by(func.sum(Appearances.G_all).asc())
+        .distinct()
+        .all()
+    )
+
 def get_players_pob_allStar():
     return (
         db.session.query(People.nameFirst, People.nameLast)
         .join(AllStarFull, AllStarFull.playerID == People.playerID)
         .filter(People.birthCountry != 'USA')
+        .filter(AllStarFull.GP > 0)
+        .group_by(People.playerID)
+        .order_by(func.sum(AllStarFull.GP).asc())
+        .distinct()
+        .all()
+    )
+
+
+def get_players_country_allStar(country):
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(AllStarFull, AllStarFull.playerID == People.playerID)
+        .filter(People.birthCountry == country)
         .filter(AllStarFull.GP > 0)
         .group_by(People.playerID)
         .order_by(func.sum(AllStarFull.GP).asc())
@@ -380,6 +406,21 @@ def get_players_pob_stdAward(award):
         .join(Appearances, Appearances.playerID == People.playerID)
         .join(Awards, Awards.playerID == People.playerID)
         .filter(People.birthCountry != 'USA')
+        .filter(Awards.awardID == award)
+        .group_by(People.playerID)
+        .order_by(func.sum(Appearances.G_all).asc())
+        .distinct()
+        .all()
+
+    )
+
+
+def get_players_country_stdAward(award, country):
+    return(
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Appearances, Appearances.playerID == People.playerID)
+        .join(Awards, Awards.playerID == People.playerID)
+        .filter(People.birthCountry == country)
         .filter(Awards.awardID == award)
         .group_by(People.playerID)
         .order_by(func.sum(Appearances.G_all).asc())
@@ -522,6 +563,35 @@ def get_players_seasonBattingAVG_hof(stat_range):
         .filter(HallOfFame.inducted == 'Y')
         .group_by(People.playerID)
         .order_by(db.func.sum(Batting.b_G).asc())
+        .distinct()
+        .all()
+    )
+
+def get_players_seasonWAR_hof(stat_range):
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Batting, Batting.playerID == People.playerID)
+        .join(HallOfFame, HallOfFame.playerID == People.playerID)
+        .join(AdvancedStats, AdvancedStats.playerID == People.playerID)
+        .filter(AdvancedStats.WAR162 >= stat_range)
+        .filter(HallOfFame.inducted == 'Y')
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Batting.b_G).asc())
+        .distinct()
+        .all()
+    )
+
+def get_players_seasonWAR_position(stat_range, position):
+    position_column = f'G_{position.lower()}'
+
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Appearances, Appearances.playerID == People.playerID)
+        .join(AdvancedStats, AdvancedStats.playerID == People.playerID)
+        .filter(AdvancedStats.bwar162 >= stat_range)
+        .filter(getattr(Appearances, position_column) > 0)
+        .group_by(People.playerID)
+        .order_by(func.sum(getattr(Appearances, position_column)))
         .distinct()
         .all()
     )
@@ -3867,6 +3937,8 @@ def search_players():
             results = get_players_seasonBatting3030_hof()
         elif stat == "30+HR/30+SB" and award == "All Star":
             results = get_players_seasonBatting3030_allStar()
+        elif stat == "WAR" and award == "Hall of Fame":
+            results = get_players_seasonWAR_hof(stat_range)
 
 
 
@@ -3897,6 +3969,8 @@ def search_players():
 
         elif stat == "30+HR/30+SB":
             results = get_players_seasonBatting3030_position(position)
+        elif stat == "WAR":
+            results = get_players_seasonWAR_position(stat_range, position)
 
 
     elif (option1 == "seasonal statistic" and option2 == "pob") or (option1 == "pob" and option2 == "seasonal statistic"):
@@ -3952,14 +4026,14 @@ def search_players():
     elif option1 == "awards" and option2 == "awards":
         if option1_details in standard_awards and option2_details in standard_awards:
             results = get_players_stdAward_stdAward(option1_details, option2_details)
-        if (option1_details == "All Star" and option2_details == "Hall of Fame") or (option1_details == "Hall of Fame" and option2_details == "All Star"):
+        elif (option1_details == "All Star" and option2_details == "Hall of Fame") or (option1_details == "Hall of Fame" and option2_details == "All Star"):
             results = get_players_allStar_hof()
-        if (option1_details == "Hall of Fame" and option2_details in standard_awards) or (option1_details in standard_awards and option2_details == "Hall of Fame"):
+        elif (option1_details == "Hall of Fame" and option2_details in standard_awards) or (option1_details in standard_awards and option2_details == "Hall of Fame"):
             if option1_details in standard_awards:
                 results = get_players_hof_stdAward(option1_details)
             else:
                 results = get_players_hof_stdAward(option2_details)
-        if (option1_details == "All Star" and option2_details in standard_awards) or (option1_details in standard_awards and option2_details == "All Star"):
+        elif (option1_details == "All Star" and option2_details in standard_awards) or (option1_details in standard_awards and option2_details == "All Star"):
             if option1_details in standard_awards:
                 results= get_players_allStar_stdAward(option1_details)
             else:
@@ -3985,15 +4059,25 @@ def search_players():
 
     elif (option1 == "pob" and option2 == "awards") or (option1 == "awards" and option2 == "pob"):
         award = option1_details if option1 == "awards" else option2_details
+        pob = option2_details if option1 == "awards" else option1_details
 
-        if award == "Hall of Fame":
+        if award == "Hall of Fame" and pob == "Outside of USA":
             results = get_players_pob_hof()
 
-        if award == "All Star":
+        elif award == "All Star" and pob == "Outside of USA":
             results = get_players_pob_allStar()
 
-        if award in standard_awards:
+        elif award in standard_awards and pob == "Outside of USA":
             results = get_players_pob_stdAward(award)
+
+        elif award in standard_awards and pob != "Outside of USA":
+            results = get_players_country_stdAward(award, pob)
+
+        elif award == "Hall of Fame" and pob != "Outside of USA":
+            results = get_players_country_hof(pob)
+
+        elif award == "All Star" and pob != "Outside of USA":
+            results = get_players_country_allStar(pob)
 
     elif (option1 == "dp" and option2 == "awards") or (option1 == "awards" and option2 == "dp"):
         award = option1_details if option1 == "awards" else option2_details

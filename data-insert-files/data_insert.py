@@ -1,7 +1,11 @@
 import pandas as pd
 import pymysql
-import csi3335f2024 as cfg
 import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'data-insert-files')))
+import csi3335f2024 as cfg
+
+file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
 # Separate function for people table since it requires more specific parameters
 def insert_csv_to_db_people(con, csv_file_path, table_name, columns, ignoreColumns):
@@ -330,3 +334,18 @@ if arg == 'Drafts' or arg == 'all':
     ignoreColumns = ['id','name_first','name_last','name_given','team_name','school_name','birth_date','birth_city','birth_country','birth_state','weight','birth_year','birth_month','birth_day']
     insert_csv_to_db_everything(con, file, table, columns, ignoreColumns)
 
+# CareerWAR
+if arg == 'CareerWar' or arg == 'all':
+    file = file_path + 'additional_data/WAR/career_war.csv'
+    table = 'CareerWar'
+    columns = ['war', 'playerID']
+    ignoreColumns = ['Rk','Player']
+    insert_csv_to_db_everything(con, file, table, columns, ignoreColumns)
+
+# SeasonWAR
+if arg == 'SeasonWar' or arg == 'all':
+    file = 'additional_data/WAR/season_war.csv'
+    table = 'CareerWar'
+    columns = ['war', 'yearID', 'playerID']
+    ignoreColumns = ['Rk','Player']
+    insert_csv_to_db_everything(con, file, table, columns, ignoreColumns)

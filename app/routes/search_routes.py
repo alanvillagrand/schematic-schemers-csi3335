@@ -817,6 +817,35 @@ def get_players_seasonPitchingERA_pob():
     )
 
 
+def get_players_seasonBattingAVG_pob(stat_range):
+
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Batting, Batting.playerID == People.playerID)
+        .filter((Batting.b_H / Batting.b_AB) >= stat_range)
+        .filter(People.birthCountry != "USA")
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Batting.b_G).asc())
+        .distinct()
+        .all()
+    )
+
+
+def get_players_seasonBatting3030_pob():
+
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Batting, Batting.playerID == People.playerID)
+        .filter(Batting.b_SB >= 30)
+        .filter(Batting.b_HR >= 30)
+        .filter(People.birthCountry != "USA")
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Batting.b_G).asc())
+        .distinct()
+        .all()
+    )
+
+
 def get_players_careerBattingAVG_team(stat_range, team):
     # Subquery: Get player IDs of players who played at least one game for the given team
     played_for_team = (
@@ -3783,7 +3812,7 @@ def search_players():
         stat = option1_details if option1 == "seasonal statistic" else option2_details
         stat_range = request.form.get(f'dropdown2_{stat}_specific') if option1 == "pob" else request.form.get(
             f'dropdown1_{stat}_specific')
-        if stat != "ERA":
+        if stat != "ERA" and stat != "30+HR/30+SB":
             stat_range = convert_to_number(stat_range)
 
         if stat in standard_seasonStatBatting:
@@ -3792,6 +3821,11 @@ def search_players():
             results = get_players_seasonStatPitching_pob(stat, stat_range)
         elif stat == "ERA":
             results = get_players_seasonPitchingERA_pob()
+        elif stat == "AVG":
+            results = get_players_seasonBattingAVG_pob(stat_range)
+        elif stat == "30+HR/30+SB":
+            results = get_players_seasonBatting3030_pob()
+        
 
     elif (option1 == "seasonal statistic" and option2 == "dp") or (option1 == "dp" and option2 == "seasonal statistic"):
         stat = option1_details if option1 == "seasonal statistic" else option2_details

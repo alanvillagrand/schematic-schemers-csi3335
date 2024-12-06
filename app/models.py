@@ -4,10 +4,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
-    password_hash = db.Column(db.String(255), nullable=False)
+    password_hash = db.Column(db.String(150), nullable=False)
 
     def set_password(self, password):
-        self.password_hash = generate_password_hash(password, method='scrypt')
+        self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
@@ -127,6 +127,16 @@ class Awards(db.Model):
     tie = db.Column(db.String(1))
     notes = db.Column(db.String(100))
 
+class Drafts(db.Model):
+    __tablename__ = 'drafts'  # Table name in your database
+
+    draft_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    playerID = db.Column(db.String(9), db.ForeignKey('people.playerID'), nullable=False)
+    yearID = db.Column(db.SmallInteger)
+    draft_round = db.Column(db.SmallInteger)
+    draft_pick = db.Column(db.SmallInteger)
+
+
 class Fielding(db.Model):
     __tablename__ = 'fielding'  # Table name in your database
 
@@ -209,12 +219,12 @@ class Appearances(db.Model):
 
 
 class Pitching(db.Model):
-    __tablename__ = "pitching"
+    __tablename__ = 'pitching'
 
-    pitching_ID = db.Column(db.Integer, primary_key=True, autoincrement=True, nullable=False)
-    playerID = db.Column(db.String(9), db.ForeignKey('people.playerID'), nullable=False)
+    pitching_ID = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    playerID = db.Column(db.String(9), nullable=False, index=True)
     yearID = db.Column(db.SmallInteger, nullable=False)
-    teamID = db.Column(db.String(3), db.ForeignKey('teams.teamID'), nullable=False)
+    teamID = db.Column(db.CHAR(3), nullable=False, index=True)
     stint = db.Column(db.SmallInteger, nullable=False)
     p_W = db.Column(db.SmallInteger, nullable=True)
     p_L = db.Column(db.SmallInteger, nullable=True)
@@ -302,6 +312,87 @@ class BattingPost(db.Model):
     b_SF = db.Column(db.SmallInteger, nullable=True)  # Sacrifice flies
     b_GIDP = db.Column(db.SmallInteger, nullable=True)  # Grounded into double plays
 
+
+class AdvancedStats(db.Model):
+    __tablename__ = 'advanced_stats'
+
+    advanced_stats_ID = db.Column(db.BigInteger, primary_key=True)
+    playerID = db.Column(db.Text, nullable=True)
+    yearID = db.Column(db.BigInteger, nullable=True)
+    teamID = db.Column(db.Text, nullable=True)
+    stint = db.Column(db.BigInteger, nullable=True)
+    is_P = db.Column(db.Text, nullable=True)
+    sched = db.Column(db.BigInteger, nullable=True)
+    g_bat = db.Column(db.BigInteger, nullable=True)
+    pa = db.Column(db.BigInteger, nullable=True)
+    bat162 = db.Column(db.Float, nullable=True)
+    bsr162 = db.Column(db.Float, nullable=True)
+    fld162 = db.Column(db.Float, nullable=True)
+    pos162 = db.Column(db.Float, nullable=True)
+    def162 = db.Column(db.Float, nullable=True)
+    rep162 = db.Column(db.Float, nullable=True)
+    bwar162 = db.Column(db.Float, nullable=True)
+    BB_plus = db.Column(db.Float, nullable=True)
+    K_plus = db.Column(db.Float, nullable=True)
+    AVG_plus = db.Column(db.Float, nullable=True)
+    OBP_plus = db.Column(db.Float, nullable=True)
+    SLG_plus = db.Column(db.Float, nullable=True)
+    wRC_plus = db.Column(db.Float, nullable=True)
+    ISO_plus = db.Column(db.Float, nullable=True)
+    BABIP_plus = db.Column(db.Float, nullable=True)
+    LD_plus = db.Column(db.Float, nullable=True)
+    GB_plus = db.Column(db.Float, nullable=True)
+    FB_plus = db.Column(db.Float, nullable=True)
+    Pull_plus = db.Column(db.Float, nullable=True)
+    Cent_plus = db.Column(db.Float, nullable=True)
+    Oppo_plus = db.Column(db.Float, nullable=True)
+    g_pitch = db.Column(db.Float, nullable=True)
+    starts = db.Column(db.Float, nullable=True)
+    innings = db.Column(db.Float, nullable=True)
+    relief_pct = db.Column(db.Float, nullable=True)
+    avg_LI = db.Column(db.Float, nullable=True)
+    br_pwar162 = db.Column(db.Float, nullable=True)
+    fg_pwar162 = db.Column(db.Float, nullable=True)
+    ra9_pwar162 = db.Column(db.Float, nullable=True)
+    pwar162 = db.Column(db.Float, nullable=True)
+    K9_plus = db.Column(db.Float, nullable=True)
+    BB9_plus = db.Column(db.Float, nullable=True)
+    KBB_plus = db.Column(db.Float, nullable=True)
+    HR9_plus = db.Column(db.Float, nullable=True)
+    Kpct_plus = db.Column(db.Float, nullable=True)
+    BBpct_plus = db.Column(db.Float, nullable=True)
+    oppAVG_plus = db.Column(db.Float, nullable=True)
+    WHIP_plus = db.Column(db.Float, nullable=True)
+    oppBABIP_plus = db.Column(db.Float, nullable=True)
+    LOB_plus = db.Column(db.Float, nullable=True)
+    ERA_minus = db.Column(db.Float, nullable=True)
+    FIP_minus = db.Column(db.Float, nullable=True)
+    xFIP_minus = db.Column(db.Float, nullable=True)
+    oppLD_plus = db.Column(db.Float, nullable=True)
+    oppGB_plus = db.Column(db.Float, nullable=True)
+    oppFB_plus = db.Column(db.Float, nullable=True)
+    pct_PT = db.Column(db.Float, nullable=True)
+    WAR162 = db.Column(db.Float, nullable=True)
+    gms_P = db.Column(db.Float, nullable=True)
+    gms_C = db.Column(db.Float, nullable=True)
+    gms_1B = db.Column(db.Float, nullable=True)
+    gms_2B = db.Column(db.Float, nullable=True)
+    gms_3B = db.Column(db.Float, nullable=True)
+    gms_SS = db.Column(db.Float, nullable=True)
+    gms_LF = db.Column(db.Float, nullable=True)
+    gms_CF = db.Column(db.Float, nullable=True)
+    gms_RF = db.Column(db.Float, nullable=True)
+    gms_OF = db.Column(db.Float, nullable=True)
+    gms_DH = db.Column(db.Float, nullable=True)
+    gms_PH = db.Column(db.Float, nullable=True)
+    gms_PR = db.Column(db.Float, nullable=True)
+    prev_tm = db.Column(db.Text, nullable=True)
+    arrived = db.Column(db.BigInteger, nullable=True)
+    departed = db.Column(db.BigInteger, nullable=True)
+    next_tm = db.Column(db.Text, nullable=True)
+    salary = db.Column(db.Float, nullable=True)
+
+
 class LeagueStats(db.Model):
     __tablename__ = 'league_stats'
 
@@ -352,25 +443,6 @@ class LeagueStats(db.Model):
     w3B = db.Column(db.Double, nullable=True)
     wHR = db.Column(db.Double, nullable=True)
 
-class AdvancedStats(db.Model):
-    __tablename__ = 'advanced_stats'
-
-    batting_advanced_ID = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    playerID = db.Column(db.String(9), db.ForeignKey('people.playerID'), nullable=False)
-    yearID = db.Column(db.SmallInteger, nullable=False)
-    teamID = db.Column(db.String(3), db.ForeignKey('teams.teamID'), nullable=False)
-    stint = db.Column(db.SmallInteger, nullable=False)
-    bat162 = db.Column(db.Double, nullable=True)
-    bsr162 = db.Column(db.Double, nullable=True)
-    fld162 = db.Column(db.Double, nullable=True)
-    pos162 = db.Column(db.Double, nullable=True)
-    def162 = db.Column(db.Double, nullable=True)
-    ref162 = db.Column(db.Double, nullable=True)
-    rep162 = db.Column(db.Double, nullable=True)
-    bwar162 = db.Column(db.Double, nullable=True)
-    br_pwar162 = db.Column(db.Double, nullable=True)
-    wRC_plus = db.Column(db.Double, nullable=True)
-    WAR162 = db.Column(db.Double, nullable=True)
 
 class ImmaculateGridTeams(db.Model):
     __tablename__ = 'immaculategridteams'
@@ -380,3 +452,5 @@ class ImmaculateGridTeams(db.Model):
     team_name = db.Column(db.String(50), nullable=False)
     startYear = db.Column(db.SmallInteger, nullable=False)
     endYear = db.Column(db.SmallInteger, nullable=False)
+
+

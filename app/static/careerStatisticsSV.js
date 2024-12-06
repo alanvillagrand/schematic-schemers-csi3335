@@ -1,0 +1,3 @@
+const careerStatisticsSV = [
+    "300+"
+]

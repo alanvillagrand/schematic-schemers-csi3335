@@ -392,3 +392,65 @@ class AdvancedStats(db.Model):
     next_tm = db.Column(db.Text, nullable=True)
     salary = db.Column(db.Float, nullable=True)
 
+
+class LeagueStats(db.Model):
+    __tablename__ = 'league_stats'
+
+    league_stats_id = db.Column(db.BigInteger, primary_key=True)
+    yearID = db.Column(db.SmallInteger, nullable=False)
+    TG = db.Column(db.BigInteger, nullable=True)
+    W = db.Column(db.BigInteger, nullable=True)
+    L = db.Column(db.BigInteger, nullable=True)
+    G = db.Column(db.BigInteger, nullable=True)
+    PA = db.Column(db.BigInteger, nullable=True)
+    HR = db.Column(db.BigInteger, nullable=True)
+    R = db.Column(db.BigInteger, nullable=True)
+    RBI = db.Column(db.BigInteger, nullable=True)
+    SB = db.Column(db.Double, nullable=True)
+    BB_percent = db.Column(db.Text, nullable=True)
+    K_percent = db.Column(db.Text, nullable=True)
+    ISO = db.Column(db.Double, nullable=True)
+    BABIP = db.Column(db.Double, nullable=True)
+    AVG = db.Column(db.Double, nullable=True)
+    OBP = db.Column(db.Double, nullable=True)
+    SLG = db.Column(db.Double, nullable=True)
+    wOBA = db.Column(db.Double, nullable=True)
+    wOBA_scale = db.Column(db.Double, nullable=True)
+    GDP = db.Column(db.BigInteger, nullable=True)
+    xwOBA = db.Column(db.Double, nullable=True)
+    wRC_plus = db.Column(db.BigInteger, nullable=True)
+    BsR = db.Column(db.Double, nullable=True)
+    Off = db.Column(db.Double, nullable=True)
+    Def = db.Column(db.Double, nullable=True)
+    WAR = db.Column(db.Double, nullable=True)
+    IP = db.Column(db.Double, nullable=True)
+    runSB = db.Column(db.Double, nullable=True)
+    runCS = db.Column(db.Double, nullable=True)
+    b_1B = db.Column(db.BigInteger, nullable=True)
+    b_2B = db.Column(db.BigInteger, nullable=True)
+    b_3B = db.Column(db.BigInteger, nullable=True)
+    BB = db.Column(db.BigInteger, nullable=True)
+    IBB = db.Column(db.Double, nullable=True)
+    HBP = db.Column(db.Double, nullable=True)
+    CS = db.Column(db.Double, nullable=True)
+    AB = db.Column(db.BigInteger, nullable=True)
+    SO = db.Column(db.BigInteger, nullable=True)
+    SF = db.Column(db.BigInteger, nullable=True)
+    wBB = db.Column(db.Double, nullable=True)
+    wHBP = db.Column(db.Double, nullable=True)
+    w1B = db.Column(db.Double, nullable=True)
+    w2B = db.Column(db.Double, nullable=True)
+    w3B = db.Column(db.Double, nullable=True)
+    wHR = db.Column(db.Double, nullable=True)
+
+
+class ImmaculateGridTeams(db.Model):
+    __tablename__ = 'immaculategridteams'
+
+    ig_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    ig_team_name = db.Column(db.String(50), nullable=False)
+    team_name = db.Column(db.String(50), nullable=False)
+    startYear = db.Column(db.SmallInteger, nullable=False)
+    endYear = db.Column(db.SmallInteger, nullable=False)
+
+

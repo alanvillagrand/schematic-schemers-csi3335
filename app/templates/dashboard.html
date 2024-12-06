@@ -17,6 +17,7 @@
                     <option value="awards">Awards</option>
                     <option value="positions">Positions</option>
                     <option value="pob">Place of Birth</option>
+                    <option value="dp">Draft Pick</option>
                 </select>
                 <div id="dynamicOptions1" class="dynamic-options"></div>
             </div>
@@ -31,6 +32,7 @@
                     <option value="awards">Awards</option>
                     <option value="positions">Positions</option>
                     <option value="pob">Place of Birth</option>
+                    <option value="dp">Draft Pick</option>
                 </select>
                 <div id="dynamicOptions2" class="dynamic-options"></div>
             </div>
@@ -74,6 +76,9 @@
                 createDropdown(dynamicOptionsDiv, placeOfBirth, `${dropdownId}_details`, "Select a Place of Birth")
 
             }
+            else if (dropdownValue === "dp"){
+                createDropdown(dynamicOptionsDiv, draftPick, `${dropdownId}_details`, "Select a Draft Round")
+            }
         }
 
         function createCareerStatsOptions(container, dropdownId) {
@@ -110,27 +115,20 @@
 
                 // Based on selected stat, generate the specific ranges
                 let statOptions = [];
-                if (selectedStat === 'HR') {
+                if (selectedStat === "HR") {
                     statOptions = careerStatisticsHR;
                 } else if (selectedStat === "W") {
                     statOptions = careerStatisticsWin;
-                } else if (selectedStat === "RBI") {
-                    statOptions = seasonalStatisticsRBI;
-                } else if (selectedStat === "R") {
-                    statOptions = seasonalStatisticsRun
                 } else if (selectedStat === "H") {
                     statOptions = careerStatisticsHits
-                } else if (selectedStat === "SB") {
-                    statOptions = seasonalStatisticsSB
                 } else if (selectedStat === "SV") {
                     statOptions = seasonalStatisticsSV
                 } else if (selectedStat === "AVG") {
                     statOptions = careerStatisticsAVG
                 } else if (selectedStat === "SO") {
                     statOptions = careerStatisticsSO
-                } else if (selectedStat === "30+HR/30+SB") {
-                    statOptions = seasonalStatistics3030
-
+                } else if (selectedStat === "ERA"){
+                    statOptions = careerStatisticsERA
                 }
 
                 // Create dropdown for the selected stat's range options
@@ -179,7 +177,7 @@
 
                 // Based on selected stat, generate the specific ranges
                 let statOptions = [];
-                if (selectedStat === 'HR') {
+                if (selectedStat === "HR") {
                     statOptions = seasonalStatisticsHR;
                 } else if (selectedStat === "W") {
                     statOptions = seasonalStatisticsWin;
@@ -199,7 +197,8 @@
                     statOptions = seasonalStatisticsSO
                 } else if (selectedStat === "30+HR/30+SB") {
                     statOptions = seasonalStatistics3030
-
+                } else if (selectedStat === "ERA"){
+                    statOptions= seasonalStatisticsERA
                 }
 
                 // Create dropdown for the selected stat's range options
@@ -259,6 +258,9 @@
     <script src="{{ url_for('static', filename='careerStatisticsWin.js') }}"></script>
     <script src="{{ url_for('static', filename='careerStatisticsHits.js') }}"></script>
     <script src="{{ url_for('static', filename='careerStatisticsAVG.js') }}"></script>
+    <script src="{{ url_for('static', filename='draftPick.js') }}"></script>
+    <script src="{{ url_for('static', filename='careerStatisticsERA.js') }}"></script>
+    <script src="{{ url_for('static', filename='seasonalStatisticsERA.js') }}"></script>
 
 
     <!-- CSS for Dynamic Dropdowns -->

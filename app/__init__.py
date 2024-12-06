@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+import csi3335f2024 as cfg
 
 db = SQLAlchemy()
 
@@ -8,7 +9,8 @@ def create_app():
     app.secret_key = "secret"
 
     # Config
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:Ninja123!@localhost/baseball'
+    app.config['SQLALCHEMY_DATABASE_URI'] = (f'mysql+pymysql://{cfg.mysql['user']}:{cfg.mysql['password']}@'
+                                             f'{cfg.mysql['host']}/{cfg.mysql['database']}')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     db.init_app(app)

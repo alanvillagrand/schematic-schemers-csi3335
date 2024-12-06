@@ -1,6 +1,6 @@
-from app.models import Teams, Batting, People, Pitching
-from sqlalchemy import func, literal, desc
-from sqlalchemy.sql import text
+from app.models import Teams, Batting, People, Pitching, LeagueStats, Fielding, AdvancedStats
+from sqlalchemy import func, literal, desc, select, and_, case
+from sqlalchemy.sql import over
 from datetime import datetime
 from app import db
 
@@ -43,15 +43,77 @@ def calculate_SLG():
     return (calculate_1B() + 2*Batting.b_2B + 3*Batting.b_3B + 4*Batting.b_HR) / Batting.b_AB
 
 # Weighted on-base average
-# I'm assuming that BB-IBB is the same as uBB
 def calculate_wOBA():
-    return (.69*(Batting.b_BB - Batting.b_IBB) + .72*Batting.b_HBP + .89*calculate_1B() + 1.27*Batting.b_2B + 1.62*Batting.b_3B + 2.10*Batting.b_HR) \
-    / (Batting.b_AB + Batting.b_BB - Batting.b_IBB + Batting.b_SF + Batting.b_HBP)
+    return (LeagueStats.wBB*(Batting.b_BB - Batting.b_IBB) + LeagueStats.wHBP*Batting.b_HBP + LeagueStats.w1B*calculate_1B()\
+             + LeagueStats.w2B*Batting.b_2B + LeagueStats.w3B*Batting.b_3B + LeagueStats.wHR*Batting.b_HR) \
+             / (Batting.b_AB + Batting.b_BB - Batting.b_IBB + Batting.b_SF + Batting.b_HBP)
+
+def calculate_wRC_plus():
+    wRAA = ((calculate_wOBA() - LeagueStats.wOBA) / LeagueStats.wOBA_scale) * calculate_PA()
+    return (((wRAA/calculate_PA() + LeagueStats.R/LeagueStats.PA) + (LeagueStats.R/LeagueStats.PA)))
+
+def calculate_BsR():
+    # Can't find GDP rate anywhere so using 10% as it seems to be the average
+    lgGDPo = LeagueStats.GDP / 0.10
+    GDPo = Batting.b_GIDP / 0.13
+    lgRPO = LeagueStats.R / (3*LeagueStats.IP)
+    wGDP =  (((LeagueStats.GDP / lgGDPo) * GDPo) - Batting.b_GIDP) * lgRPO
+    lgwSB = (LeagueStats.SB * LeagueStats.runSB + LeagueStats.CS * LeagueStats.runCS) \
+        / (LeagueStats.b_1B + LeagueStats.BB + LeagueStats.HBP - LeagueStats.IBB)
+    wSB = ((Batting.b_SB * LeagueStats.runSB) + (Batting.b_CS * LeagueStats.runCS)) \
+        - (lgwSB * (calculate_1B() + Batting.b_BB + Batting.b_HBP - Batting.b_IBB))
+    return wGDP + wSB
+
+# Wins above replacement
+def calculate_WAR(innings_played, position_multiplier):
+    wRAA = ((calculate_wOBA() - LeagueStats.wOBA) / LeagueStats.wOBA_scale) * calculate_PA()
+    BSR = calculate_BsR()
+    Rpos = (innings_played * position_multiplier) / 1350
+
+    RPW = ((9 * (LeagueStats.R / LeagueStats.IP)) * 1.5) + 3
+    RLR = ((0.235 * LeagueStats.W) * RPW * calculate_PA()) / LeagueStats.PA
+
+    return (wRAA + BSR + Rpos + RLR) / RPW
 
 def get_team_info(team_name, year):
     return Teams.query.filter_by(team_name=team_name, yearID=year).first()
 
 def get_batting_info(team_name, year):
+    fielding_subquery = (
+        db.session.query(Fielding.playerID, Fielding.yearID, Fielding.f_InnOuts, Fielding.position)
+        .filter(Fielding.yearID == year)
+        .group_by(Fielding.playerID)
+        .subquery()
+    )
+
+    advanced_stats_subquery = (
+        db.session.query(AdvancedStats.playerID,
+                         AdvancedStats.yearID,
+                         AdvancedStats.bat162,
+                         AdvancedStats.bsr162,
+                         AdvancedStats.bwar162,
+                         AdvancedStats.def162,
+                         AdvancedStats.wRC_plus)
+        .filter(AdvancedStats.yearID == year)
+        .group_by(AdvancedStats.playerID)
+        .subquery()
+    )
+
+    # Get position of player
+    position_multplier = case(
+        (fielding_subquery.c.position == "SS", 7),
+        (fielding_subquery.c.position == "2B", 3),
+        (fielding_subquery.c.position == "OF", 0),
+        (fielding_subquery.c.position == "C", 9),
+        (fielding_subquery.c.position == "1B", -9.5),
+        (fielding_subquery.c.position == "3B", 2),
+        (fielding_subquery.c.position == "P", 0),
+        (fielding_subquery.c.position == "LF", -7),
+        (fielding_subquery.c.position == "RF", -7),
+        (fielding_subquery.c.position == "CF", 2.5),
+        else_=0
+    )
+
     date = datetime.strptime(year + "-06-30", "%Y-%m-%d")
     results = (
         db.session.query(
@@ -69,16 +131,23 @@ def get_batting_info(team_name, year):
             func.round(calculate_OBP(), 3),
             func.round(calculate_SLG(), 3),
             func.round(calculate_wOBA(), 3),
-            0, # wRC+
-            0, # BsR
-            0, # Off
-            0, # Def
-            0 # WAR
+            func.round(advanced_stats_subquery.c.wRC_plus),
+            # func.round(advanced_stats_subquery.c.bsr162, 2), # BsR
+            # func.round(advanced_stats_subquery.c.bat162 + advanced_stats_subquery.c.bsr162, 1), # Off
+            # func.round(advanced_stats_subquery.c.def162, 1), # Def
+            func.round(advanced_stats_subquery.c.bwar162, 2).label('WAR')
         )
         .join(Batting, Batting.playerID == People.playerID)
+        .join(fielding_subquery, and_(
+            Batting.playerID == fielding_subquery.c.playerID,
+            Batting.yearID == fielding_subquery.c.yearID))
+        .join(advanced_stats_subquery, and_(
+            Batting.playerID == advanced_stats_subquery.c.playerID,
+            Batting.yearID == advanced_stats_subquery.c.yearID))
         .join(Teams, (Batting.teamID == Teams.teamID) & (Batting.yearID == Teams.yearID))
+        .join(LeagueStats, Batting.yearID == LeagueStats.yearID)
         .filter(Teams.team_name == team_name, Batting.yearID == year)
-        .order_by(desc(Batting.b_G))
+        .order_by(desc('WAR'))
         .all()
     )
     return results
@@ -115,6 +184,16 @@ def calculate_FIP():
     return ((13*Pitching.p_HR) + (3*(Pitching.p_BB + Pitching.p_HBP)) - (2*Pitching.p_SO)) / calculate_IP() + constant
 
 def get_pitching_info(team_name, year):
+    advanced_stats_subquery = (
+        db.session.query(AdvancedStats.playerID,
+                         AdvancedStats.yearID,
+                         AdvancedStats.br_pwar162
+        )
+        .filter(AdvancedStats.yearID == year)
+        .group_by(AdvancedStats.playerID)
+        .subquery()
+    )
+
     date = datetime.strptime(year + "-06-30", "%Y-%m-%d")
     results = (
         db.session.query(
@@ -127,17 +206,212 @@ def get_pitching_info(team_name, year):
             func.round(calculate_HR9(), 2),
             func.round(calculate_BABIP_pitching(), 3),
             func.concat(func.round(calculate_LOB_percentage(), 1), literal('%')),
-            0, # GB%
-            0, # HR/FB
+            # 0, # GB%
+            # 0, # HR/FB
             Pitching.p_ERA,
             func.round(calculate_FIP(), 2),
-            0, # xFIP
-            0 # WAR
+            # 0, # xFIP
+            func.round(advanced_stats_subquery.c.br_pwar162, 2).label('WAR') # WAR
 
         )
         .join(Pitching, Pitching.playerID == People.playerID)
+        .join(advanced_stats_subquery, and_(
+            Pitching.playerID == advanced_stats_subquery.c.playerID,
+            Pitching.yearID == advanced_stats_subquery.c.yearID))
         .join(Teams, (Pitching.teamID == Teams.teamID) & (Pitching.yearID == Teams.yearID))
         .filter(Teams.team_name == team_name, Pitching.yearID == year)
+        .order_by(desc('WAR'))
         .all()
     )
     return results
+
+def get_batting_position_info_playing_time(position, team_name, year):
+    subquery = func.sum(Fielding.f_InnOuts).over(
+        partition_by=Fielding.position
+    ).label("total_outs")
+
+    playing_time = func.round((Fielding.f_InnOuts * 100.0 / subquery), 2)
+
+    results = (
+        db.session.query(
+            func.concat(People.nameFirst, ' ', People.nameLast).label('name'),
+            playing_time.label('playing_time'),
+            (func.concat(func.round(playing_time, 2), '%')).label('statistic')
+        )
+        .join(Fielding, Fielding.playerID == People.playerID)
+        .join(Teams, (Fielding.teamID == Teams.teamID) & (Fielding.yearID == Teams.yearID))
+        .filter(Teams.team_name == team_name, Fielding.yearID == year, Fielding.position == position)
+        .order_by(desc('playing_time'))
+        .all()
+    )
+    return [{"name": row.name, "statistic": row.statistic} for row in results]
+
+# def get_batting_position_info_PA(position, team_name, year):
+#     fielding_subquery = (
+#         db.session.query(Fielding.playerID, Fielding.yearID, Fielding.position)
+#         .filter(Fielding.yearID == year)
+#         .group_by(Fielding.playerID)
+#         .subquery()
+#     )
+
+#     results = (
+#         db.session.query(
+#             func.concat(People.nameFirst, ' ', People.nameLast).label('name'),
+#             calculate_PA().label('statistic')
+#         )
+#         .join(Batting, Batting.playerID == People.playerID)
+#         .join(fielding_subquery, and_(
+#             Batting.playerID == fielding_subquery.c.playerID,
+#             Batting.yearID == fielding_subquery.c.yearID))
+#         .join(Teams, (Batting.teamID == Teams.teamID) & (Batting.yearID == Teams.yearID))
+#         .filter(Teams.team_name == team_name, Batting.yearID == year, fielding_subquery.c.position == position)
+#         .order_by(desc('statistic'))
+#         .all()
+#     )
+#     return results
+
+def get_batting_position_info_WAR(position, team_name, year):
+    advanced_stats_subquery = (
+        db.session.query(AdvancedStats.playerID,
+                         AdvancedStats.yearID,
+                         AdvancedStats.bwar162)
+        .filter(AdvancedStats.yearID == year)
+        .group_by(AdvancedStats.playerID)
+        .subquery()
+    )
+
+    results = (
+        db.session.query(
+            func.concat(People.nameFirst, ' ', People.nameLast).label('name'),
+            func.round(advanced_stats_subquery.c.bwar162, 1).label('statistic')
+        )
+        .join(Fielding, Fielding.playerID == People.playerID)
+        .join(advanced_stats_subquery, and_(
+            Fielding.playerID == advanced_stats_subquery.c.playerID,
+            Fielding.yearID == advanced_stats_subquery.c.yearID))
+        .join(Teams, (Fielding.teamID == Teams.teamID) & (Fielding.yearID == Teams.yearID))
+        .filter(Teams.team_name == team_name, Fielding.yearID == year, Fielding.position == position)
+        .order_by(desc('statistic'))
+        .all()
+    )
+    return [{"name": row.name, "statistic": row.statistic} for row in results]
+
+def get_batting_position_info_wRC_plus(position, team_name, year):
+    advanced_stats_subquery = (
+        db.session.query(AdvancedStats.playerID,
+                         AdvancedStats.yearID,
+                         AdvancedStats.wRC_plus)
+        .filter(AdvancedStats.yearID == year)
+        .group_by(AdvancedStats.playerID)
+        .subquery()
+    )
+
+    results = (
+        db.session.query(
+            func.concat(People.nameFirst, ' ', People.nameLast).label('name'),
+            advanced_stats_subquery.c.wRC_plus.label('statistic')
+        )
+        .join(Fielding, Fielding.playerID == People.playerID)
+        .join(advanced_stats_subquery, and_(
+            Fielding.playerID == advanced_stats_subquery.c.playerID,
+            Fielding.yearID == advanced_stats_subquery.c.yearID))
+        .join(Teams, (Fielding.teamID == Teams.teamID) & (Fielding.yearID == Teams.yearID))
+        .filter(Teams.team_name == team_name, Fielding.yearID == year, Fielding.position == position)
+        .order_by(desc('statistic'))
+        .all()
+    )
+    return [{"name": row.name, "statistic": row.statistic} for row in results]
+
+# def get_batting_position_info_wOBA(position, team_name, year):
+#     results = (
+#         db.session.query(
+#             func.concat(People.nameFirst, ' ', People.nameLast).label('name'),
+#             func.round(calculate_wOBA(), 3).label('statistic')
+#         )
+#         .join(Batting, Batting.playerID == People.playerID)
+#         .join(Teams, (Batting.teamID == Teams.teamID) & (Batting.yearID == Teams.yearID))
+#         .join(LeagueStats, Batting.yearID == LeagueStats.yearID)
+#         .join(Fielding, (Fielding.playerID == Batting.playerID) & (Fielding.teamID == Batting.teamID) & (Fielding.yearID == Batting.yearID))
+#         .filter(Teams.team_name == team_name, Fielding.yearID == year, Fielding.position == position)
+#         .order_by(desc('statistic'))
+#         .all()
+#     )
+#     return [{"name": row.name, "statistic": row.statistic} for row in results]
+
+def get_pitching_position_info_playing_time(position, team_name, year):
+    playing_time = func.sum(Pitching.p_IPOuts).over(partition_by=[Pitching.yearID, Pitching.teamID])
+    results = (
+        db.session.query(
+            func.concat(People.nameFirst, ' ', People.nameLast).label('name'),
+            func.round((Pitching.p_IPOuts * 100.0 / playing_time), 2).label('playing-time'),
+            func.concat(func.round((Pitching.p_IPOuts * 100.0 / playing_time), 2), '%').label('statistic')
+        )
+        .join(Pitching, Pitching.playerID == People.playerID)
+        .join(Teams, (Pitching.teamID == Teams.teamID) & (Pitching.yearID == Teams.yearID))
+        .filter(Teams.team_name == team_name,
+                Pitching.yearID == year,
+                case(
+                    (position == 'RP', Pitching.p_GS == 0),
+                    (position == 'SP', Pitching.p_GS > 0)
+                ))
+        .order_by(desc('playing-time'))
+        .all()
+    )
+    return [{"name": row.name, "statistic": row.statistic} for row in results]
+
+def get_pitching_position_info_IP(position, team_name, year):
+    results = (
+        db.session.query(
+            func.concat(People.nameFirst, ' ', People.nameLast).label('name'),
+            func.round(calculate_IP()).label('statistic')
+        )
+        .join(Pitching, Pitching.playerID == People.playerID)
+        .join(Teams, (Pitching.teamID == Teams.teamID) & (Pitching.yearID == Teams.yearID))
+        .filter(Teams.team_name == team_name,
+                Pitching.yearID == year,
+                case(
+                    (position == 'RP', Pitching.p_GS == 0),
+                    (position == 'SP', Pitching.p_GS > 0)
+                ))
+        .order_by(desc('statistic'))
+        .all()
+    )
+    return [{"name": row.name, "statistic": row.statistic} for row in results]
+
+def get_pitching_position_info_ERA(position, team_name, year):
+    results = (
+        db.session.query(
+            func.concat(People.nameFirst, ' ', People.nameLast).label('name'),
+            func.round(Pitching.p_ERA).label('statistic')
+        )
+        .join(Pitching, Pitching.playerID == People.playerID)
+        .join(Teams, (Pitching.teamID == Teams.teamID) & (Pitching.yearID == Teams.yearID))
+        .filter(Teams.team_name == team_name,
+                Pitching.yearID == year,
+                case(
+                    (position == 'RP', Pitching.p_GS == 0),
+                    (position == 'SP', Pitching.p_GS > 0)
+                ))
+        .order_by(desc('statistic'))
+        .all()
+    )
+    return [{"name": row.name, "statistic": row.statistic} for row in results]
+
+def get_pitching_position_info_FIP(position, team_name, year):
+    results = (
+        db.session.query(
+            func.concat(People.nameFirst, ' ', People.nameLast).label('name'),
+            func.round(calculate_FIP()).label('statistic')
+        )
+        .join(Pitching, Pitching.playerID == People.playerID)
+        .join(Teams, (Pitching.teamID == Teams.teamID) & (Pitching.yearID == Teams.yearID))
+        .filter(Teams.team_name == team_name,
+                Pitching.yearID == year,
+                case(
+                    (position == 'RP', Pitching.p_GS == 0),
+                    (position == 'SP', Pitching.p_GS > 0)
+                ))
+        .order_by(desc('statistic'))
+        .all()
+    )
+    return [{"name": row.name, "statistic": row.statistic} for row in results]

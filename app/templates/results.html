@@ -1,50 +1,126 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Search Results</title>
+{% extends "base.html" %}
+
+{% block body %}
     <style>
-        body {
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
             font-family: Arial, sans-serif;
-            margin: 20px;
+        }
+        body {
+            margin: 0;
+            padding: 0;
         }
         h2 {
             color: #333;
         }
-        ul {
-            list-style-type: none;
-            padding: 0;
+        .results-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
         }
-        ul li {
-            margin: 5px 0;
+        .player-box {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 5px;
+            width: calc(20% - 10px);
+            text-align: center;
+            align-items: center;
         }
-        a {
-            color: #007bff;
+        .back-button {
+            display: inline-block;
+            padding: 10px 15px;
+            margin-top: 20px;
+            border: 2px solid #3b7a57;
+            color: #3b7a57;
             text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.3s, color 0.3s;
         }
-        a:hover {
-            text-decoration: underline;
+        .back-button:hover {
+            background-color: #3b7a57;
+            color: white;
         }
+        .copy-button {
+            font-size: 10px;
+            width: 20px;
+            height: 20px;
+            background-color: transparent;
+            border: none;
+            color: black;
+            margin-bottom: 10px;
+            margin-top: -10px;
+            margin-left: -10px;
+        }
+        .copy-button:hover {
+            font-size: 10px;
+            width: 20px;
+            height: 20px;
+            background-color: transparent;
+            border: none;
+            color: black;
+            margin-top: -10px;
+            margin-left: -10px;
+        }
+        .copy-image {
+            width: 20px;
+            height: 20px;
+        }
+        .player-text {
+            color: black;
+        }
+        .button-wrapper .copy-text {
+            margin-top: -20px;
+            margin-left: -50px;
+            z-index: 10;
+            position: absolute;
+            display: inline-block;
+            visibility: hidden;
+        }
+        .button-wrapper:hover .copy-text {
+            margin-top: -25px;
+            margin-left: -50px;
+            z-index: 10;
+            position: absolute;
+            display: inline-block;
+            font-size: 15px;
+            visibility: visible;
+        }
+
+
     </style>
-</head>
-<body>
-    <h2>Search Results</h2>
 
-    {% if message %}
-        <p>{{ message }}</p>
-    {% endif %}
+    <div class="container">
+        <h2>Search Results</h2>
 
-    {% if results %}
-        <ul>
-            {% for player in results %}
-                <li>{{ player[0] }} {{ player[1] }}</li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>No results found for your search criteria.</p>
-    {% endif %}
+        {% if message %}
+            <p>{{ message }}</p>
+        {% endif %}
 
-    <a href="/">Back</a>
-</body>
-</html>
+        {% if results %}
+            <div class="results-container">
+                {% for player in results %}
+                    <div class="player-box">
+                        <div class="button-wrapper">
+                            <button class="copy-button" onclick="copyText('{{ player[0] }}' + ' ' + '{{ player[1] }}')"><img class="copy-image" src="/static/copy.png" alt="copy"/></button>
+                            <p class = copy-text>Copy</p>
+                        </div>
+                        <p class="player-text" id="player-{{ loop.index }}">{{ loop.index }}. {{ player[0] }} {{ player[1] }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No results found for your search criteria.</p>
+        {% endif %}
+
+        <a href="/" class="back-button">Back</a>
+    </div>
+
+    <script>
+        function copyText(name) {
+            navigator.clipboard.writeText(name);
+        }
+    </script>
+{% endblock %}

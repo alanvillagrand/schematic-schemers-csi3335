@@ -7,10 +7,20 @@ bp = Blueprint('auth', __name__)
 def login():
     username = request.form['username']
     password = request.form['password']
+    print(f"Attempted Username: {username}")
+    print(f"Attempted Password: {password}")  # Debugging
+
     user = User.query.filter_by(username=username).first()
+
+    if user:
+        print(f"User found: {user.username}")
+        print(f"Stored Hash: {user.password_hash}")
+        print(f"Password Check Result: {user.check_password(password)}")
+
     if user and user.check_password(password):
         session['username'] = username
         return redirect(url_for('main.dashboard'))
+
     return render_template('index.html', error="Invalid username or password")
 
 
@@ -19,12 +29,20 @@ def register():
     username = request.form['username']
     password = request.form['password']
     user = User.query.filter_by(username=username).first()
+
     if user:
         return render_template("index.html", error="Username already registered")
+
     new_user = User(username=username)
     new_user.set_password(password)
+
+    # Debugging: Show plaintext password and hash
+    print(f"Plaintext Password: {password}")
+    print(f"Generated Hash: {new_user.password_hash}")
+
     db.session.add(new_user)
     db.session.commit()
+
     session['username'] = username
     return redirect(url_for('main.dashboard'))
 

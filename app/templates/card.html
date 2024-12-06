@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block body %}
+    <style>
+        .container {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+        .baseball-card {
+          width: 250px;
+          height: 350px;
+          position: relative;
+          perspective: 1000px;
+          transition: transform 0.3s;
+        }
+        .baseball-card:hover {
+          transform: translateY(-10px);
+        }
+        .card-front,
+        .card-back {
+          width: 100%;
+          height: 100%;
+          position: absolute;
+          backface-visibility: hidden;
+          border-radius: 10px;
+          overflow: hidden;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+          transition: transform 0.6s ease-in-out;
+        }
+        .card-front {
+          background-color: #ffffff;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+        }
+        .card-back {
+          background-color: #003087;
+          color: #ffffff;
+          transform: rotateY(180deg);
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+        }
+        .card-header {
+          background-color: #003087;
+          padding: 10px;
+          text-align: center;
+        }
+        .player-image {
+          width: 100px;
+          height: 100px;
+          border-radius: 50%;
+          border: 3px solid #ffffff;
+        }
+        .card-body {
+          padding: 15px;
+          text-align: center;
+        }
+        .player-name {
+          font-size: 1.5em;
+          margin-bottom: 5px;
+          margin-top: -5px;
+        }
+        .player-info,
+        .player-stats {
+          font-size: 0.9em;
+          line-height: 1.6;
+        }
+        .card-footer {
+          padding: 10px;
+          text-align: center;
+          background-color: transparent;
+          margin-top: auto; /* Pushes footer to the bottom */
+        }
+        button {
+          background-color: #28a745;
+          color: #fff;
+          border: none;
+          padding: 8px 16px;
+          font-size: 0.9em;
+          border-radius: 5px;
+          cursor: pointer;
+          transition: background-color 0.3s;
+        }
+        button:hover {
+          background-color: #218838;
+        }
+        .baseball-card.flip .card-front {
+          transform: rotateY(180deg);
+        }
+        .baseball-card.flip .card-back {
+          transform: rotateY(0);
+        }
+    </style>
+
+    <div class="container">
+        <div class="baseball-card">
+          <!-- Front of the card -->
+          <div class="card-front">
+            <div class="card-header">
+              <img src="https://www.jetpunk.com/img/user-img/e2/e27da91b3d-450.webp" alt="Player Image" class="player-image">
+            </div>
+            <div class="card-body">
+              <h2 class="player-name">John Doe</h2>
+              <p class="player-info">
+                <strong>Team:</strong> New York Yankees<br>
+                <strong>Position:</strong> Pitcher
+              </p>
+            </div>
+            <div class="card-footer">
+              <button class="flip-card-btn">Flip Card</button>
+            </div>
+          </div>
+
+          <!-- Back of the card -->
+          <div class="card-back">
+            <div class="card-body">
+              <h2 class="player-name">John Doe</h2>
+              <p class="player-stats">
+                <strong>Games Played:</strong> 150<br>
+                <strong>ERA:</strong> 3.45<br>
+                <strong>Strikeouts:</strong> 230<br>
+                <strong>Wins:</strong> 15
+              </p>
+            </div>
+            <div class="card-footer">
+              <button class="back-button">Back</button>
+            </div>
+          </div>
+        </div>
+    </div>
+
+  <script>
+    const card = document.querySelector('.baseball-card');
+    const flipCardBtn = document.querySelector('.flip-card-btn');
+    const backButton = document.querySelector('.back-button');
+    flipCardBtn.addEventListener('click', (event) => {
+      event.stopPropagation();
+      card.classList.add('flip');
+    });
+    backButton.addEventListener('click', (event) => {
+      event.stopPropagation();
+      card.classList.remove('flip');
+    });
+  </script>
+
+{% endblock %}

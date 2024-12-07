@@ -145,6 +145,7 @@ const teams = [
 */
 
 const teams = [
+    'Only One Team',
     'Arizona Diamondbacks',
     'Atlanta Braves',
     'Baltimore Orioles',

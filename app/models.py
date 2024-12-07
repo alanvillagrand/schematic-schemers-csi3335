@@ -458,3 +458,20 @@ class ImmaculateGridTeams(db.Model):
     team_name = db.Column(db.String(50), nullable=False)
     startYear = db.Column(db.SmallInteger, nullable=False)
     endYear = db.Column(db.SmallInteger, nullable=False)
+
+
+class SeasonWar(db.Model):
+    __tablename__ = 'seasonwar'
+
+    seasonwar_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    playerID = db.Column(db.String(9), nullable=False, index=True)
+    yearID = db.Column(db.SmallInteger, nullable=True)
+    war = db.Column(db.Float, nullable=True)
+
+class CareerWar(db.Model):
+    __tablename__ = 'careerwar'
+
+    careerwar_id = db.Column(db.Integer, primary_key=True, autoincrement=True)  # Primary key with auto-increment
+    playerID = db.Column(db.String(9), nullable=False, index=True)  # Indexed for fast lookups
+    war = db.Column(db.Float, nullable=True)  # Can be NULL, stores the WAR value
+

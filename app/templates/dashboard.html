@@ -201,6 +201,8 @@
                     statOptions = seasonalStatistics3030
                 } else if (selectedStat === "ERA"){
                     statOptions= seasonalStatisticsERA
+                } else if (selectedStat === "WAR"){
+                    statOptions = seasonalStatisticsWAR
                 }
 
                 // Create dropdown for the selected stat's range options
@@ -264,6 +266,7 @@
     <script src="{{ url_for('static', filename='careerStatisticsERA.js') }}"></script>
     <script src="{{ url_for('static', filename='seasonalStatisticsERA.js') }}"></script>
     <script src="{{ url_for('static', filename='careerStatisticsWAR.js') }}"></script>
+    <script src="{{ url_for('static', filename='seasonalStatisticsWAR.js') }}"></script>
 
 
     <!-- CSS for Dynamic Dropdowns -->

@@ -1,5 +1,5 @@
 from app.models import People, Batting, Teams, db, Fielding, Awards, HallOfFame, AllStarFull, Appearances, Pitching, \
-    SeriesPost, FieldingPost, BattingPost, Drafts, AdvancedStats, ImmaculateGridTeams, CareerWar
+    SeriesPost, FieldingPost, BattingPost, Drafts, AdvancedStats, ImmaculateGridTeams, CareerWar, SeasonWar
 
 from sqlalchemy import func, and_, or_
 
@@ -76,6 +76,43 @@ def get_players_seasonStatBatting_team(stat, team, stat_range):
         .filter(batting_column1 >= stat_range)
         .group_by(People.playerID)
         .order_by(db.func.sum(Batting.b_G).asc())
+        .distinct()
+        .all()
+    )
+
+"""fix this"""
+def get_players_ws_team(team):
+    team_subquery = played_on_team_subquery(team)
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Appearances, Appearances.playerID == People.playerID)
+        .join(team_subquery, team_subquery.c.playerID == People.playerID)
+        .join(SeriesPost, SeriesPost.teamIDwinner == team_subquery.c.teamID)
+        .filter(SeriesPost.round == 'WS')
+        .filter(Teams.yearID == SeriesPost.yearID)
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Appearances.G_all).asc())
+        .distinct()
+        .all()
+
+    )
+
+"""fix this"""
+def get_players_seasonStatWAR_team(team, stat_range):
+
+    team_subquery = played_on_team_subquery(team)
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Appearances, Appearances.playerID == People.playerID)
+        .join(team_subquery, and_(
+            team_subquery.c.playerID == Appearances.playerID,
+            team_subquery.c.teamID == Appearances.teamID,
+        ))
+        .join(SeasonWar, SeasonWar.playerID == team_subquery.c.playerID)
+        .filter(SeasonWar.war >= stat_range)
+        .filter(SeasonWar.yearID == Appearances.yearID)
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Appearances.G_all).asc())
         .distinct()
         .all()
     )
@@ -372,7 +409,7 @@ def get_players_careerBattingAVG_team(stat_range, team):
             People.nameLast
         )
         .join(Batting, Batting.playerID == People.playerID)
-        .join(team_subquery, team_subquery.c.playerID == Batting.playerID)
+        .join(team_subquery, team_subquery.c.playerID == People.playerID)
         .group_by(People.playerID, People.nameFirst, People.nameLast)
         .having(db.func.sum(Batting.b_AB) > 0)
         .having((db.func.sum(Batting.b_H) / db.func.sum(Batting.b_AB)) >= stat_range)
@@ -445,71 +482,6 @@ def get_players_allstar_team(team):
     )
 
 
-
-
-
-""" currently not working"""
-
-
-def get_players_ws_team(team):
-    team_subquery = played_on_team_subquery(team)
-    ws_win_subquery = (
-        db.session.query(Appearances.playerID)
-        .join(Teams, and_(Teams.teamID == Appearances.teamID, Teams.yearID == Appearances.yearID))
-        .filter(Teams.WSWin == 'Y')
-    )
-    return join_subqueries(team_subquery, ws_win_subquery)
-
-
-    '''
-    currently not working too hard :/
-    '''
-
-
-def get_players_career_war_team(team, min_war=40):
-    return (
-        # db.session.query(
-        #     People.nameFirst,
-        #     People.nameLast,
-        #     (db.func.sum(Batting.b_WAR) + db.func.sum(Pitching.p_WAR)).label("career_war")
-        # )
-        # .join(Batting, Batting.playerID == People.playerID)
-        # .join(Pitching, Pitching.playerID == People.playerID, isouter=True)
-        # .join(Teams, Teams.teamID == Batting.teamID)
-        # .filter(Teams.team_name == team)
-        # .group_by(People.playerID)
-        # .having(db.func.sum(Batting.b_WAR) + db.func.sum(Pitching.p_WAR) >= min_war)
-        # .order_by((db.func.sum(Batting.b_WAR) + db.func.sum(Pitching.p_WAR)).desc())
-        # .all()
-    )
-
-
-"""Fix this"""
-
-
-def get_players_career_era_team(team, max_era=3.00):
-    team_subquery = played_on_team_subquery(team)
-    # Calculate the sum of ERA and count to get the average ERA
-    sum_era = db.func.sum(Pitching.p_ERA).label("sum_era")
-    count_era = db.func.count(Pitching.p_ERA).label("count_era")
-    avg_era = (sum_era / db.func.nullif(count_era, 0)).label("career_avg_era")
-
-    results = (
-        db.session.query(
-            People.nameFirst,
-            People.nameLast,
-            avg_era
-        )
-        .join(Pitching, Pitching.playerID == People.playerID)
-        .join(team_subquery, team_subquery.c.playerID == Pitching.playerID)
-        .filter(pitching_column >= stat_range)
-        .group_by(People.playerID, People.nameFirst, People.nameLast)
-        .having(avg_era <= max_era)  # Only include players with avg ERA under 3.00
-        .order_by(avg_era.asc())
-        .all()
-    )
-
-    return results
 
 
 

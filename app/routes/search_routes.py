@@ -57,7 +57,7 @@ from app.services.immaculateGridQueries import get_players_team_team, get_player
     get_players_draftPick_country, get_players_draftPick_pob, get_players_draftPick_position, \
     get_players_stdAward_position, get_players_hof_position, get_players_allstar_position, \
     get_players_careerPitchingERA_team, get_players_exclusive_to_team, get_players_seasonPitchingERA_team, \
-    get_players_pob_team, get_players_careerStatWAR_team
+    get_players_pob_team, get_players_careerStatWAR_team, get_players_seasonStatWAR_team
 
 bp = Blueprint('search', __name__)
 
@@ -181,6 +181,9 @@ def search_players():
 
         elif stat == "ERA":
             results = get_players_seasonPitchingERA_team(team)
+
+        elif stat == "WAR":
+            results = get_players_seasonStatWAR_team(team, stat_range)
 
 
     elif (option1 == "awards" and option2 == "teams") or (option1 == "teams" and option2 == "awards"):

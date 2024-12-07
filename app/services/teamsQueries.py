@@ -375,13 +375,22 @@ def get_players_position_team(position, team):
 
 
 def get_players_ws_team(team):
-    team_subquery = played_on_team_subquery(team)
-    ws_win_subquery = (
-        db.session.query(Appearances.playerID)
-        .join(Teams, and_(Teams.teamID == Appearances.teamID, Teams.yearID == Appearances.yearID))
+    return (
+        db.session.query(
+            People.nameFirst,
+            People.nameLast,
+        )
+        .join(BattingPost, BattingPost.playerID == People.playerID)
+        .join(Teams, and_(Teams.teamID == BattingPost.teamID, Teams.yearID == BattingPost.yearId))
+        .join(ImmaculateGridTeams, ImmaculateGridTeams.team_name == Teams.team_name)
+        .filter(ImmaculateGridTeams.ig_team_name == team)
+        .filter(Teams.yearID >= ImmaculateGridTeams.startYear)
+        .filter(or_(ImmaculateGridTeams.endYear.is_(None), Teams.yearID <= ImmaculateGridTeams.endYear))
         .filter(Teams.WSWin == 'Y')
+        .order_by(db.func.sum(BattingPost.b_G))
+        .group_by(BattingPost.playerID)
+        .all()
     )
-    return join_subqueries(team_subquery, ws_win_subquery)
 
 
     '''

@@ -1,4 +1,4 @@
 mysql = {'host':'localhost',
-		 'user':'jakemauldin',
-		 'password':'password',
-		 'database':'baseball_test'}
+		 'user':'root',
+		 'password':'csi3335rocks',
+		 'database':'db_project'}

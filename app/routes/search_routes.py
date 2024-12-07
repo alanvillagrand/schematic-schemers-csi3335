@@ -56,7 +56,8 @@ from app.services.immaculateGridQueries import get_players_team_team, get_player
     get_players_position_position, get_players_pob_position, get_players_country_position, \
     get_players_draftPick_country, get_players_draftPick_pob, get_players_draftPick_position, \
     get_players_stdAward_position, get_players_hof_position, get_players_allstar_position, \
-    get_players_careerPitchingERA_team, get_players_exclusive_to_team, get_players_seasonPitchingERA_team
+    get_players_careerPitchingERA_team, get_players_exclusive_to_team, get_players_seasonPitchingERA_team, \
+    get_players_pob_team
 
 bp = Blueprint('search', __name__)
 
@@ -205,6 +206,9 @@ def search_players():
 
     elif (option1 == "pob" and option2 == "teams") or (option1 == "teams" and option2 == "pob"):
         team= option1_details if option1 == "teams" else option2_details
+        pob= option1_details if option1 == "pob" else option2_details
+        if pob == "Outside of USA":
+            results = get_players_pob_team(team)
 
 
     elif option1 == "career statistic" and option2 == "career statistic":

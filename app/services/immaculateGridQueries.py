@@ -133,6 +133,21 @@ def get_players_hof_team(team):
     )
 
 
+def get_players_pob_team(team):
+    team_subquery = played_on_team_subquery(team)
+
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Appearances, Appearances.playerID == People.playerID)
+        .join(team_subquery, team_subquery.c.playerID == People.playerID)
+        .filter(People.birthCountry != "USA")
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Appearances.G_all).asc())
+        .distinct()
+        .all()
+    )
+
+
 def get_players_position_team(position, team):
     # Construct the column name for the specified position (e.g., G_ss, G_1b)
     position_column = f'G_{position.lower()}'

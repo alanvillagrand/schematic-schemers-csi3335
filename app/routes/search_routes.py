@@ -59,7 +59,6 @@ from app.services.immaculateGridQueries import get_players_team_team, get_player
     get_players_careerPitchingERA_team, get_players_exclusive_to_team, get_players_seasonPitchingERA_team, \
     get_players_pob_team, get_players_careerStatWAR_team, get_players_seasonStatWAR_team
 
-from app.services import teamsQueries
 
 bp = Blueprint('search', __name__)
 

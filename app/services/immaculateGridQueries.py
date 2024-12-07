@@ -98,6 +98,24 @@ def get_players_seasonPitchingERA_team(team):
         .all()
     )
 
+def get_players_seasonStatPitching_team(stat_column, team, stat_range):
+    pitching_column = getattr(Pitching, f"p_{stat_column}")
+
+    team_subquery = played_on_team_subquery(team)
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Pitching, Pitching.playerID == People.playerID)
+        .join(team_subquery, and_(
+            team_subquery.c.playerID == Pitching.playerID,
+            team_subquery.c.teamID == Pitching.teamID,
+        ))
+        .filter(pitching_column >= stat_range)
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Pitching.p_G).asc())
+        .distinct()
+        .all()
+    )
+
 
 def get_players_hof_team(team):
     team_subquery = played_on_team_subquery(team)
@@ -152,28 +170,8 @@ def get_players_seasonBattingAVG_team(stat_range, team):
         .all()
     )
 
-"""
-get_players_seasonStatPitching_team
-queries for a player that has this pitching stat and achieved it in a season with the team
-takes in a team, stat, and stat_range
-algorithm orders it by least appearances in pitching p_G
-"""
 
 
-def get_players_seasonStatPitching_team(stat_column, team, stat_range):
-    pitching_column = getattr(Pitching, f"p_{stat_column}")
-
-    team_subquery = played_on_team_subquery(team)
-    return (
-        db.session.query(People.nameFirst, People.nameLast)
-        .join(Pitching, Pitching.playerID == People.playerID)
-        .join(team_subquery, team_subquery.c.playerID == Pitching.playerID)
-        .filter(pitching_column >= stat_range)
-        .group_by(People.playerID)
-        .order_by(db.func.sum(Pitching.p_G).asc())
-        .distinct()
-        .all()
-    )
 
 
 

@@ -19,6 +19,9 @@ def login():
 
     if user and user.check_password(password):
         session['username'] = username
+
+        if username == 'admin':
+            return redirect(url_for('auth.admin_home'))
         return redirect(url_for('main.dashboard'))
     else:
         return render_template('index.html', error="Invalid username or password")
@@ -36,7 +39,6 @@ def register():
     new_user = User(username=username)
     new_user.set_password(password)
 
-    # Debugging: Show plaintext password and hash
     print(f"Plaintext Password: {password}")
     print(f"Generated Hash: {new_user.password_hash}")
 
@@ -44,6 +46,8 @@ def register():
     db.session.commit()
 
     session['username'] = username
+    if username == 'admin':
+        return redirect(url_for('auth.admin_home'))
     return redirect(url_for('main.dashboard'))
 
 
@@ -51,3 +55,26 @@ def register():
 def logout():
     session.pop('username', None)
     return redirect(url_for('main.home'))
+
+
+@bp.route("/ban_user/<int:user_id>", methods=["POST"])
+def ban_user(user_id):
+    if 'username' not in session or session['username'] != 'admin':
+        return redirect(url_for('auth.login'))
+
+    user_to_ban = User.query.get(user_id)
+    if user_to_ban:
+        db.session.delete(user_to_ban)
+        db.session.commit()
+
+    return redirect(url_for('auth.admin_home'))
+
+
+@bp.route("/admin_home")
+def admin_home():
+    if 'username' not in session or session['username'] != 'admin':
+        return redirect(url_for('auth.login'))
+
+    users = User.query.all()
+
+    return render_template("admin_home.html", users=users)

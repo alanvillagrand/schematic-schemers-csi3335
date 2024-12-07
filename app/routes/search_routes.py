@@ -4,6 +4,8 @@ from sqlalchemy import func
 from app.models import People, Batting, Teams, db, Fielding, Awards, HallOfFame, AllStarFull, Appearances, Pitching, \
     SeriesPost, FieldingPost, BattingPost, Drafts, AdvancedStats
 
+from app.services import teamsQueries
+
 bp = Blueprint('search', __name__)
 
 """ 

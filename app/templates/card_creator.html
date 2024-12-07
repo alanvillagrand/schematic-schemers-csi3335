@@ -52,6 +52,7 @@
           height: 100px;
           border-radius: 50%;
           border: 3px solid #ffffff;
+          background-color: white;
         }
         .card-body {
           padding: 15px;
@@ -101,13 +102,14 @@
                   <!-- Front of the card -->
                   <div class="card-front">
                     <div class="card-header">
-                      <img src="https://www.jetpunk.com/img/user-img/e2/e27da91b3d-450.webp" alt="Player Image" class="player-image">
+                      <img src="/static/mlb.png" alt="Player Image" class="player-image">
                     </div>
                     <div class="card-body">
                       <h2 class="player-name">{{ player[0] }} {{ player[1] }}</h2>
                       <p class="player-info">
                         <strong>Team:</strong> {{ player[2]}} <br>
-                        <strong>Year:</strong> {{ player[3] }}
+                        <strong>Year:</strong> {{ player[3] }} <br>
+                        <strong>From: </strong> {{ player[4] }}
                       </p>
                     </div>
                     <div class="card-footer">
@@ -118,12 +120,15 @@
                   <!-- Back of the card -->
                   <div class="card-back">
                     <div class="card-body">
-                      <h2 class="player-name">John Doe</h2>
+                      <h2 class="player-name">{{ player[0] }} {{ player[1] }}</h2>
                       <p class="player-stats">
-                        <strong>Games Played:</strong> 150<br>
-                        <strong>ERA:</strong> 3.45<br>
-                        <strong>Strikeouts:</strong> 230<br>
-                        <strong>Wins:</strong> 15
+                        <strong>Games Played:</strong> {{ player[9] }}<br>
+                        <strong>AVG:</strong> {{ player[12] }}<br>
+                        <strong>Runs:</strong> {{ player[10] }}<br>
+                        <strong>Hits:</strong> {{ player[11] }}<br>
+                        <strong>RBI:</strong> {{ player[13] }}<br>
+                        <strong>HR:</strong> {{ player[7] }}<br>
+                        <strong>SB:</strong> {{ player[14] }}
                       </p>
                     </div>
                     <div class="card-footer">
@@ -138,17 +143,20 @@
     {% endif %}
 
   <script>
-    const card = document.querySelector('.baseball-card');
-    const flipCardBtn = document.querySelector('.flip-card-btn');
-    const backButton = document.querySelector('.back-button');
-    flipCardBtn.addEventListener('click', (event) => {
-      event.stopPropagation();
-      card.classList.add('flip');
-    });
-    backButton.addEventListener('click', (event) => {
-      event.stopPropagation();
-      card.classList.remove('flip');
-    });
+    const cards = document.querySelectorAll('.baseball-card')
+    cards.forEach((card) => {
+        const flipCardBtn = card.querySelector('.flip-card-btn');
+        const backButton = card.querySelector('.back-button');
+
+        flipCardBtn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            card.classList.add('flip');
+        });
+        backButton.addEventListener('click', (event) => {
+            event.stopPropagation();
+            card.classList.remove('flip');
+        });
+    })
   </script>
 
 {% endblock %}

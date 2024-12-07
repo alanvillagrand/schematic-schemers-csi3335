@@ -6,10 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="0485066a-a959-4c52-ade2-6d2d13e46ffa" name="Changes" comment="updated queries">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/routes/search_routes.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/search_routes.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/services/immaculateGridQueries.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/immaculateGridQueries.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/templates/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/dashboard.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -192,14 +188,6 @@
       <workItem from="1733269315942" duration="487000" />
       <workItem from="1733269816422" duration="38129000" />
       <workItem from="1733423250839" duration="16872000" />
-    </task>
-    <task id="LOCAL-00006" summary="improved algorithim for queries">
-      <option name="closed" value="true" />
-      <created>1732085569701</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1732085569701</updated>
     </task>
     <task id="LOCAL-00007" summary="improved algorithim for queries">
       <option name="closed" value="true" />
@@ -585,7 +573,15 @@
       <option name="project" value="LOCAL" />
       <updated>1733598885926</updated>
     </task>
-    <option name="localTasksCounter" value="55" />
+    <task id="LOCAL-00055" summary="updated queries">
+      <option name="closed" value="true" />
+      <created>1733604797554</created>
+      <option name="number" value="00055" />
+      <option name="presentableId" value="LOCAL-00055" />
+      <option name="project" value="LOCAL" />
+      <updated>1733604797554</updated>
+    </task>
+    <option name="localTasksCounter" value="56" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

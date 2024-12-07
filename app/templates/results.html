@@ -101,7 +101,7 @@
 
         {% if results %}
             <div class="results-container">
-                {% for player in results %}
+                {% for player in results[:5] %}
                     <div class="player-box">
                         <div class="button-wrapper">
                             <button class="copy-button" onclick="copyText('{{ player[0] }}' + ' ' + '{{ player[1] }}')"><img class="copy-image" src="/static/copy.png" alt="copy"/></button>

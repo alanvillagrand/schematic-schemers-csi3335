@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 import pandas as pd
 
-engine = create_engine('mysql+pymysql://jakemauldin:password@localhost/baseball_test')
+engine = create_engine('mysql+pymysql://root:csi3335rocks@localhost/db_project')
 
 csv_file_path = 'advanced_stats.csv'
 df = pd.read_csv(csv_file_path)

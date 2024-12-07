@@ -6,5 +6,6 @@ const careerStatistics = [
     "SV",
     "AVG",
     "SO",
-    "ERA"
+    "ERA",
+    "WAR"
 ];

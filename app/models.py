@@ -454,3 +454,9 @@ class ImmaculateGridTeams(db.Model):
     endYear = db.Column(db.SmallInteger, nullable=False)
 
 
+class CareerWar(db.Model):
+    __tablename__ = 'careerwar'
+
+    careerwar_id = db.Column(db.Integer, primary_key=True, autoincrement=True)  # Primary key with auto-increment
+    playerID = db.Column(db.String(9), nullable=False, index=True)  # Indexed for fast lookups
+    war = db.Column(db.Float, nullable=True)  # Can be NULL, stores the WAR value

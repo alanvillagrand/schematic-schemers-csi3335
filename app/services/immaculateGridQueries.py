@@ -1,5 +1,5 @@
 from app.models import People, Batting, Teams, db, Fielding, Awards, HallOfFame, AllStarFull, Appearances, Pitching, \
-    SeriesPost, FieldingPost, BattingPost, Drafts, AdvancedStats, ImmaculateGridTeams
+    SeriesPost, FieldingPost, BattingPost, Drafts, AdvancedStats, ImmaculateGridTeams, CareerWar
 
 from sqlalchemy import func, and_, or_
 
@@ -76,6 +76,22 @@ def get_players_seasonStatBatting_team(stat, team, stat_range):
         .filter(batting_column1 >= stat_range)
         .group_by(People.playerID)
         .order_by(db.func.sum(Batting.b_G).asc())
+        .distinct()
+        .all()
+    )
+
+
+def get_players_careerStatWAR_team(team, stat_range):
+
+    team_subquery = played_on_team_subquery(team)
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(CareerWar, CareerWar.playerID == People.playerID)
+        .join(team_subquery, team_subquery.c.playerID == People.playerID)
+        .join(Appearances, Appearances.playerID == People.playerID)
+        .filter(CareerWar.war >= stat_range)
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Appearances.G_all).asc())
         .distinct()
         .all()
     )

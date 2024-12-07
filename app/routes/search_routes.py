@@ -57,8 +57,9 @@ from app.services.immaculateGridQueries import get_players_team_team, get_player
     get_players_draftPick_country, get_players_draftPick_pob, get_players_draftPick_position, \
     get_players_stdAward_position, get_players_hof_position, get_players_allstar_position, \
     get_players_careerPitchingERA_team, get_players_exclusive_to_team, get_players_seasonPitchingERA_team, \
-    get_players_pob_team, get_players_careerStatWAR_team, get_players_seasonStatWAR_team
-
+    get_players_pob_team, get_players_careerStatWAR_team, get_players_seasonStatWAR_team, get_players_hof_onlyOneTeam, \
+    get_players_allStar_onlyOneTeam, get_players_stdAward_onlyOneTeam, get_players_careerBattingAVG_onlyOneTeam, \
+    get_players_careerStatBatting_onlyOneTeam, get_players_careerStatPitching_onlyOneTeam
 
 bp = Blueprint('search', __name__)
 
@@ -141,16 +142,25 @@ def search_players():
             stat_range = convert_to_number(stat_range)
 
         # Handling different career statistics based on user input
-        if career_stat == "AVG":
+        if career_stat == "AVG" and team != "Only One Team":
             results = get_players_careerBattingAVG_team(stat_range, team)
-        elif career_stat in standard_careerStatBatting:
+        elif career_stat in standard_careerStatBatting and team != "Only One Team":
             results = get_players_careerStatBatting_team(career_stat, team, stat_range)
-        elif career_stat in standard_careerStatPitching:
+        elif career_stat in standard_careerStatPitching and team != "Only One Team":
             results = get_players_careerStatPitching_team(career_stat, team, stat_range)
-        elif career_stat == "ERA":
+        elif career_stat == "ERA" and team != "Only One Team":
             results = get_players_careerPitchingERA_team(team)
-        elif career_stat == "WAR":
+        elif career_stat == "WAR" and team != "Only One Team":
             results = get_players_careerStatWAR_team(team, stat_range)
+
+        elif career_stat == "AVG" and team == "Only One Team":
+            results = get_players_careerBattingAVG_onlyOneTeam(stat_range)
+        elif career_stat in standard_careerStatBatting and team == "Only One Team":
+            results = get_players_careerStatBatting_onlyOneTeam(career_stat, stat_range)
+        elif career_stat in standard_careerStatPitching and team == "Only One Team":
+            results = get_players_careerStatPitching_onlyOneTeam(career_stat, stat_range)
+
+
 
 
     elif (option1 == "teams" and option2 == "seasonal statistic") or (option1 == "seasonal statistic" and option2 == "teams"):
@@ -192,17 +202,28 @@ def search_players():
         award = option1_details if option1 == "awards" else option2_details
         team = option1_details if option1 == "teams" else option2_details
 
-        if award in standard_awards:
+        if award in standard_awards and team != "Only One Team":
             results = get_players_stdAward_team(award, team)
 
-        elif award == "Hall of Fame":
+        elif award == "Hall of Fame" and team != "Only One Team":
             results = get_players_hof_team(team)
 
-        elif award == "All Star":
+        elif award == "All Star" and team != "Only One Team":
             results = get_players_allstar_team(team)
 
-        elif award == "World Series":
+        elif award == "World Series" and team != "Only One Team":
             results = get_players_ws_team(team)
+
+        elif award == "Hall of Fame" and team == "Only One Team":
+            results = get_players_hof_onlyOneTeam()
+
+        elif award == "All Star" and team == "Only One Team":
+            results = get_players_allStar_onlyOneTeam()
+
+        elif award in standard_awards and team == "Only One Team":
+            results = get_players_stdAward_onlyOneTeam(award)
+
+
 
     elif (option1 == "positions" and option2 == "teams") or (option1 == "teams" and option2 == "positions"):
         # Extract the position and team details

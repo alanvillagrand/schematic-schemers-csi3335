@@ -186,6 +186,7 @@ def get_players_hof_team(team):
     )
 
 
+
 def get_players_pob_team(team):
     team_subquery = played_on_team_subquery(team)
 
@@ -240,10 +241,6 @@ def get_players_seasonBattingAVG_team(stat_range, team):
 
 
 
-
-
-
-
 def get_players_exclusive_to_team(team):
     team_subquery = played_on_team_subquery(team)
     return (
@@ -254,6 +251,53 @@ def get_players_exclusive_to_team(team):
         .group_by(People.playerID)
         .having(db.func.count(db.func.distinct(Teams.teamID)) == 1)
         .order_by(db.func.sum(Appearances.G_all).asc())
+        .distinct()
+        .all()
+    )
+
+
+def get_players_hof_onlyOneTeam():
+
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Appearances, Appearances.playerID == People.playerID)
+        .join(HallOfFame, HallOfFame.playerID == People.playerID)
+        .join(Teams, Teams.teamID == Appearances.teamID)
+        .filter(HallOfFame.inducted == 'Y')
+        .group_by(People.playerID)
+        .having(db.func.count(db.func.distinct(Teams.teamID)) == 1)
+        .order_by(db.func.sum(Appearances.G_all).asc())
+        .distinct()
+        .all()
+    )
+
+
+def get_players_stdAward_onlyOneTeam(award):
+
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Appearances, Appearances.playerID == People.playerID)
+        .join(Awards, Awards.playerID == People.playerID)
+        .join(Teams, Teams.teamID == Appearances.teamID)
+        .filter(Awards.awardID == award)
+        .group_by(People.playerID)
+        .having(db.func.count(db.func.distinct(Teams.teamID)) == 1)
+        .order_by(db.func.sum(Appearances.G_all).asc())
+        .distinct()
+        .all()
+    )
+
+
+def get_players_allStar_onlyOneTeam():
+
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(AllStarFull, AllStarFull.playerID == People.playerID)
+        .join(Teams, Teams.teamID == AllStarFull.teamID)
+        .filter(AllStarFull.GP > 0)
+        .group_by(People.playerID)
+        .having(db.func.count(db.func.distinct(Teams.teamID)) == 1)
+        .order_by(db.func.sum(AllStarFull.GP).asc())
         .distinct()
         .all()
     )
@@ -317,6 +361,66 @@ def get_players_careerStatBatting_team(stat_column, team, stat_range):
         .join(team_subquery, team_subquery.c.playerID == Batting.playerID)
         .group_by(People.playerID)
         .order_by(db.func.sum(Batting.b_G).asc())
+        .distinct()
+        .all()
+    )
+
+
+def get_players_careerStatBatting_onlyOneTeam(stat_column, stat_range):
+    batting_column = getattr(Batting, f"b_{stat_column}")
+    total_stat = db.func.sum(batting_column).label("total_stat")
+
+    career_stats = (
+        db.session.query(
+            Batting.playerID,
+            total_stat
+        )
+        .group_by(Batting.playerID)
+        .having(total_stat > stat_range)
+        .subquery()
+    )
+
+    return (
+        db.session.query(
+            People.nameFirst,
+            People.nameLast,
+        )
+        .join(career_stats, career_stats.c.playerID == People.playerID)
+        .join(Batting, Batting.playerID == People.playerID)
+        .join(Teams, Teams.teamID == Batting.teamID)
+        .group_by(People.playerID)
+        .having(db.func.count(db.func.distinct(Teams.teamID)) == 1)
+        .order_by(db.func.sum(Batting.b_G).asc())
+        .distinct()
+        .all()
+    )
+
+
+def get_players_careerStatPitching_onlyOneTeam(stat_column, stat_range):
+    pitching_column = getattr(Pitching, f"p_{stat_column}")
+    total_stat = db.func.sum(pitching_column).label("total_stat")
+
+    career_stats = (
+        db.session.query(
+            Pitching.playerID,
+            total_stat
+        )
+        .group_by(Pitching.playerID)
+        .having(total_stat > stat_range)
+        .subquery()
+    )
+
+    return (
+        db.session.query(
+            People.nameFirst,
+            People.nameLast,
+        )
+        .join(career_stats, career_stats.c.playerID == People.playerID)
+        .join(Pitching, Pitching.playerID == People.playerID)
+        .join(Teams, Teams.teamID == Pitching.teamID)
+        .group_by(People.playerID)
+        .having(db.func.count(db.func.distinct(Teams.teamID)) == 1)
+        .order_by(db.func.sum(Pitching.p_G).asc())
         .distinct()
         .all()
     )
@@ -413,6 +517,25 @@ def get_players_careerBattingAVG_team(stat_range, team):
         .group_by(People.playerID, People.nameFirst, People.nameLast)
         .having(db.func.sum(Batting.b_AB) > 0)
         .having((db.func.sum(Batting.b_H) / db.func.sum(Batting.b_AB)) >= stat_range)
+        .order_by(db.func.sum(Batting.b_G).asc())
+        .all()
+    )
+
+
+
+def get_players_careerBattingAVG_onlyOneTeam(stat_range):
+
+    return (
+        db.session.query(
+            People.nameFirst,
+            People.nameLast
+        )
+        .join(Batting, Batting.playerID == People.playerID)
+        .join(Teams, Teams.teamID == Batting.teamID)
+        .group_by(People.playerID)
+        .having(db.func.sum(Batting.b_AB) > 0)
+        .having((db.func.sum(Batting.b_H) / db.func.sum(Batting.b_AB)) >= stat_range)
+        .having(db.func.count(db.func.distinct(Teams.teamID)) == 1)
         .order_by(db.func.sum(Batting.b_G).asc())
         .all()
     )

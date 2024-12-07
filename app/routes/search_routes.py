@@ -59,7 +59,8 @@ from app.services.immaculateGridQueries import get_players_team_team, get_player
     get_players_careerPitchingERA_team, get_players_exclusive_to_team, get_players_seasonPitchingERA_team, \
     get_players_pob_team, get_players_careerStatWAR_team, get_players_seasonStatWAR_team, get_players_hof_onlyOneTeam, \
     get_players_allStar_onlyOneTeam, get_players_stdAward_onlyOneTeam, get_players_careerBattingAVG_onlyOneTeam, \
-    get_players_careerStatBatting_onlyOneTeam, get_players_careerStatPitching_onlyOneTeam
+    get_players_careerStatBatting_onlyOneTeam, get_players_careerStatPitching_onlyOneTeam, \
+    get_players_careerPitchingERA_onlyOneTeam, get_players_careerStatWAR_onlyOneTeam
 
 bp = Blueprint('search', __name__)
 
@@ -159,6 +160,10 @@ def search_players():
             results = get_players_careerStatBatting_onlyOneTeam(career_stat, stat_range)
         elif career_stat in standard_careerStatPitching and team == "Only One Team":
             results = get_players_careerStatPitching_onlyOneTeam(career_stat, stat_range)
+        elif career_stat == "ERA" and team == "Only One Team":
+            results = get_players_careerPitchingERA_onlyOneTeam()
+        elif career_stat == "WAR" and team == "Only One Team":
+            results = get_players_careerStatWAR_onlyOneTeam(stat_range)
 
 
 

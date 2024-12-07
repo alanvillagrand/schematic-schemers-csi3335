@@ -134,6 +134,22 @@ def get_players_careerStatWAR_team(team, stat_range):
     )
 
 
+def get_players_careerStatWAR_onlyOneTeam(stat_range):
+
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(CareerWar, CareerWar.playerID == People.playerID)
+        .join(Appearances, Appearances.playerID == People.playerID)
+        .join(Teams, Teams.teamID == Appearances.teamID)
+        .filter(CareerWar.war >= stat_range)
+        .group_by(People.playerID)
+        .having(db.func.count(db.func.distinct(Teams.teamID)) == 1)
+        .order_by(db.func.sum(Appearances.G_all).asc())
+        .distinct()
+        .all()
+    )
+
+
 def get_players_seasonPitchingERA_team(team):
 
     team_subquery = played_on_team_subquery(team)
@@ -490,6 +506,37 @@ def get_players_careerPitchingERA_team(team):
         .join(Pitching, Pitching.playerID == People.playerID)
         .join(team_subquery, team_subquery.c.playerID == Pitching.playerID)
         .group_by(People.playerID)
+        .order_by(db.func.sum(Pitching.p_G).asc())
+        .distinct()
+        .all()
+    )
+
+
+def get_players_careerPitchingERA_onlyOneTeam():
+
+    career_stats = (
+        db.session.query(
+            Pitching.playerID
+        )
+
+        .group_by(Pitching.playerID)
+        .having(func.sum(Pitching.p_IPOuts > 0))
+        .having(
+            (func.sum(Pitching.p_ER) / (func.sum(Pitching.p_IPOuts) / 3)) * 9 <= 3.00
+        )  # Weighted ERA <= 3.00
+        .subquery()
+    )
+
+    return (
+        db.session.query(
+            People.nameFirst,
+            People.nameLast,
+        )
+        .join(career_stats, career_stats.c.playerID == People.playerID)
+        .join(Pitching, Pitching.playerID == People.playerID)
+        .join(Teams, Teams.teamID == Pitching.teamID)
+        .group_by(People.playerID)
+        .having(db.func.count(db.func.distinct(Teams.teamID)) == 1)
         .order_by(db.func.sum(Pitching.p_G).asc())
         .distinct()
         .all()

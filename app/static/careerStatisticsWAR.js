@@ -1,0 +1,3 @@
+const careerStatisticsWAR = [
+    "40+"
+]

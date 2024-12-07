@@ -1,16 +1,17 @@
 from . import db
 from werkzeug.security import generate_password_hash, check_password_hash
 
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(150), unique=True, nullable=False)
+    username = db.Column(db.String(25), unique=True, nullable=False)
     password_hash = db.Column(db.String(150), nullable=False)
 
     def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
+        self.password_hash = password
 
     def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
+        return self.password_hash == password
 
 
 class People(db.Model):
@@ -116,6 +117,7 @@ class Teams(db.Model):
     team_projW = db.Column(db.SmallInteger)
     team_projL = db.Column(db.SmallInteger)
 
+
 class Awards(db.Model):
     __tablename__ = 'awards'  # Table name in your database
 
@@ -126,6 +128,7 @@ class Awards(db.Model):
     lgID = db.Column(db.CHAR(2), nullable=False)
     tie = db.Column(db.String(1))
     notes = db.Column(db.String(100))
+
 
 class Drafts(db.Model):
     __tablename__ = 'drafts'  # Table name in your database
@@ -173,6 +176,7 @@ class HallOfFame(db.Model):
     inducted = db.Column(db.String(1))  # 'Y' or 'N'
     category = db.Column(db.String(20))
     note = db.Column(db.String(25))
+
 
 class AllStarFull(db.Model):
     __tablename__ = 'allstarfull'
@@ -252,6 +256,7 @@ class Pitching(db.Model):
     p_SF = db.Column(db.SmallInteger, nullable=True)
     p_GIDP = db.Column(db.SmallInteger, nullable=True)
 
+
 class SeriesPost(db.Model):
     __tablename__ = 'seriespost'
 
@@ -283,7 +288,6 @@ class FieldingPost(db.Model):
     f_DP = db.Column(db.SmallInteger, nullable=True)  # Double plays
     f_TP = db.Column(db.SmallInteger, nullable=True)  # Triple plays
     f_PB = db.Column(db.SmallInteger, nullable=True)  # Passed balls (for catchers)
-
 
 
 class BattingPost(db.Model):
@@ -452,20 +456,3 @@ class ImmaculateGridTeams(db.Model):
     team_name = db.Column(db.String(50), nullable=False)
     startYear = db.Column(db.SmallInteger, nullable=False)
     endYear = db.Column(db.SmallInteger, nullable=False)
-
-
-class CareerWar(db.Model):
-    __tablename__ = 'careerwar'
-
-    careerwar_id = db.Column(db.Integer, primary_key=True, autoincrement=True)  # Primary key with auto-increment
-    playerID = db.Column(db.String(9), nullable=False, index=True)  # Indexed for fast lookups
-    war = db.Column(db.Float, nullable=True)  # Can be NULL, stores the WAR value
-
-
-class SeasonWar(db.Model):
-    __tablename__ = 'seasonwar'
-
-    seasonwar_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    playerID = db.Column(db.String(9), nullable=False, index=True)
-    yearID = db.Column(db.SmallInteger, nullable=True)
-    war = db.Column(db.Float, nullable=True)

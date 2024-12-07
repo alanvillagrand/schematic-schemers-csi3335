@@ -6,6 +6,7 @@
           display: flex;
           justify-content: center;
           align-items: center;
+          width: 300px;
         }
         .baseball-card {
           width: 250px;
@@ -52,6 +53,7 @@
           height: 100px;
           border-radius: 50%;
           border: 3px solid #ffffff;
+          background-color: white;
         }
         .card-body {
           padding: 15px;
@@ -92,42 +94,63 @@
         .baseball-card.flip .card-back {
           transform: rotateY(0);
         }
+        .form-container {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
     </style>
 
-    <div class="container">
-        <div class="baseball-card">
-          <!-- Front of the card -->
-          <div class="card-front">
-            <div class="card-header">
-              <img src="https://www.jetpunk.com/img/user-img/e2/e27da91b3d-450.webp" alt="Player Image" class="player-image">
-            </div>
-            <div class="card-body">
-              <h2 class="player-name">John Doe</h2>
-              <p class="player-info">
-                <strong>Team:</strong> New York Yankees<br>
-                <strong>Position:</strong> Pitcher
-              </p>
-            </div>
-            <div class="card-footer">
-              <button class="flip-card-btn">Flip Card</button>
-            </div>
-          </div>
+    <div>
+        <h1>Generate Baseball Cards of your Favorite Players!</h1>
+        <div class="form-container">
+            <form action="{{ url_for('card.card') }}" method="POST">
+              <div class="player-input">
+                <label for="player">Player:</label>
+                <input type="text" id="player" name="player"/>
+              </div>
+              <button type="submit" class="btn-submit">Create Card</button>
+            </form>
+        </div>
+        <div class="container">
+            <div class="baseball-card">
+              <!-- Front of the card -->
+              <div class="card-front">
+                <div class="card-header">
+                  <img src="/static/mlb.png" alt="Player Image" class="player-image">
+                </div>
+                <div class="card-body">
+                  <h2 class="player-name">John Doe</h2>
+                  <p class="player-info">
+                    <strong>Team:</strong> New York Yankees<br>
+                    <strong>Year:</strong> 2024 <br>
+                    <strong>From: </strong> USA
+                  </p>
+                </div>
+                <div class="card-footer">
+                  <button class="flip-card-btn">Flip Card</button>
+                </div>
+              </div>
 
-          <!-- Back of the card -->
-          <div class="card-back">
-            <div class="card-body">
-              <h2 class="player-name">John Doe</h2>
-              <p class="player-stats">
-                <strong>Games Played:</strong> 150<br>
-                <strong>ERA:</strong> 3.45<br>
-                <strong>Strikeouts:</strong> 230<br>
-                <strong>Wins:</strong> 15
-              </p>
+              <!-- Back of the card -->
+              <div class="card-back">
+                <div class="card-body">
+                  <h2 class="player-name">John Doe</h2>
+                  <p class="player-stats">
+                    <strong>Games Played:</strong> 150<br>
+                    <strong>AVG:</strong> .300<br>
+                    <strong>Runs:</strong> 37<br>
+                    <strong>Hits:</strong> 112<br>
+                    <strong>RBI:</strong> 50<br>
+                    <strong>HR:</strong> 15<br>
+                    <strong>SB:</strong> 11
+                  </p>
+                </div>
+                <div class="card-footer">
+                  <button class="back-button">Back</button>
+                </div>
+              </div>
             </div>
-            <div class="card-footer">
-              <button class="back-button">Back</button>
-            </div>
-          </div>
         </div>
     </div>
 

@@ -3571,7 +3571,7 @@ def search_players():
             results = get_players_allstar_team(team)
 
         elif award == "World Series":
-            results = get_players_ws_team(team)
+            results = teamsQueries.get_players_ws_team(team)
 
     elif (option1 == "positions" and option2 == "teams") or (option1 == "teams" and option2 == "positions"):
         # Extract the position and team details

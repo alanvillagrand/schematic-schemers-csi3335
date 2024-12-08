@@ -63,7 +63,7 @@ from app.services.immaculateGridQueries import get_players_team_team, get_player
     get_players_seasonStatPitching_negroLg, get_players_careerBattingAVG_negroLg, get_players_careerPitchingERA_negroLg, \
     get_players_careerStatWAR_negroLg, get_players_seasonBattingAVG_negroLg, get_players_seasonPitchingERA_negroLg, \
     get_players_seasonStatWAR_negroLg, get_players_team_negroLg, get_players_pob_negroLg, get_players_country_negroLg, \
-    get_players_position_negroLg
+    get_players_position_negroLg, get_players_negroLg, get_players_3030_negroLg, get_players_draftPick_negroLg
 
 bp = Blueprint('search', __name__)
 
@@ -782,7 +782,6 @@ def search_players():
         else:
             results = get_players_country_position(position, pob)
 
-
     elif (option1 == "dp" and option2 == "positions") or (option1 == "positions" and option2 == "dp"):
         position = option1_details if option1 == "positions" else option2_details
         results = get_players_draftPick_position(position)
@@ -834,7 +833,7 @@ def search_players():
 
         stat_range = request.form.get(f'dropdown2_{seasonal_stat}_specific') if option1 == "lg" else request.form.get(
             f'dropdown1_{seasonal_stat}_specific')
-        if seasonal_stat != "ERA":
+        if seasonal_stat != "ERA" and seasonal_stat != "30+HR/30+SB":
             stat_range = convert_to_number(stat_range)
 
         if seasonal_stat == "AVG":
@@ -844,26 +843,35 @@ def search_players():
         elif seasonal_stat in standard_seasonStatPitching:
             results = get_players_seasonStatPitching_negroLg(seasonal_stat, stat_range)
         elif seasonal_stat == "ERA":
-            results = get_players_seasonPitchingERA_negroLg()
+            results = get_players_seasonPitchingERA_negroLg(stat_range)
         elif seasonal_stat == "WAR":
             results = get_players_seasonStatWAR_negroLg(stat_range)
+        elif seasonal_stat == "30+HR/30+SB":
+            results = get_players_3030_negroLg()
 
     elif (option1 == "lg" and option2 == "teams") or (option1 == "teams" and option2 == "lg"):
         team = option1_details if option1 == "teams" else option2_details
         results = get_players_team_negroLg(team)
 
     elif (option1 == "lg" and option2 == "pob") or (option1 == "pob" and option2 == "lg"):
-        pob = option2_details if option1 == "pob" else option1_details
-
+        print("IN NEGRO LEAGUE POB")
+        pob = option1_details if option1 == "pob" else option2_details
         if pob == "Outside of USA":
             results = get_players_pob_negroLg()
         else:
             results = get_players_country_negroLg(pob)
 
-    elif (option1 == "lg" and option2 == "position") or (option1 == "position" and option2 == "lg"):
-        position = option1_details if option1 == "position" else option2_details
+    elif (option1 == "lg" and option2 == "positions") or (option1 == "positions" and option2 == "lg"):
+        print("IN NEGRO LEAGUE POS")
+        position = option1_details if option1 == "positions" else option2_details
         results = get_players_position_negroLg(position)
 
+    elif (option1 == "lg" and option2 == "lg") or (option1 == "lg" and option2 == "lg"):
+        print("IN NEGRO LEAGUE")
+        results = get_players_negroLg()
+
+    elif (option1 == "lg" and option2 == "dp") or (option1 == "dp" and option2 == "lg"):
+        results = get_players_draftPick_negroLg()
     else:
         return "Invalid selection or combination. Please try again.", 400
         # Render results

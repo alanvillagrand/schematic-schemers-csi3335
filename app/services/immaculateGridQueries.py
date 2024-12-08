@@ -3581,6 +3581,12 @@ def get_players_draftPick_country(country):
         .order_by(db.func.sum(Appearances.G_all).asc())
     )
 
+#
+#
+# all negro league queries with seperate combinations
+#
+#
+
 
 def get_players_negroLg_awards(award):
     negro_league_subquery = negro_league_appearance_subquery()
@@ -3661,7 +3667,6 @@ def get_players_careerStatBatting_negroLg(stat_column, stat_range):
 
 
 def get_players_careerStatPitching_negroLg(stat_column, stat_range):
-    # Map the stat column to the Pitching table
     pitching_column = getattr(Pitching, f"p_{stat_column}")
     total_stat = db.func.sum(pitching_column).label("total_stat")
 
@@ -3677,7 +3682,6 @@ def get_players_careerStatPitching_negroLg(stat_column, stat_range):
         .subquery()
     )
 
-    # Main query: Combine career stats with Negro League appearances
     return (
         db.session.query(
             People.nameFirst,
@@ -3697,12 +3701,17 @@ def get_players_careerBattingAVG_negroLg(stat_range):
     negro_league_subquery = negro_league_appearance_subquery()
 
     return (
-        db.session.query(People.nameFirst, People.nameLast)
+        db.session.query(
+            People.nameFirst,
+            People.nameLast
+        )
         .join(Batting, Batting.playerID == People.playerID)
         .join(negro_league_subquery, negro_league_subquery.c.playerID == Batting.playerID)
-        .filter(Batting.b_AB > 0)
-        .filter((db.func.sum(Batting.b_H) / db.func.sum(Batting.b_AB)) >= stat_range)
-        .group_by(People.playerID)
+        .group_by(People.playerID)  # Group by player
+        .having(
+            db.func.sum(Batting.b_AB) > 0,
+            (db.func.sum(Batting.b_H) / db.func.sum(Batting.b_AB)) >= stat_range
+        )
         .order_by(db.func.sum(Batting.b_G).asc())
         .distinct()
         .all()
@@ -3713,13 +3722,16 @@ def get_players_careerPitchingERA_negroLg():
     negro_league_subquery = negro_league_appearance_subquery()
 
     return (
-        db.session.query(People.nameFirst, People.nameLast)
+        db.session.query(
+            People.nameFirst,
+            People.nameLast
+        )
         .join(Pitching, Pitching.playerID == People.playerID)
         .join(negro_league_subquery, negro_league_subquery.c.playerID == Pitching.playerID)
-        .filter(
-            (db.func.sum(Pitching.p_ER) / (db.func.sum(Pitching.p_IPOuts) / 3)) * 9 <= 3.00
+        .group_by(People.playerID)  # Group by player
+        .having(
+            (db.func.sum(Pitching.p_ER) / (db.func.sum(Pitching.p_IPOuts) / 3)) * 9 <= 3.00  # ERA <= 3.00
         )
-        .group_by(People.playerID)
         .order_by(db.func.sum(Pitching.p_G).asc())
         .distinct()
         .all()
@@ -3731,10 +3743,12 @@ def get_players_careerStatWAR_negroLg(stat_range):
 
     return (
         db.session.query(People.nameFirst, People.nameLast)
-        .join(AdvancedStats, AdvancedStats.playerID == People.playerID)
-        .join(negro_league_subquery, negro_league_subquery.c.playerID == AdvancedStats.playerID)
-        .filter(db.func.sum(AdvancedStats.bwar162) >= stat_range)
+        .join(CareerWar, CareerWar.playerID == People.playerID)
+        .join(negro_league_subquery, negro_league_subquery.c.playerID == People.playerID)
+        .join(Appearances, Appearances.playerID == People.playerID)
+        .filter(CareerWar.war >= stat_range)
         .group_by(People.playerID)
+        .order_by(db.func.sum(Appearances.G_all).asc())
         .distinct()
         .all()
     )
@@ -3786,7 +3800,7 @@ def get_players_seasonStatWAR_negroLg(stat_range):
         .join(negro_league_subquery, negro_league_subquery.c.playerID == AdvancedStats.playerID)
         .filter(AdvancedStats.bwar162 >= stat_range)
         .group_by(People.playerID)
-        .order_by(db.func.sum(AdvancedStats.bwar162).desc())
+        .order_by(db.func.sum(AdvancedStats.bwar162).asc())
         .distinct()
         .all()
     )
@@ -3804,9 +3818,9 @@ def get_players_seasonStatBatting_negroLg(stat, stat_range):
             negro_league_subquery.c.playerID == Batting.playerID,
             negro_league_subquery.c.teamID == Batting.teamID,
             ))
-        .filter(batting_column1 >= stat_range)  # Filter players meeting stat range
+        .filter(batting_column1 >= stat_range)
         .group_by(People.playerID)
-        .order_by(db.func.sum(Batting.b_G).asc())  # Order by least games played
+        .order_by(db.func.sum(Batting.b_G).asc())
         .distinct()
         .all()
     )
@@ -3824,9 +3838,9 @@ def get_players_seasonStatPitching_negroLg(stat_column, stat_range):
             negro_league_subquery.c.playerID == Pitching.playerID,
             negro_league_subquery.c.teamID == Pitching.teamID,
             ))
-        .filter(pitching_column >= stat_range)  # Filter players meeting stat range
+        .filter(pitching_column >= stat_range)
         .group_by(People.playerID)
-        .order_by(db.func.sum(Pitching.p_G).asc())  # Order by least games pitched
+        .order_by(db.func.sum(Pitching.p_G).asc())
         .distinct()
         .all()
     )
@@ -3837,16 +3851,16 @@ def get_players_team_negroLg(team):
     team_subquery = played_on_team_subquery(team)
 
     return (
-        db.session.query(People.nameFirst, People.nameLast)
+        db.session.query(
+            People.nameFirst,
+            People.nameLast,
+            db.func.sum(Appearances.G_all).label("total_appearances")
+        )
         .join(negro_league_subquery, negro_league_subquery.c.playerID == People.playerID)
-        .join(team_subquery, and_(
-            team_subquery.c.playerID == negro_league_subquery.c.playerID,
-            team_subquery.c.teamID == negro_league_subquery.c.teamID
-        ))
+        .join(team_subquery, team_subquery.c.playerID == People.playerID)
+        .join(Appearances, Appearances.playerID == People.playerID)
         .group_by(People.playerID)
-        .order_by(People.nameLast.asc(), People.nameFirst.asc())  # Alphabetical order
-        .distinct()
-        .all()
+        .order_by(db.func.sum(Appearances.G_all).asc())
     )
 
 
@@ -3855,12 +3869,11 @@ def get_players_pob_negroLg():
 
     return (
         db.session.query(People.nameFirst, People.nameLast)
+        .join(Appearances, Appearances.playerID == People.playerID)
         .join(negro_league_subquery, negro_league_subquery.c.playerID == People.playerID)
         .filter(People.birthCountry != "USA")
         .group_by(People.playerID)
-        .order_by(db.func.sum(negro_league_subquery.c.teamID).asc())  # Order by least appearances in teams
-        .distinct()
-        .all()
+        .order_by(db.func.sum(Appearances.G_all).asc())
     )
 
 
@@ -3871,32 +3884,73 @@ def get_players_country_negroLg(country):
         db.session.query(People.nameFirst, People.nameLast)
         .join(negro_league_subquery, negro_league_subquery.c.playerID == People.playerID)
         .filter(People.birthCountry == country)
-        .group_by(People.playerID)  # Group by player ID to avoid duplicates
-        .order_by(db.func.sum(negro_league_subquery.c.teamID).asc())  # Order by least appearances in teams
-        .distinct()
-        .all()
+        .group_by(People.playerID)
+        .order_by(db.func.sum(negro_league_subquery.c.teamID).asc())
     )
 
 
 def get_players_position_negroLg(position):
     position_column = f'G_{position.lower()}'
 
-    # Ensure the column exists in the Appearances model
-    if not hasattr(Appearances, position_column):
-        raise ValueError(f"Invalid position: {position}")
+    # Subquery for players who played the specified position
+    plays_position = (
+        db.session.query(
+            Appearances.playerID,
+            db.func.sum(getattr(Appearances, position_column)).label("total_appearances")
+        )
+        .filter(getattr(Appearances, position_column) > 0)
+        .group_by(Appearances.playerID)
+        .subquery()
+    )
 
     negro_league_subquery = negro_league_appearance_subquery()
 
     return (
+        db.session.query(
+            People.nameFirst,
+            People.nameLast,
+            plays_position.c.total_appearances
+        )
+        .join(negro_league_subquery, negro_league_subquery.c.playerID == People.playerID)
+        .join(plays_position, plays_position.c.playerID == People.playerID)
+        .group_by(People.playerID, plays_position.c.total_appearances)
+        .order_by(plays_position.c.total_appearances.asc())
+    )
+
+
+def get_players_negroLg():
+    negro_league_subquery = negro_league_appearance_subquery()
+
+    return (
         db.session.query(People.nameFirst, People.nameLast)
-        .join(Appearances, Appearances.playerID == People.playerID)
-        .join(negro_league_subquery, and_(
-            negro_league_subquery.c.playerID == Appearances.playerID,
-            negro_league_subquery.c.teamID == Appearances.teamID,
-            ))
-        .filter(getattr(Appearances, position_column) > 0)
+        .join(negro_league_subquery, negro_league_subquery.c.playerID == People.playerID)
         .group_by(People.playerID)
-        .order_by(db.func.sum(getattr(Appearances, position_column)).asc())
-        .distinct()
-        .all()
+        .order_by(People.nameLast.asc(), People.nameFirst.asc())
+    )
+
+
+def get_players_3030_negroLg():
+    negro_league_subquery = negro_league_appearance_subquery()
+
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Batting, Batting.playerID == People.playerID)
+        .join(negro_league_subquery, negro_league_subquery.c.playerID == Batting.playerID)
+        .filter(Batting.b_SB > 30)
+        .filter(Batting.b_HR > 30)
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Batting.b_G).asc())
+    )
+
+
+def get_players_draftPick_negroLg():
+    negro_league_subquery = negro_league_appearance_subquery()
+
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Drafts, Drafts.playerID == People.playerID)
+        .join(negro_league_subquery, negro_league_subquery.c.playerID == People.playerID)
+        .filter(Drafts.draft_round == 1)
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Drafts.draft_round).asc())
     )

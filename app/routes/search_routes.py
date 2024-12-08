@@ -57,8 +57,13 @@ from app.services.immaculateGridQueries import get_players_team_team, get_player
     get_players_draftPick_country, get_players_draftPick_pob, get_players_draftPick_position, \
     get_players_stdAward_position, get_players_hof_position, get_players_allstar_position, \
     get_players_careerPitchingERA_team, get_players_exclusive_to_team, get_players_seasonPitchingERA_team, \
-    get_players_pob_team, get_players_careerStatWAR_team, get_players_seasonStatWAR_team
-
+    get_players_pob_team, get_players_careerStatWAR_team, get_players_seasonStatWAR_team, get_players_negroLg_hof, \
+    get_players_negroLg_allStar, get_players_negroLg_awards, get_players_careerStatPitching_negroLg, \
+    get_players_careerStatBatting_negroLg, get_players_seasonStatBatting_negroLg, \
+    get_players_seasonStatPitching_negroLg, get_players_careerBattingAVG_negroLg, get_players_careerPitchingERA_negroLg, \
+    get_players_careerStatWAR_negroLg, get_players_seasonBattingAVG_negroLg, get_players_seasonPitchingERA_negroLg, \
+    get_players_seasonStatWAR_negroLg, get_players_team_negroLg, get_players_pob_negroLg, get_players_country_negroLg, \
+    get_players_position_negroLg
 
 bp = Blueprint('search', __name__)
 
@@ -215,7 +220,6 @@ def search_players():
         pob= option1_details if option1 == "pob" else option2_details
         if pob == "Outside of USA":
             results = get_players_pob_team(team)
-
 
     elif option1 == "career statistic" and option2 == "career statistic":
         stat1 = option1_details
@@ -743,7 +747,7 @@ def search_players():
         elif award == "All Star" and pob == "Outside of USA":
             results = get_players_pob_allStar()
 
-        elif award in standard_awards and pob == "Outside of USA":
+        elif award in standard_awards and pob == "Outsid e of USA":
             results = get_players_pob_stdAward(award)
 
         elif award in standard_awards and pob != "Outside of USA":
@@ -789,8 +793,76 @@ def search_players():
             results = get_players_draftPick_pob()
         else:
             results = get_players_draftPick_country(pob)
+    elif (option1 == "lg" and option2 == "awards") or (option1 == "awards" and option2 == "lg"):
+        award = option1_details if option1 == "awards" else option2_details
+        league = option2_details if option1 == "awards" else option1_details
 
+        if award == "Hall of Fame" and league == "Negro League":
+            results = get_players_negroLg_hof()
 
+        elif award == "All Star" and league == "Negro League":
+            results = get_players_negroLg_allStar()
+
+        elif award in standard_awards and league == "Negro League":
+            results = get_players_negroLg_awards(award)
+
+    elif (option1 == "lg" and option2 == "career statistic") or (option1 == "career statistic" and option2 == "lg"):
+        print("IN NEGRO LEAGUE CSTATS")
+        career_stat = option1_details if option1 == "career statistic" else option2_details
+        lg = option2_details if option1 == "career statistic" else option1_details
+
+        stat_range = request.form.get(f'dropdown2_{career_stat}_specific') if option1 == "lg" else request.form.get(
+            f'dropdown1_{career_stat}_specific')
+        if career_stat != "ERA":
+            stat_range = convert_to_number(stat_range)
+
+        if career_stat == "AVG":
+            results = get_players_careerBattingAVG_negroLg(stat_range)
+        elif career_stat in standard_careerStatBatting:
+            results = get_players_careerStatBatting_negroLg(career_stat, stat_range)
+        elif career_stat in standard_careerStatPitching:
+            results = get_players_careerStatPitching_negroLg(career_stat, stat_range)
+        elif career_stat == "ERA":
+            results = get_players_careerPitchingERA_negroLg()
+        elif career_stat == "WAR":
+            results = get_players_careerStatWAR_negroLg(stat_range)
+
+    elif (option1 == "lg" and option2 == "seasonal statistic") or (option1 == "seasonal statistic" and option2 == "lg"):
+        print("IN NEGRO LEAGUE SSTATS")
+        seasonal_stat = option1_details if option1 == "seasonal statistic" else option2_details
+        lg = option2_details if option1 == "seasonal statistic" else option1_details
+
+        stat_range = request.form.get(f'dropdown2_{seasonal_stat}_specific') if option1 == "lg" else request.form.get(
+            f'dropdown1_{seasonal_stat}_specific')
+        if seasonal_stat != "ERA":
+            stat_range = convert_to_number(stat_range)
+
+        if seasonal_stat == "AVG":
+            results = get_players_seasonBattingAVG_negroLg(stat_range)
+        elif seasonal_stat in standard_seasonStatBatting:
+            results = get_players_seasonStatBatting_negroLg(seasonal_stat, stat_range)
+        elif seasonal_stat in standard_seasonStatPitching:
+            results = get_players_seasonStatPitching_negroLg(seasonal_stat, stat_range)
+        elif seasonal_stat == "ERA":
+            results = get_players_seasonPitchingERA_negroLg()
+        elif seasonal_stat == "WAR":
+            results = get_players_seasonStatWAR_negroLg(stat_range)
+
+    elif (option1 == "lg" and option2 == "teams") or (option1 == "teams" and option2 == "lg"):
+        team = option1_details if option1 == "teams" else option2_details
+        results = get_players_team_negroLg(team)
+
+    elif (option1 == "lg" and option2 == "pob") or (option1 == "pob" and option2 == "lg"):
+        pob = option2_details if option1 == "pob" else option1_details
+
+        if pob == "Outside of USA":
+            results = get_players_pob_negroLg()
+        else:
+            results = get_players_country_negroLg(pob)
+
+    elif (option1 == "lg" and option2 == "position") or (option1 == "position" and option2 == "lg"):
+        position = option1_details if option1 == "position" else option2_details
+        results = get_players_position_negroLg(position)
 
     else:
         return "Invalid selection or combination. Please try again.", 400

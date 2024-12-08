@@ -68,7 +68,12 @@ from app.services.immaculateGridQueries import get_players_team_team, get_player
     get_players_careerBattingAVG_careerStatWAR, get_players_careerStatWAR_careerStatPitching, \
     get_players_careerStatWAR_careerStatBatting, get_players_careerStatWAR_seasonBatting3030, \
     get_players_careerStatWAR_seasonBattingAVG, get_players_careerStatWAR_seasonPitchingERA, \
-    get_players_careerStatWAR_seasonStatPitching, get_players_careerStatWAR_seasonStatBatting
+    get_players_careerStatWAR_seasonStatPitching, get_players_careerStatWAR_seasonStatBatting, \
+    get_players_careerStatWAR_seasonStatWAR, get_players_careerStatWAR_stdAward, get_players_careerStatWAR_hof, \
+    get_players_careerStatWAR_allStar, get_players_careerStatWAR_position, get_players_careerStatWAR_pob, \
+    get_players_careerStatWAR_country, get_players_careerStatWAR_draftPick, get_players_seasonStatWAR_seasonStatBatting, \
+    get_players_seasonStatWAR_seasonStatPitching, get_players_seasonStatWAR_seasonBatting3030, \
+    get_players_seasonStatWAR_seasonBattingAVG, get_players_seasonStatWAR_seasonPitchingERA
 
 bp = Blueprint('search', __name__)
 
@@ -448,6 +453,9 @@ def search_players():
         elif career_stat == "WAR" and seasonal_stat in standard_seasonStatBatting:
             results = get_players_careerStatWAR_seasonStatBatting(career_range1, seasonal_stat, seasonal_range2)
 
+        elif career_stat == "WAR" and seasonal_stat == "WAR":
+            results = get_players_careerStatWAR_seasonStatWAR(career_range1, seasonal_range2)
+
 
 
 
@@ -504,6 +512,18 @@ def search_players():
         elif career_stat == "ERA" and award in standard_awards:
             results = get_players_careerPitchingERA_stdAward(award)
 
+        elif career_stat == "WAR" and award in standard_awards:
+            results = get_players_careerStatWAR_stdAward(stat_range, award)
+
+        elif career_stat == "WAR" and award == "Hall of Fame":
+            results = get_players_careerStatWAR_hof(stat_range)
+
+        elif career_stat == "WAR" and award == "All Star":
+            results = get_players_careerStatWAR_allStar(stat_range)
+
+
+
+
 
 
 
@@ -532,6 +552,10 @@ def search_players():
         elif career_stat == "ERA":
             results = get_players_careerPitchingERA_position(position)
 
+        elif career_stat == "WAR":
+            results = get_players_careerStatWAR_position(stat_range, position)
+
+
 
 
     elif (option1 == "career statistic" and option2 == "pob") or (option1 == "pob" and option2 == "career statistic"):
@@ -548,26 +572,32 @@ def search_players():
         if career_stat in standard_careerStatPitching and pob == "Outside of USA":
             results = get_players_careerStatPitching_pob(career_stat, stat_range)
 
-        if career_stat in standard_careerStatBatting and pob == "Outside of USA":
+        elif career_stat in standard_careerStatBatting and pob == "Outside of USA":
             results = get_players_careerStatBatting_pob(career_stat, stat_range)
 
-        if career_stat == "AVG" and pob == "Outside of USA":
+        elif career_stat == "AVG" and pob == "Outside of USA":
             results = get_players_careerBattingAVG_pob(stat_range)
 
-        if career_stat == "ERA" and pob == "Outside of USA":
+        elif career_stat == "ERA" and pob == "Outside of USA":
             results = get_players_careerPitchingERA_pob()
 
-        if career_stat in standard_careerStatPitching and pob != "Outside of USA":
+        elif career_stat in standard_careerStatPitching and pob != "Outside of USA":
             results = get_players_careerStatPitching_country(career_stat, stat_range, pob)
 
-        if career_stat in standard_careerStatBatting and pob != "Outside of USA":
+        elif career_stat in standard_careerStatBatting and pob != "Outside of USA":
             results = get_players_careerStatBatting_country(career_stat, stat_range, pob)
 
-        if career_stat == "AVG" and pob != "Outside of USA":
+        elif career_stat == "AVG" and pob != "Outside of USA":
             results = get_players_careerBattingAVG_country(stat_range, pob)
 
-        if career_stat == "ERA" and pob != "Outside of USA":
+        elif career_stat == "ERA" and pob != "Outside of USA":
             results = get_players_careerPitchingERA_country(pob)
+
+        elif career_stat == "WAR" and pob == "Outside of USA":
+            results = get_players_careerStatWAR_pob(stat_range)
+
+        elif career_stat == "WAR" and pob != "Outside of USA":
+            results = get_players_careerStatWAR_country(stat_range, pob)
 
 
 
@@ -580,14 +610,17 @@ def search_players():
         if career_stat in standard_careerStatBatting:
             results = get_players_careerStatBatting_draftPick(career_stat, stat_range)
 
-        if career_stat in standard_careerStatPitching:
+        elif career_stat in standard_careerStatPitching:
             results = get_players_careerStatPitching_draftPick(career_stat, stat_range)
 
-        if career_stat == "AVG":
+        elif career_stat == "AVG":
             results = get_players_careerBattingAVG_draftPick(stat_range)
 
-        if career_stat == "ERA":
+        elif career_stat == "ERA":
             results = get_players_careerPitchingERA_draftPick()
+
+        elif career_stat == "WAR":
+            results = get_players_careerStatWAR_draftPick(stat_range)
 
 
 
@@ -669,6 +702,42 @@ def search_players():
                 results = get_players_seasonPitchingERA_seasonStatBatting(stat2, stat_range2)
             else:
                 results= get_players_seasonPitchingERA_seasonStatBatting(stat1, stat_range1)
+
+        elif (stat1 in standard_seasonStatBatting and stat2 == "WAR") or (stat1 == "WAR" and stat2 in standard_seasonStatBatting):
+            if stat1 == "WAR":
+                results = get_players_seasonStatWAR_seasonStatBatting(stat2, stat_range2, stat_range1)
+            else:
+                results = get_players_seasonStatWAR_seasonStatBatting(stat1, stat_range1, stat_range2)
+
+        elif (stat1 in standard_seasonStatPitching and stat2 == "WAR") or (stat1 == "WAR" and stat2 in standard_seasonStatPitching):
+            if stat1 == "WAR":
+                results = get_players_seasonStatWAR_seasonStatPitching(stat2, stat_range2, stat_range1)
+            else:
+                results = get_players_seasonStatWAR_seasonStatPitching(stat1, stat_range1, stat_range2)
+
+        elif (stat1 == "30+HR/30+SB" and stat2 == "WAR") or (stat1 == "WAR" and stat2 == "30+HR/30+SB"):
+            if stat1 == "WAR":
+                results = get_players_seasonStatWAR_seasonBatting3030(stat_range1)
+            else:
+                results = get_players_seasonStatWAR_seasonBatting3030(stat_range2)
+
+        elif (stat1 == "AVG" and stat2 == "WAR") or (stat1 == "WAR" and stat2 == "AVG"):
+            if stat1 == "WAR":
+                results = get_players_seasonStatWAR_seasonBattingAVG(stat_range1, stat_range2)
+            else:
+                results = get_players_seasonStatWAR_seasonBattingAVG(stat_range2, stat_range1)
+
+        elif (stat1 == "ERA" and stat2 == "WAR") or (stat1 == "WAR" and stat2 == "ERA"):
+            if stat1 == "WAR":
+                results = get_players_seasonStatWAR_seasonPitchingERA(stat_range1)
+            else:
+                results = get_players_seasonStatWAR_seasonPitchingERA(stat_range2)
+
+
+
+
+
+
 
 
 

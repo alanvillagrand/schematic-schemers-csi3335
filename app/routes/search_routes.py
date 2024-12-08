@@ -73,7 +73,9 @@ from app.services.immaculateGridQueries import get_players_team_team, get_player
     get_players_careerStatWAR_allStar, get_players_careerStatWAR_position, get_players_careerStatWAR_pob, \
     get_players_careerStatWAR_country, get_players_careerStatWAR_draftPick, get_players_seasonStatWAR_seasonStatBatting, \
     get_players_seasonStatWAR_seasonStatPitching, get_players_seasonStatWAR_seasonBatting3030, \
-    get_players_seasonStatWAR_seasonBattingAVG, get_players_seasonStatWAR_seasonPitchingERA
+    get_players_seasonStatWAR_seasonBattingAVG, get_players_seasonStatWAR_seasonPitchingERA, \
+    get_players_seasonWAR_allStar, get_players_seasonWAR_stdAward, get_players_seasonStatWAR_pob, \
+    get_players_seasonStatWAR_country, get_players_draftPick_seasonStatWAR
 
 bp = Blueprint('search', __name__)
 
@@ -789,6 +791,11 @@ def search_players():
             results = get_players_seasonBatting3030_allStar()
         elif stat == "WAR" and award == "Hall of Fame":
             results = get_players_seasonWAR_hof(stat_range)
+        elif stat == "WAR" and award == "All Star":
+            results = get_players_seasonWAR_allStar(stat_range)
+        elif stat == "WAR" and award in standard_awards:
+            results = get_players_seasonWAR_stdAward(stat_range, award)
+
 
 
 
@@ -851,6 +858,10 @@ def search_players():
             results = get_players_seasonPitchingERA_country(pob)
         elif stat == "30+HR/30+SB" and pob != "Outside of USA":
             results = get_players_seasonBatting3030_country(pob)
+        elif stat == "WAR" and pob == "Outside of USA":
+            results = get_players_seasonStatWAR_pob(stat_range)
+        elif stat == "WAR" and pob != "Outside of USA":
+            results = get_players_seasonStatWAR_country(stat_range, pob)
 
 
     elif (option1 == "seasonal statistic" and option2 == "dp") or (option1 == "dp" and option2 == "seasonal statistic"):
@@ -870,6 +881,8 @@ def search_players():
             results = get_players_draftPick_seasonPitchingERA()
         elif stat == "30+HR/30+SB":
             results = get_players_draftPick_seasonBatting3030()
+        elif stat == "WAR":
+            results = get_players_draftPick_seasonStatWAR(stat_range)
 
 
 

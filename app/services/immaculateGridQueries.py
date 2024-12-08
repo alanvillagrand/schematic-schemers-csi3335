@@ -1169,13 +1169,40 @@ def get_players_seasonBattingAVG_hof(stat_range):
 def get_players_seasonWAR_hof(stat_range):
     return (
         db.session.query(People.nameFirst, People.nameLast)
-        .join(Batting, Batting.playerID == People.playerID)
+        .join(Appearances, Appearances.playerID == People.playerID)
         .join(HallOfFame, HallOfFame.playerID == People.playerID)
-        .join(AdvancedStats, AdvancedStats.playerID == People.playerID)
-        .filter(AdvancedStats.WAR162 >= stat_range)
+        .join(SeasonWar, SeasonWar.playerID == People.playerID)
+        .filter(SeasonWar.war >= stat_range)
         .filter(HallOfFame.inducted == 'Y')
         .group_by(People.playerID)
-        .order_by(db.func.sum(Batting.b_G).asc())
+        .order_by(db.func.sum(Appearances.G_all).asc())
+        .distinct()
+        .all()
+    )
+
+def get_players_seasonWAR_stdAward(stat_range, award):
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Appearances, Appearances.playerID == People.playerID)
+        .join(Awards, Awards.playerID == People.playerID)
+        .join(SeasonWar, SeasonWar.playerID == People.playerID)
+        .filter(SeasonWar.war >= stat_range)
+        .filter(Awards.awardID == award)
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Appearances.G_all).asc())
+        .distinct()
+        .all()
+    )
+
+def get_players_seasonWAR_allStar(stat_range):
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(AllStarFull, AllStarFull.playerID == People.playerID)
+        .join(SeasonWar, SeasonWar.playerID == People.playerID)
+        .filter(SeasonWar.war >= stat_range)
+        .filter(AllStarFull.GP > 0)
+        .group_by(People.playerID)
+        .order_by(db.func.sum(AllStarFull.GP).asc())
         .distinct()
         .all()
     )
@@ -1186,8 +1213,8 @@ def get_players_seasonWAR_position(stat_range, position):
     return (
         db.session.query(People.nameFirst, People.nameLast)
         .join(Appearances, Appearances.playerID == People.playerID)
-        .join(AdvancedStats, AdvancedStats.playerID == People.playerID)
-        .filter(AdvancedStats.bwar162 >= stat_range)
+        .join(SeasonWar, SeasonWar.playerID == People.playerID)
+        .filter(SeasonWar.war >= stat_range)
         .filter(getattr(Appearances, position_column) > 0)
         .group_by(People.playerID)
         .order_by(func.sum(getattr(Appearances, position_column)))
@@ -1533,6 +1560,34 @@ def get_players_seasonBatting3030_pob():
         .filter(People.birthCountry != "USA")
         .group_by(People.playerID)
         .order_by(db.func.sum(Batting.b_G).asc())
+        .distinct()
+        .all()
+    )
+
+def get_players_seasonStatWAR_pob(stat_range):
+
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(SeasonWar, SeasonWar.playerID == People.playerID)
+        .join(Appearances, Appearances.playerID == People.playerID)
+        .filter(SeasonWar.war >= stat_range)
+        .filter(People.birthCountry != "USA")
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Appearances.G_all).asc())
+        .distinct()
+        .all()
+    )
+
+def get_players_seasonStatWAR_country(stat_range, country):
+
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(SeasonWar, SeasonWar.playerID == People.playerID)
+        .join(Appearances, Appearances.playerID == People.playerID)
+        .filter(SeasonWar.war >= stat_range)
+        .filter(People.birthCountry == country)
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Appearances.G_all).asc())
         .distinct()
         .all()
     )
@@ -4485,6 +4540,19 @@ def get_players_draftPick_seasonBattingAVG(season_range):
         .filter(Drafts.draft_round == 1)
         .group_by(People.playerID)
         .order_by(db.func.sum(Batting.b_G).asc())
+    )
+
+
+def get_players_draftPick_seasonStatWAR(season_range):
+    return(
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(SeasonWar, SeasonWar.playerID == People.playerID)
+        .join(Appearances, Appearances.playerID == People.playerID)
+        .join(Drafts, Drafts.playerID == People.playerID)
+        .filter(SeasonWar.war >= season_range)
+        .filter(Drafts.draft_round == 1)
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Appearances.G_all).asc())
     )
 
 def get_players_draftPick_seasonBatting3030():

@@ -462,7 +462,7 @@ class SeasonWar(db.Model):
     __tablename__ = 'seasonwar'
 
     seasonwar_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    playerID = db.Column(db.String(9), nullable=False, index=True)
+    playerID = db.Column(db.String(9), db.ForeignKey('people.playerID'), nullable=False)
     yearID = db.Column(db.SmallInteger, nullable=True)
     war = db.Column(db.Float, nullable=True)
 
@@ -470,6 +470,16 @@ class CareerWar(db.Model):
     __tablename__ = 'careerwar'
 
     careerwar_id = db.Column(db.Integer, primary_key=True, autoincrement=True)  # Primary key with auto-increment
-    playerID = db.Column(db.String(9), nullable=False, index=True)  # Indexed for fast lookups
+    playerID = db.Column(db.String(9), db.ForeignKey('people.playerID'), nullable=False)
     war = db.Column(db.Float, nullable=True)  # Can be NULL, stores the WAR value
+
+class NoHitters(db.Model):
+    __tablename__ = 'no_hitters'
+
+    no_hitters__ID = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    playerID = db.Column(db.String(9), db.ForeignKey('people.playerID'), nullable=False)
+    yearID = db.Column(db.SmallInteger, nullable=False)
+    teamID = db.Column(db.String(3), db.ForeignKey('teams.teamID'), nullable=False)
+    Rk = db.Column(db.BigInteger, nullable=True)
+    Name = db.Column(db.Text, nullable=True)
 

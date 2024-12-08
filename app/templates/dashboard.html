@@ -18,6 +18,7 @@
                     <option value="positions">Positions</option>
                     <option value="pob">Place of Birth</option>
                     <option value="dp">Draft Pick</option>
+                    <option value="no-hitter">No Hitter</option>
                 </select>
                 <div id="dynamicOptions1" class="dynamic-options"></div>
             </div>
@@ -33,6 +34,7 @@
                     <option value="positions">Positions</option>
                     <option value="pob">Place of Birth</option>
                     <option value="dp">Draft Pick</option>
+                    <option value="no-hitter">No Hitter</option>
                 </select>
                 <div id="dynamicOptions2" class="dynamic-options"></div>
             </div>
@@ -78,6 +80,9 @@
             }
             else if (dropdownValue === "dp"){
                 createDropdown(dynamicOptionsDiv, draftPick, `${dropdownId}_details`, "Select a Draft Round")
+            }
+            else if (dropdownValue === "no-hitter"){
+                
             }
         }
 

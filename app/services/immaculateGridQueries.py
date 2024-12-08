@@ -1,7 +1,9 @@
 from app.models import People, Batting, Teams, db, Fielding, Awards, HallOfFame, AllStarFull, Appearances, Pitching, \
-    SeriesPost, FieldingPost, BattingPost, Drafts, AdvancedStats, ImmaculateGridTeams, CareerWar, SeasonWar
+    SeriesPost, FieldingPost, BattingPost, Drafts, AdvancedStats, ImmaculateGridTeams, CareerWar, SeasonWar, NoHitters
 
-from sqlalchemy import func, and_, or_
+from sqlalchemy import func, and_, or_, case, desc
+from sqlalchemy.orm import aliased
+from sqlalchemy.sql import exists
 
 ''' Subquery Functions '''
 def join_subqueries(subquery1, subquery2):
@@ -3552,3 +3554,138 @@ def get_players_draftPick_country(country):
         .group_by(People.playerID)
         .order_by(db.func.sum(Appearances.G_all).asc())
     )
+
+def get_no_hitter_career_statistic(career_stat, stat_range):
+    if (career_stat != "WAR"):
+        results = (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Pitching, Pitching.playerID == People.playerID)
+        .filter(
+            exists().where(Pitching.playerID == NoHitters.playerID)
+        )
+        .group_by(Pitching.playerID)
+        .having(
+            case(
+                (career_stat == "HR", func.sum(Pitching.p_HR) > stat_range),
+                (career_stat == "W", func.sum(Pitching.p_W) > stat_range),
+                (career_stat == "H", func.sum(Pitching.p_H) > stat_range),
+                (career_stat == "SV", func.sum(Pitching.p_SV) > stat_range),
+                (career_stat == "SO", func.sum(Pitching.p_SO) > stat_range),
+                (career_stat == "ERA", func.avg(Pitching.p_ERA) <= stat_range),
+            )
+        )
+        .all()
+        )
+    else:
+        results = (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(CareerWar, CareerWar.playerID == People.playerID)
+        .filter(
+            exists().where(CareerWar.playerID == NoHitters.playerID)
+        )
+        .filter(CareerWar.war > stat_range)
+        .order_by(CareerWar.war)
+        .all()
+        )
+    return results
+
+def get_no_hitter_seasonal_statistic(seasonal_stat, stat_range):
+    if (seasonal_stat != "WAR"):
+        results = (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Pitching, Pitching.playerID == People.playerID)
+        .filter(
+            case(
+                (seasonal_stat == "HR", Pitching.p_HR > stat_range),
+                (seasonal_stat == "W", Pitching.p_W > stat_range),
+                (seasonal_stat == "R", Pitching.p_R > stat_range),
+                (seasonal_stat == "H", Pitching.p_H > stat_range),
+                (seasonal_stat == "SV", Pitching.p_SV > stat_range),
+                (seasonal_stat == "SO", Pitching.p_SO > stat_range),
+                (seasonal_stat == "ERA", Pitching.p_ERA <= stat_range),
+
+            ),
+            exists().where(Pitching.playerID == NoHitters.playerID)
+        )
+        .all()
+        )
+    else:
+        results = (
+        db.session.query(People.nameFirst, People.nameLast).distinct()
+        .join(AdvancedStats, AdvancedStats.playerID == People.playerID)
+        .filter(
+            (AdvancedStats.br_pwar162 > stat_range),
+            exists().where(People.playerID == NoHitters.playerID)
+        )
+        .order_by(AdvancedStats.br_pwar162)
+        .all()
+        )
+    return results
+
+def get_no_hitter_awards(award):
+    if(award == "Hall of Fame"):
+        results = (
+        db.session.query(People.nameFirst, People.nameLast).distinct()
+        .join(HallOfFame, HallOfFame.playerID == People.playerID)
+        .filter(
+            exists().where(HallOfFame.playerID == NoHitters.playerID)
+        )
+        .all()
+        )
+    elif(award == "All Star"):
+        results = (
+        db.session.query(People.nameFirst, People.nameLast).distinct()
+        .join(AllStarFull, AllStarFull.playerID == People.playerID)
+        .filter(
+            exists().where(AllStarFull.playerID == NoHitters.playerID)
+        )
+        .all()
+        )
+    else:
+        results = (
+        db.session.query(People.nameFirst, People.nameLast).distinct()
+        .join(Awards, Awards.playerID == People.playerID)
+        .filter(
+            (Awards.awardID == award),
+            exists().where(Awards.playerID == NoHitters.playerID)
+        )
+        .all())
+    return results
+
+def get_no_hitter_pob(pob):
+    if (pob == "Outside of USA"):
+        results = (
+        db.session.query(People.nameFirst, People.nameLast).distinct()
+        .join(Pitching, Pitching.playerID == People.playerID)
+        .filter(
+            (People.birthCountry != "USA"),
+            exists().where(Pitching.playerID == NoHitters.playerID)
+        )
+        .order_by(People.birthYear)
+        .all()
+        )
+    else:
+        results = (
+        db.session.query(People.nameFirst, People.nameLast).distinct()
+        .join(Pitching, Pitching.playerID == People.playerID)
+        .filter(
+            (People.birthCountry == pob),
+            exists().where(Pitching.playerID == NoHitters.playerID)
+        )
+        .order_by(People.birthYear)
+        .all()
+        )
+    return results
+
+def get_no_hitter_dp(dp):
+    results = (
+    db.session.query(People.nameFirst, People.nameLast).distinct()
+    .join(Drafts, Drafts.playerID == People.playerID)
+    .filter(
+        (Drafts.draft_round == dp),
+        exists().where(Drafts.playerID == NoHitters.playerID)
+    )
+    .order_by(People.birthYear)
+    .all()
+    )
+    return results

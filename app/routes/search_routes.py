@@ -1,63 +1,6 @@
 from flask import Blueprint, request, render_template
 
-from app.services.immaculateGridQueries import get_players_team_team, get_players_careerBattingAVG_team, \
-    get_players_careerStatBatting_team, get_players_careerStatPitching_team, get_players_seasonStatBatting_team, \
-    get_players_seasonStatPitching_team, get_players_seasonBattingAVG_team, get_players_seasonBatting3030_team, \
-    get_players_stdAward_team, get_players_hof_team, get_players_allstar_team, get_players_ws_team, \
-    get_players_position_team, get_players_careerStatBatting_careerStatBatting, \
-    get_players_careerStatPitching_careerStatPitching, get_players_careerStatBatting_careerStatPitching, \
-    get_players_careerBattingAVG_careerStatBatting, get_players_careerBattingAVG_careerStatPitching, \
-    get_players_careerPitchingERA_careerStatPitching, get_players_careerPitchingERA_careerStatBatting, \
-    get_players_careerPitchingERA_careerStatAVG, get_players_careerStatBatting_seasonStatBatting, \
-    get_players_careerStatBatting_seasonPitchingERA, get_players_careerStatPitching_seasonPitchingERA, \
-    get_players_careerStatBatting_seasonStatPitching, get_players_careerStatPitching_seasonStatBatting, \
-    get_players_careerStatPitching_seasonStatPitching, get_players_careerPitchingERA_seasonStatPitching, \
-    get_players_careerPitchingERA_seasonStatBatting, get_players_careerPitchingERA_seasonPitchingERA, \
-    get_players_careerPitchingERA_seasonStatAVG, get_players_careerPitchingERA_seasonBatting3030, \
-    get_players_careerBattingAVG_seasonStatBatting, get_players_careerBattingAVG_seasonBatting3030, \
-    get_players_careerBattingAVG_seasonBattingAVG, get_players_careerBattingAVG_seasonPitchingERA, \
-    get_players_careerBattingAVG_seasonStatPitching, get_players_careerStatBatting_seasonBattingAVG, \
-    get_players_careerStatPitching_seasonBattingAVG, get_players_careerStatBatting_seasonBatting3030, \
-    get_players_careerStatPitching_seasonBatting3030, get_players_careerStatPitching_hof, \
-    get_players_careerStatBatting_hof, get_players_careerStatPitching_allStar, get_players_careerStatBatting_allStar, \
-    get_players_careerStatPitching_stdAward, get_players_careerStatBatting_stdAward, \
-    get_players_careerBattingAVG_stdAward, get_players_careerBattingAVG_allStar, get_players_careerBattingAVG_hof, \
-    get_players_careerPitchingERA_hof, get_players_careerPitchingERA_allStar, get_players_careerPitchingERA_stdAward, \
-    get_players_careerBattingAVG_position, get_players_careerStatBatting_position, \
-    get_players_careerStatPitching_position, get_players_careerPitchingERA_position, get_players_careerStatPitching_pob, \
-    get_players_careerStatBatting_pob, get_players_careerBattingAVG_pob, get_players_careerPitchingERA_pob, \
-    get_players_careerStatPitching_country, get_players_careerStatBatting_country, get_players_careerBattingAVG_country, \
-    get_players_careerPitchingERA_country, get_players_careerStatBatting_draftPick, \
-    get_players_careerStatPitching_draftPick, get_players_careerBattingAVG_draftPick, \
-    get_players_careerPitchingERA_draftPick, get_players_seasonStatBatting_seasonStatBatting, \
-    get_players_seasonStatPitching_seasonStatPitching, get_players_seasonStatPitching_seasonStatBatting, \
-    get_players_seasonStatPitching_seasonStatAVG, get_players_seasonStatBatting_seasonStatAVG, \
-    get_players_seasonBatting3030_seasonStatAVG, get_players_seasonPitchingERA_seasonStatAVG, \
-    get_players_seasonPitchingERA_seasonBatting3030, get_players_seasonStatBatting3030_seasonStatBatting, \
-    get_players_seasonStatBatting3030_seasonStatPitching, get_players_seasonPitchingERA_seasonStatPitching, \
-    get_players_seasonPitchingERA_seasonStatBatting, get_players_seasonStatBatting_stdAward, \
-    get_players_seasonStatPitching_stdAward, get_players_seasonStatBatting_ws, get_players_seasonStatBatting_allStar, \
-    get_players_seasonStatPitching_allStar, get_players_seasonBattingAVG_stdAward, get_players_seasonBattingAVG_allStar, \
-    get_players_seasonBattingAVG_hof, get_players_seasonStatBatting_hof, get_players_seasonStatPitching_hof, \
-    get_players_seasonStatERA_stdAward, get_players_seasonStatERA_allStar, get_players_seasonStatERA_hof, \
-    get_players_seasonBatting3030_stdAward, get_players_seasonBatting3030_hof, get_players_seasonBatting3030_allStar, \
-    get_players_seasonWAR_hof, get_players_seasonStatBatting_position, get_players_seasonStatPitching_position, \
-    get_players_seasonPitchingERA_position, get_players_seasonBattingAVG_position, \
-    get_players_seasonBatting3030_position, get_players_seasonWAR_position, get_players_seasonStatBatting_pob, \
-    get_players_seasonStatPitching_pob, get_players_seasonPitchingERA_pob, get_players_seasonBattingAVG_pob, \
-    get_players_seasonBatting3030_pob, get_players_seasonStatBatting_country, get_players_seasonStatPitching_country, \
-    get_players_seasonBattingAVG_country, get_players_seasonPitchingERA_country, get_players_seasonBatting3030_country, \
-    get_players_draftPick_seasonStatPitching, get_players_draftPick_seasonStatBatting, \
-    get_players_draftPick_seasonBattingAVG, get_players_draftPick_seasonPitchingERA, \
-    get_players_draftPick_seasonBatting3030, get_players_stdAward_stdAward, get_players_allStar_hof, \
-    get_players_hof_stdAward, get_players_allStar_stdAward, get_players_pob_hof, get_players_pob_allStar, \
-    get_players_pob_stdAward, get_players_country_stdAward, get_players_country_hof, get_players_country_allStar, \
-    get_players_draftPick_hof, get_players_draftPick_allStar, get_players_draftPick_stdAward, \
-    get_players_position_position, get_players_pob_position, get_players_country_position, \
-    get_players_draftPick_country, get_players_draftPick_pob, get_players_draftPick_position, \
-    get_players_stdAward_position, get_players_hof_position, get_players_allstar_position, \
-    get_players_careerPitchingERA_team, get_players_exclusive_to_team, get_players_seasonPitchingERA_team, \
-    get_players_pob_team, get_players_careerStatWAR_team, get_players_seasonStatWAR_team
+from app.services.immaculateGridQueries import *
 
 
 bp = Blueprint('search', __name__)
@@ -111,6 +54,10 @@ def search_players():
     option1_details = request.form.get('dropdown1_details')
     option2 = request.form.get('option2')
     option2_details = request.form.get('dropdown2_details')
+    print(option1)
+    print(option1_details)
+    print(option2)
+    print(option2_details)
 
     # Validate input
     if not option1 or not option2:
@@ -789,7 +736,33 @@ def search_players():
             results = get_players_draftPick_pob()
         else:
             results = get_players_draftPick_country(pob)
-
+    
+    elif (option1 == "no-hitter" and option2 == "career statistic") or (option1 == "career statistic" and option2 == "no-hitter"):
+        career_stat = option1_details if option1 == "career statistic" else option2_details
+        stat_range = request.form.get(f'dropdown2_{career_stat}_specific') if option1 == "no-hitter" else request.form.get(
+            f'dropdown1_{career_stat}_specific')
+        if career_stat != "ERA":
+            stat_range = convert_to_number(stat_range)
+        results = get_no_hitter_career_statistic(career_stat, stat_range)
+    elif (option1 == "no-hitter" and option2 == "seasonal statistic") or (option1 == "seasonal statistic" and option2 == "no-hitter"):
+        seasonal_stat = option1_details if option1 == "seasonal statistic" else option2_details
+        stat_range = request.form.get(f'dropdown2_{seasonal_stat}_specific') if option1 == "no-hitter" else request.form.get(
+            f'dropdown1_{seasonal_stat}_specific')
+        if seasonal_stat != "ERA":
+            stat_range = convert_to_number(stat_range)
+        results = get_no_hitter_seasonal_statistic(seasonal_stat, stat_range)
+    
+    elif (option1 == "no-hitter" and option2 == "awards") or (option1 == "awards" and option2 == "no-hitter"):
+        award = option1_details if option1 == "awards" else option2_details
+        results = get_no_hitter_awards(award)
+    
+    elif (option1 == "no-hitter" and option2 == "pob") or (option1 == "pob" and option2 == "no-hitter"):
+        pob = option1_details if option1 == "pob" else option2_details
+        results = get_no_hitter_pob(pob)
+    
+    elif (option1 == "no-hitter" and option2 == "dp") or (option1 == "dp" and option2 == "no-hitter"):
+        dp = option1_details if option1 == "dp" else option2_details
+        results = get_no_hitter_dp(dp)
 
 
     else:

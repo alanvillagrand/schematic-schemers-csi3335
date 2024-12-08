@@ -76,9 +76,9 @@ from app.services.immaculateGridQueries import get_players_team_team, get_player
     get_players_seasonStatWAR_seasonBattingAVG, get_players_seasonStatWAR_seasonPitchingERA, \
     get_players_seasonWAR_allStar, get_players_seasonWAR_stdAward, get_players_seasonStatWAR_pob, \
     get_players_seasonStatWAR_country, get_players_draftPick_seasonStatWAR
+from app.services.immaculateGridQueries import *
 
 bp = Blueprint('search', __name__)
-
 
 
 @bp.route('/search_players', methods=['POST'])
@@ -128,14 +128,16 @@ def search_players():
     option1_details = request.form.get('dropdown1_details')
     option2 = request.form.get('option2')
     option2_details = request.form.get('dropdown2_details')
+    print(option1)
+    print(option1_details)
+    print(option2)
+    print(option2_details)
 
     # Validate input
     if not option1 or not option2:
         return "Please select an option from both dropdowns.", 400
 
     results = []
-
-
 
     if option1 == "teams" and option2 == "teams":
         # Query players who played on both selected teams
@@ -147,7 +149,8 @@ def search_players():
         else:
             results = get_players_exclusive_to_team(option1_details)
 
-    elif (option1 == "career statistic" and option2 == "teams") or (option1 == "teams" and option2 == "career statistic"):
+    elif (option1 == "career statistic" and option2 == "teams") or (
+            option1 == "teams" and option2 == "career statistic"):
         print("IN TEAMS CSTATS")
         # Extract career statistics and team details
         career_stat = option1_details if option1 == "career statistic" else option2_details
@@ -184,6 +187,8 @@ def search_players():
 
 
     elif (option1 == "teams" and option2 == "seasonal statistic") or (option1 == "seasonal statistic" and option2 == "teams"):
+    elif (option1 == "teams" and option2 == "seasonal statistic") or (
+            option1 == "seasonal statistic" and option2 == "teams"):
         if option1 == "teams":
             team = option1_details
             stat = option2_details
@@ -272,6 +277,9 @@ def search_players():
             results = get_players_position_onlyOneTeam(position)
 
     elif (option1 == "pob" and option2 == "teams") or (option1 == "teams" and option2 == "pob"):
+        team = option1_details if option1 == "teams" else option2_details
+        pob = option1_details if option1 == "pob" else option2_details
+        if pob == "Outside of USA":
         team= option1_details if option1 == "teams" else option2_details
         pob= option1_details if option1 == "pob" else option2_details
         if pob == "Outside of USA" and team != "Only One Team":
@@ -284,14 +292,11 @@ def search_players():
             results = get_players_country_onlyOneTeam(pob)
 
 
-
     elif option1 == "career statistic" and option2 == "career statistic":
         stat1 = option1_details
         stat2 = option2_details
         stat_range1 = request.form.get(f'dropdown1_{stat1}_specific')
         stat_range2 = request.form.get(f'dropdown2_{stat2}_specific')
-
-
 
         if stat1 != "ERA":
             stat_range1 = convert_to_number(stat_range1)
@@ -300,6 +305,10 @@ def search_players():
 
         if stat1 in standard_careerStatBatting and stat2 in standard_careerStatBatting:
             results = get_players_careerStatBatting_careerStatBatting(stat1, stat_range1, stat2, stat_range2)
+        if stat1 in standard_careerStatPitching and stat2 in standard_careerStatPitching:
+            results = get_players_careerStatPitching_careerStatPitching(stat1, stat_range1, stat2, stat_range2)
+        if (stat1 in standard_careerStatBatting and stat2 in standard_careerStatPitching) or (
+                stat1 in standard_careerStatPitching and stat2 in standard_careerStatBatting):
         elif stat1 in standard_careerStatPitching and stat2 in standard_careerStatPitching:
             results =get_players_careerStatPitching_careerStatPitching(stat1, stat_range1, stat2, stat_range2)
         elif (stat1 in standard_careerStatBatting and stat2 in standard_careerStatPitching) or (stat1 in standard_careerStatPitching and stat2 in standard_careerStatBatting):
@@ -308,21 +317,29 @@ def search_players():
             else:
                 results = get_players_careerStatBatting_careerStatPitching(stat2, stat_range2, stat1, stat_range1)
 
+        if (stat1 == "AVG" and stat2 in standard_careerStatBatting) or (
+                stat1 in standard_careerStatBatting and stat2 == "AVG"):
         elif (stat1 == "AVG" and stat2 in standard_careerStatBatting) or (stat1 in standard_careerStatBatting and stat2 == "AVG"):
             if stat1 == "AVG":
                 results = get_players_careerBattingAVG_careerStatBatting(stat_range1, stat2, stat_range2)
             else:
                 results = get_players_careerBattingAVG_careerStatBatting(stat_range2, stat1, stat_range1)
+        if (stat1 == "AVG" and stat2 in standard_careerStatPitching) or (
+                stat1 in standard_careerStatPitching and stat2 == "AVG"):
         elif (stat1 == "AVG" and stat2 in standard_careerStatPitching) or (stat1 in standard_careerStatPitching and stat2 == "AVG"):
             if stat1 == "AVG":
-                results= get_players_careerBattingAVG_careerStatPitching(stat_range1, stat2, stat_range2)
+                results = get_players_careerBattingAVG_careerStatPitching(stat_range1, stat2, stat_range2)
             else:
                 results = get_players_careerBattingAVG_careerStatPitching(stat_range2, stat1, stat_range1)
+        if (stat1 == "ERA" and stat2 in standard_careerStatPitching) or (
+                stat1 in standard_careerStatPitching and stat2 == "ERA"):
         elif (stat1 == "ERA" and stat2 in standard_careerStatPitching) or (stat1 in standard_careerStatPitching and stat2 == "ERA"):
             if stat1 == "ERA":
                 results = get_players_careerPitchingERA_careerStatPitching(stat2, stat_range2)
             else:
                 results = get_players_careerPitchingERA_careerStatPitching(stat1, stat_range1)
+        if (stat1 == "ERA" and stat2 in standard_careerStatBatting) or (
+                stat1 in standard_careerStatBatting and stat2 == "ERA"):
         elif (stat1 == "ERA" and stat2 in standard_careerStatBatting) or (stat1 in standard_careerStatBatting and stat2 == "ERA"):
             if stat1 == "ERA":
                 results = get_players_careerPitchingERA_careerStatBatting(stat2, stat_range2)
@@ -361,7 +378,6 @@ def search_players():
 
 
 
-
     elif (option1 == "career statistic" and option2 == "seasonal statistic") or \
             (option1 == "seasonal statistic" and option2 == "career statistic"):
         # Determine which is career and which is seasonal
@@ -381,7 +397,8 @@ def search_players():
 
         # Check statistics and fetch results
         if career_stat in standard_careerStatBatting and seasonal_stat in standard_seasonStatBatting:
-            results = get_players_careerStatBatting_seasonStatBatting(career_stat, career_range1, seasonal_stat, seasonal_range2)
+            results = get_players_careerStatBatting_seasonStatBatting(career_stat, career_range1, seasonal_stat,
+                                                                      seasonal_range2)
 
         elif career_stat in standard_careerStatBatting and seasonal_stat == "ERA":
             results = get_players_careerStatBatting_seasonPitchingERA(career_stat, career_range1)
@@ -390,13 +407,16 @@ def search_players():
             results = get_players_careerStatPitching_seasonPitchingERA(career_stat, career_range1)
 
         elif career_stat in standard_careerStatBatting and seasonal_stat in standard_seasonStatPitching:
-            results = get_players_careerStatBatting_seasonStatPitching(career_stat, career_range1, seasonal_stat, seasonal_range2)
+            results = get_players_careerStatBatting_seasonStatPitching(career_stat, career_range1, seasonal_stat,
+                                                                       seasonal_range2)
 
         elif career_stat in standard_careerStatPitching and seasonal_stat in standard_seasonStatBatting:
-            results = get_players_careerStatPitching_seasonStatBatting(career_stat, career_range1, seasonal_stat, seasonal_range2)
+            results = get_players_careerStatPitching_seasonStatBatting(career_stat, career_range1, seasonal_stat,
+                                                                       seasonal_range2)
 
         elif career_stat in standard_careerStatPitching and seasonal_stat in standard_seasonStatPitching:
-            results = get_players_careerStatPitching_seasonStatPitching(career_stat, career_range1, seasonal_stat, seasonal_range2)
+            results = get_players_careerStatPitching_seasonStatPitching(career_stat, career_range1, seasonal_stat,
+                                                                        seasonal_range2)
 
         elif career_stat == "ERA" and seasonal_stat in standard_seasonStatPitching:
             results = get_players_careerPitchingERA_seasonStatPitching(seasonal_stat, seasonal_range2)
@@ -440,6 +460,8 @@ def search_players():
         elif career_stat in standard_careerStatPitching and seasonal_stat == "30+HR/30+SB":
             results = get_players_careerStatPitching_seasonBatting3030(career_stat, career_range1)
 
+    elif (option1 == "career statistic" and option2 == "awards") or (
+            option1 == "awards" and option2 == "career statistic"):
         elif career_stat == "WAR" and seasonal_stat == "30+HR/30+SB":
             results = get_players_careerStatWAR_seasonBatting3030(career_range1)
 
@@ -473,7 +495,8 @@ def search_players():
         # Extract the award and career statistic details
         career_stat = option1_details if option1 == "career statistic" else option2_details
         award = option2_details if option1 == "career statistic" else option1_details
-        stat_range = request.form.get(f'dropdown2_{career_stat}_specific') if option1 == "awards" else request.form.get(f'dropdown1_{career_stat}_specific')
+        stat_range = request.form.get(f'dropdown2_{career_stat}_specific') if option1 == "awards" else request.form.get(
+            f'dropdown1_{career_stat}_specific')
         if career_stat != "ERA":
             stat_range = convert_to_number(stat_range)
 
@@ -532,11 +555,14 @@ def search_players():
 
 
     elif (option1 == "career statistic" and option2 == "positions") or (option1 == "positions" and option2 == "career statistic"):
+    elif (option1 == "career statistic" and option2 == "positions") or (
+            option1 == "positions" and option2 == "career statistic"):
         print("IN POSITION CSTATS")
         # Extract career statistics and team details
         career_stat = option1_details if option1 == "career statistic" else option2_details
         position = option2_details if option1 == "career statistic" else option1_details
-        stat_range = request.form.get(f'dropdown2_{career_stat}_specific') if option1 == "positions" else request.form.get(
+        stat_range = request.form.get(
+            f'dropdown2_{career_stat}_specific') if option1 == "positions" else request.form.get(
             f'dropdown1_{career_stat}_specific')
 
         if career_stat != "ERA":
@@ -569,7 +595,6 @@ def search_players():
         stat_range = request.form.get(
             f'dropdown2_{career_stat}_specific') if option1 == "pob" else request.form.get(
             f'dropdown1_{career_stat}_specific')
-
 
         if career_stat in standard_careerStatPitching and pob == "Outside of USA":
             results = get_players_careerStatPitching_pob(career_stat, stat_range)
@@ -631,7 +656,6 @@ def search_players():
         stat1 = option1_details
         stat2 = option2_details
 
-
         stat_range1 = request.form.get(f'dropdown1_{stat1}_specific')
         stat_range2 = request.form.get(f'dropdown2_{stat2}_specific')
 
@@ -647,19 +671,22 @@ def search_players():
         elif stat1 in standard_seasonStatPitching and stat2 in standard_seasonStatPitching:
             results = get_players_seasonStatPitching_seasonStatPitching(stat1, stat_range1, stat2, stat_range2)
 
-        elif (stat1 in standard_seasonStatBatting or stat1 in standard_seasonStatPitching) and (stat2 in standard_seasonStatBatting or stat2 in standard_seasonStatPitching):
+        elif (stat1 in standard_seasonStatBatting or stat1 in standard_seasonStatPitching) and (
+                stat2 in standard_seasonStatBatting or stat2 in standard_seasonStatPitching):
             if stat1 in standard_seasonStatBatting:
                 results = get_players_seasonStatPitching_seasonStatBatting(stat2, stat_range2, stat1, stat_range1)
             else:
                 results = get_players_seasonStatPitching_seasonStatBatting(stat1, stat_range1, stat2, stat_range2)
 
-        elif (stat1 in standard_seasonStatPitching and stat2 == "AVG") or (stat1 == "AVG" and stat2 in standard_seasonStatPitching):
+        elif (stat1 in standard_seasonStatPitching and stat2 == "AVG") or (
+                stat1 == "AVG" and stat2 in standard_seasonStatPitching):
             if stat1 in standard_seasonStatPitching:
                 results = get_players_seasonStatPitching_seasonStatAVG(stat1, stat_range1, stat_range2)
             else:
                 results = get_players_seasonStatPitching_seasonStatAVG(stat2, stat_range2, stat_range1)
 
-        elif (stat1 in standard_seasonStatBatting and stat2 == "AVG") or (stat1 == "AVG" and stat2 in standard_seasonStatBatting):
+        elif (stat1 in standard_seasonStatBatting and stat2 == "AVG") or (
+                stat1 == "AVG" and stat2 in standard_seasonStatBatting):
             if stat1 in standard_seasonStatBatting:
                 results = get_players_seasonStatBatting_seasonStatAVG(stat1, stat_range1, stat_range2)
             else:
@@ -677,33 +704,36 @@ def search_players():
             else:
                 results = get_players_seasonPitchingERA_seasonStatAVG(stat_range2)
 
-        elif (stat1 == "30+HR/30+SB" and stat2 == "ERA") or (stat1 == "ERA" and  stat2 == "30+HR/30+SB"):
+        elif (stat1 == "30+HR/30+SB" and stat2 == "ERA") or (stat1 == "ERA" and stat2 == "30+HR/30+SB"):
             results = get_players_seasonPitchingERA_seasonBatting3030()
 
-
-        elif (stat1 in standard_seasonStatBatting and stat2 == "30+HR/30+SB") or (stat1 == "30+HR/30+SB" and stat2 in standard_seasonStatBatting):
+        elif (stat1 in standard_seasonStatBatting and stat2 == "30+HR/30+SB") or (
+                stat1 == "30+HR/30+SB" and stat2 in standard_seasonStatBatting):
             if stat1 == "30+HR/30+SB":
                 results = get_players_seasonStatBatting3030_seasonStatBatting(stat2, stat_range2)
             else:
                 results = get_players_seasonStatBatting3030_seasonStatBatting(stat1, stat_range1)
 
-        elif (stat1 in standard_seasonStatPitching and stat2 == "30+HR/30+SB") or (stat1 == "30+HR/30+SB" and stat2 in standard_seasonStatPitching):
+        elif (stat1 in standard_seasonStatPitching and stat2 == "30+HR/30+SB") or (
+                stat1 == "30+HR/30+SB" and stat2 in standard_seasonStatPitching):
             if stat1 == "30+HR/30+SB":
                 results = get_players_seasonStatBatting3030_seasonStatPitching(stat2, stat_range2)
             else:
                 results = get_players_seasonStatBatting3030_seasonStatPitching(stat1, stat_range1)
 
-        elif (stat1 in standard_seasonStatPitching and stat2 == "ERA") or (stat1 == "ERA" and stat2 in standard_seasonStatPitching):
+        elif (stat1 in standard_seasonStatPitching and stat2 == "ERA") or (
+                stat1 == "ERA" and stat2 in standard_seasonStatPitching):
             if stat1 == "ERA":
                 results = get_players_seasonPitchingERA_seasonStatPitching(stat2, stat_range2)
             else:
-                results= get_players_seasonPitchingERA_seasonStatPitching(stat1, stat_range1)
+                results = get_players_seasonPitchingERA_seasonStatPitching(stat1, stat_range1)
 
-        elif (stat1 in standard_seasonStatBatting and stat2 == "ERA") or (stat1 == "ERA" and stat2 in standard_seasonStatBatting):
+        elif (stat1 in standard_seasonStatBatting and stat2 == "ERA") or (
+                stat1 == "ERA" and stat2 in standard_seasonStatBatting):
             if stat1 == "ERA":
                 results = get_players_seasonPitchingERA_seasonStatBatting(stat2, stat_range2)
             else:
-                results= get_players_seasonPitchingERA_seasonStatBatting(stat1, stat_range1)
+                results = get_players_seasonPitchingERA_seasonStatBatting(stat1, stat_range1)
 
         elif (stat1 in standard_seasonStatBatting and stat2 == "WAR") or (stat1 == "WAR" and stat2 in standard_seasonStatBatting):
             if stat1 == "WAR":
@@ -744,6 +774,8 @@ def search_players():
 
 
     elif (option1 == "seasonal statistic" and option2 == "awards") or (option1 == "awards" and option2 == "seasonal statistic"):
+    elif (option1 == "seasonal statistic" and option2 == "awards") or (
+            option1 == "awards" and option2 == "seasonal statistic"):
         if option1 == "awards":
             award = option1_details  # option1 holds the award details
             stat = option2_details  # option2 holds the stat details
@@ -756,8 +788,7 @@ def search_players():
         if stat != "ERA" and stat != "30+HR/30+SB":
             stat_range = convert_to_number(stat_range)
 
-
-        if stat in standard_seasonStatBatting and award in standard_awards :
+        if stat in standard_seasonStatBatting and award in standard_awards:
             results = get_players_seasonStatBatting_stdAward(stat, award, stat_range)
         elif stat in standard_seasonStatPitching and award in standard_awards:
             results = get_players_seasonStatPitching_stdAward(award, stat, stat_range)
@@ -797,9 +828,8 @@ def search_players():
             results = get_players_seasonWAR_stdAward(stat_range, award)
 
 
-
-
-    elif (option1 == "seasonal statistic" and option2 == "positions") or (option1 == "positions" and option2 == "seasonal statistic"):
+    elif (option1 == "seasonal statistic" and option2 == "positions") or (
+            option1 == "positions" and option2 == "seasonal statistic"):
         if option1 == "positions":
             position = option1_details
             stat = option2_details
@@ -829,8 +859,8 @@ def search_players():
         elif stat == "WAR":
             results = get_players_seasonWAR_position(stat_range, position)
 
-
-    elif (option1 == "seasonal statistic" and option2 == "pob") or (option1 == "pob" and option2 == "seasonal statistic"):
+    elif (option1 == "seasonal statistic" and option2 == "pob") or (
+            option1 == "pob" and option2 == "seasonal statistic"):
         stat = option1_details if option1 == "seasonal statistic" else option2_details
         pob = option2_details if option1 == "seasonal statistic" else option1_details
         stat_range = request.form.get(f'dropdown2_{stat}_specific') if option1 == "pob" else request.form.get(
@@ -863,7 +893,6 @@ def search_players():
         elif stat == "WAR" and pob != "Outside of USA":
             results = get_players_seasonStatWAR_country(stat_range, pob)
 
-
     elif (option1 == "seasonal statistic" and option2 == "dp") or (option1 == "dp" and option2 == "seasonal statistic"):
         stat = option1_details if option1 == "seasonal statistic" else option2_details
         stat_range = request.form.get(f'dropdown2_{stat}_specific') if option1 == "dp" else request.form.get(
@@ -884,28 +913,24 @@ def search_players():
         elif stat == "WAR":
             results = get_players_draftPick_seasonStatWAR(stat_range)
 
-
-
     elif option1 == "awards" and option2 == "awards":
         if option1_details in standard_awards and option2_details in standard_awards:
             results = get_players_stdAward_stdAward(option1_details, option2_details)
-        elif (option1_details == "All Star" and option2_details == "Hall of Fame") or (option1_details == "Hall of Fame" and option2_details == "All Star"):
+        elif (option1_details == "All Star" and option2_details == "Hall of Fame") or (
+                option1_details == "Hall of Fame" and option2_details == "All Star"):
             results = get_players_allStar_hof()
-        elif (option1_details == "Hall of Fame" and option2_details in standard_awards) or (option1_details in standard_awards and option2_details == "Hall of Fame"):
+        elif (option1_details == "Hall of Fame" and option2_details in standard_awards) or (
+                option1_details in standard_awards and option2_details == "Hall of Fame"):
             if option1_details in standard_awards:
                 results = get_players_hof_stdAward(option1_details)
             else:
                 results = get_players_hof_stdAward(option2_details)
-        elif (option1_details == "All Star" and option2_details in standard_awards) or (option1_details in standard_awards and option2_details == "All Star"):
+        elif (option1_details == "All Star" and option2_details in standard_awards) or (
+                option1_details in standard_awards and option2_details == "All Star"):
             if option1_details in standard_awards:
-                results= get_players_allStar_stdAward(option1_details)
+                results = get_players_allStar_stdAward(option1_details)
             else:
                 results = get_players_allStar_stdAward(option2_details)
-
-
-
-
-
 
     elif (option1 == "positions" and option2 == "awards") or (option1 == "awards" and option2 == "positions"):
         position = option1_details if option1 == "positions" else option2_details
@@ -977,7 +1002,120 @@ def search_players():
         else:
             results = get_players_draftPick_country(pob)
 
+    elif (option1 == "no-hitter" and option2 == "career statistic") or (
+            option1 == "career statistic" and option2 == "no-hitter"):
+        career_stat = option1_details if option1 == "career statistic" else option2_details
+        stat_range = request.form.get(
+            f'dropdown2_{career_stat}_specific') if option1 == "no-hitter" else request.form.get(
+            f'dropdown1_{career_stat}_specific')
+        if career_stat != "ERA":
+            stat_range = convert_to_number(stat_range)
+        results = get_no_hitter_career_statistic(career_stat, stat_range)
+    elif (option1 == "no-hitter" and option2 == "seasonal statistic") or (
+            option1 == "seasonal statistic" and option2 == "no-hitter"):
+        seasonal_stat = option1_details if option1 == "seasonal statistic" else option2_details
+        stat_range = request.form.get(
+            f'dropdown2_{seasonal_stat}_specific') if option1 == "no-hitter" else request.form.get(
+            f'dropdown1_{seasonal_stat}_specific')
+        if seasonal_stat != "ERA":
+            stat_range = convert_to_number(stat_range)
+        results = get_no_hitter_seasonal_statistic(seasonal_stat, stat_range)
 
+    elif (option1 == "no-hitter" and option2 == "awards") or (option1 == "awards" and option2 == "no-hitter"):
+        award = option1_details if option1 == "awards" else option2_details
+        results = get_no_hitter_awards(award)
+
+    elif (option1 == "no-hitter" and option2 == "pob") or (option1 == "pob" and option2 == "no-hitter"):
+        pob = option1_details if option1 == "pob" else option2_details
+        results = get_no_hitter_pob(pob)
+
+    elif (option1 == "no-hitter" and option2 == "dp") or (option1 == "dp" and option2 == "no-hitter"):
+        dp = option1_details if option1 == "dp" else option2_details
+        results = get_no_hitter_dp(dp)
+
+    elif (option1 == "lg" and option2 == "awards") or (option1 == "awards" and option2 == "lg"):
+        award = option1_details if option1 == "awards" else option2_details
+        league = option2_details if option1 == "awards" else option1_details
+
+        if award == "Hall of Fame" and league == "Negro League":
+            results = get_players_negroLg_hof()
+
+        elif award == "All Star" and league == "Negro League":
+            results = get_players_negroLg_allStar()
+
+        elif award in standard_awards and league == "Negro League":
+            results = get_players_negroLg_awards(award)
+
+    elif (option1 == "lg" and option2 == "career statistic") or (option1 == "career statistic" and option2 == "lg"):
+        print("IN NEGRO LEAGUE CSTATS")
+        career_stat = option1_details if option1 == "career statistic" else option2_details
+        lg = option2_details if option1 == "career statistic" else option1_details
+
+        stat_range = request.form.get(f'dropdown2_{career_stat}_specific') if option1 == "lg" else request.form.get(
+            f'dropdown1_{career_stat}_specific')
+        if career_stat != "ERA":
+            stat_range = convert_to_number(stat_range)
+
+        if career_stat == "AVG":
+            results = get_players_careerBattingAVG_negroLg(stat_range)
+        elif career_stat in standard_careerStatBatting:
+            results = get_players_careerStatBatting_negroLg(career_stat, stat_range)
+        elif career_stat in standard_careerStatPitching:
+            results = get_players_careerStatPitching_negroLg(career_stat, stat_range)
+        elif career_stat == "ERA":
+            results = get_players_careerPitchingERA_negroLg()
+        elif career_stat == "WAR":
+            results = get_players_careerStatWAR_negroLg(stat_range)
+
+    elif (option1 == "lg" and option2 == "seasonal statistic") or (option1 == "seasonal statistic" and option2 == "lg"):
+        print("IN NEGRO LEAGUE SSTATS")
+        seasonal_stat = option1_details if option1 == "seasonal statistic" else option2_details
+        lg = option2_details if option1 == "seasonal statistic" else option1_details
+
+        stat_range = request.form.get(f'dropdown2_{seasonal_stat}_specific') if option1 == "lg" else request.form.get(
+            f'dropdown1_{seasonal_stat}_specific')
+        if seasonal_stat != "ERA" and seasonal_stat != "30+HR/30+SB":
+            stat_range = convert_to_number(stat_range)
+
+        if seasonal_stat == "AVG":
+            results = get_players_seasonBattingAVG_negroLg(stat_range)
+        elif seasonal_stat in standard_seasonStatBatting:
+            results = get_players_seasonStatBatting_negroLg(seasonal_stat, stat_range)
+        elif seasonal_stat in standard_seasonStatPitching:
+            results = get_players_seasonStatPitching_negroLg(seasonal_stat, stat_range)
+        elif seasonal_stat == "ERA":
+            results = get_players_seasonPitchingERA_negroLg(stat_range)
+        elif seasonal_stat == "WAR":
+            results = get_players_seasonStatWAR_negroLg(stat_range)
+        elif seasonal_stat == "30+HR/30+SB":
+            results = get_players_3030_negroLg()
+
+    elif (option1 == "lg" and option2 == "teams") or (option1 == "teams" and option2 == "lg"):
+        team = option1_details if option1 == "teams" else option2_details
+        results = get_players_team_negroLg(team)
+
+    elif (option1 == "lg" and option2 == "pob") or (option1 == "pob" and option2 == "lg"):
+        print("IN NEGRO LEAGUE POB")
+        pob = option1_details if option1 == "pob" else option2_details
+        if pob == "Outside of USA":
+            results = get_players_pob_negroLg()
+        else:
+            results = get_players_country_negroLg(pob)
+
+    elif (option1 == "lg" and option2 == "positions") or (option1 == "positions" and option2 == "lg"):
+        print("IN NEGRO LEAGUE POS")
+        position = option1_details if option1 == "positions" else option2_details
+        results = get_players_position_negroLg(position)
+
+    elif (option1 == "lg" and option2 == "lg") or (option1 == "lg" and option2 == "lg"):
+        print("IN NEGRO LEAGUE")
+        results = get_players_negroLg()
+
+    elif (option1 == "lg" and option2 == "dp") or (option1 == "dp" and option2 == "lg"):
+        results = get_players_draftPick_negroLg()
+
+    elif (option1 == "lg" and option2 == "no-hitter") or (option1 == "no-hitter" and option2 == "lg"):
+        results = get_players_noHitter_negroLg()
 
     else:
         return "Invalid selection or combination. Please try again.", 400

@@ -64,7 +64,11 @@ from app.services.immaculateGridQueries import get_players_team_team, get_player
     get_players_country_team, get_players_pob_onlyOneTeam, get_players_country_onlyOneTeam, \
     get_players_seasonStatBatting_onlyOneTeam, get_players_seasonStatPitching_onlyOneTeam, \
     get_players_seasonBattingAVG_onlyOneTeam, get_players_seasonBatting3030_onlyOneTeam, \
-    get_players_seasonPitchingERA_onlyOneTeam
+    get_players_seasonPitchingERA_onlyOneTeam, get_players_careerPitchingERA_careerStatWAR, \
+    get_players_careerBattingAVG_careerStatWAR, get_players_careerStatWAR_careerStatPitching, \
+    get_players_careerStatWAR_careerStatBatting, get_players_careerStatWAR_seasonBatting3030, \
+    get_players_careerStatWAR_seasonBattingAVG, get_players_careerStatWAR_seasonPitchingERA, \
+    get_players_careerStatWAR_seasonStatPitching, get_players_careerStatWAR_seasonStatBatting
 
 bp = Blueprint('search', __name__)
 
@@ -289,39 +293,66 @@ def search_players():
 
         if stat1 in standard_careerStatBatting and stat2 in standard_careerStatBatting:
             results = get_players_careerStatBatting_careerStatBatting(stat1, stat_range1, stat2, stat_range2)
-        if stat1 in standard_careerStatPitching and stat2 in standard_careerStatPitching:
+        elif stat1 in standard_careerStatPitching and stat2 in standard_careerStatPitching:
             results =get_players_careerStatPitching_careerStatPitching(stat1, stat_range1, stat2, stat_range2)
-        if (stat1 in standard_careerStatBatting and stat2 in standard_careerStatPitching) or (stat1 in standard_careerStatPitching and stat2 in standard_careerStatBatting):
+        elif (stat1 in standard_careerStatBatting and stat2 in standard_careerStatPitching) or (stat1 in standard_careerStatPitching and stat2 in standard_careerStatBatting):
             if stat1 in standard_careerStatBatting:
                 results = get_players_careerStatBatting_careerStatPitching(stat1, stat_range1, stat2, stat_range2)
             else:
                 results = get_players_careerStatBatting_careerStatPitching(stat2, stat_range2, stat1, stat_range1)
 
-        if (stat1 == "AVG" and stat2 in standard_careerStatBatting) or (stat1 in standard_careerStatBatting and stat2 == "AVG"):
+        elif (stat1 == "AVG" and stat2 in standard_careerStatBatting) or (stat1 in standard_careerStatBatting and stat2 == "AVG"):
             if stat1 == "AVG":
                 results = get_players_careerBattingAVG_careerStatBatting(stat_range1, stat2, stat_range2)
             else:
                 results = get_players_careerBattingAVG_careerStatBatting(stat_range2, stat1, stat_range1)
-        if (stat1 == "AVG" and stat2 in standard_careerStatPitching) or (stat1 in standard_careerStatPitching and stat2 == "AVG"):
+        elif (stat1 == "AVG" and stat2 in standard_careerStatPitching) or (stat1 in standard_careerStatPitching and stat2 == "AVG"):
             if stat1 == "AVG":
                 results= get_players_careerBattingAVG_careerStatPitching(stat_range1, stat2, stat_range2)
             else:
                 results = get_players_careerBattingAVG_careerStatPitching(stat_range2, stat1, stat_range1)
-        if (stat1 == "ERA" and stat2 in standard_careerStatPitching) or (stat1 in standard_careerStatPitching and stat2 == "ERA"):
+        elif (stat1 == "ERA" and stat2 in standard_careerStatPitching) or (stat1 in standard_careerStatPitching and stat2 == "ERA"):
             if stat1 == "ERA":
                 results = get_players_careerPitchingERA_careerStatPitching(stat2, stat_range2)
             else:
                 results = get_players_careerPitchingERA_careerStatPitching(stat1, stat_range1)
-        if (stat1 == "ERA" and stat2 in standard_careerStatBatting) or (stat1 in standard_careerStatBatting and stat2 == "ERA"):
+        elif (stat1 == "ERA" and stat2 in standard_careerStatBatting) or (stat1 in standard_careerStatBatting and stat2 == "ERA"):
             if stat1 == "ERA":
                 results = get_players_careerPitchingERA_careerStatBatting(stat2, stat_range2)
             else:
                 results = get_players_careerPitchingERA_careerStatBatting(stat1, stat_range1)
-        if (stat1 == "AVG" and stat2 == "ERA") or (stat1 == "ERA" and stat2 == "AVG"):
+        elif (stat1 == "AVG" and stat2 == "ERA") or (stat1 == "ERA" and stat2 == "AVG"):
             if stat1 == "AVG":
                 results = get_players_careerPitchingERA_careerStatAVG(stat_range1)
             else:
                 results = get_players_careerPitchingERA_careerStatAVG(stat_range2)
+        elif (stat1 == "WAR" and stat2 == "ERA") or (stat1 == "ERA" and stat2 == "WAR"):
+            if stat1 == "WAR":
+                results = get_players_careerPitchingERA_careerStatWAR(stat_range1)
+            else:
+                results = get_players_careerPitchingERA_careerStatWAR(stat_range2)
+
+        elif (stat1 == "WAR" and stat2 == "AVG") or (stat1 == "AVG" and stat2 == "WAR"):
+            if stat1 == "WAR":
+                results = get_players_careerBattingAVG_careerStatWAR(stat_range2, stat_range1)
+            else:
+                results = get_players_careerBattingAVG_careerStatWAR(stat_range1, stat_range2)
+
+        elif (stat1 == "WAR" and stat2 in standard_careerStatPitching) or (stat1 in standard_careerStatPitching and stat2 == "WAR"):
+            if stat1 == "WAR":
+                results = get_players_careerStatWAR_careerStatPitching(stat_range1, stat2, stat_range2)
+            else:
+                results = get_players_careerStatWAR_careerStatPitching(stat_range2, stat1, stat_range1)
+
+        elif (stat1 == "WAR" and stat2 in standard_careerStatBatting) or (stat1 in standard_careerStatBatting and stat2 == "WAR"):
+            if stat1 == "WAR":
+                results = get_players_careerStatWAR_careerStatBatting(stat_range1, stat2, stat_range2)
+            else:
+                results = get_players_careerStatWAR_careerStatBatting(stat_range2, stat1, stat_range1)
+
+
+
+
 
 
     elif (option1 == "career statistic" and option2 == "seasonal statistic") or \
@@ -401,6 +432,23 @@ def search_players():
 
         elif career_stat in standard_careerStatPitching and seasonal_stat == "30+HR/30+SB":
             results = get_players_careerStatPitching_seasonBatting3030(career_stat, career_range1)
+
+        elif career_stat == "WAR" and seasonal_stat == "30+HR/30+SB":
+            results = get_players_careerStatWAR_seasonBatting3030(career_range1)
+
+        elif career_stat == "WAR" and seasonal_stat == "AVG":
+            results = get_players_careerStatWAR_seasonBattingAVG(career_range1, seasonal_range2)
+
+        elif career_stat == "WAR" and seasonal_stat == "ERA":
+            results = get_players_careerStatWAR_seasonPitchingERA(career_range1)
+
+        elif career_stat == "WAR" and seasonal_stat in standard_seasonStatPitching:
+            results = get_players_careerStatWAR_seasonStatPitching(career_range1, seasonal_stat, seasonal_range2)
+
+        elif career_stat == "WAR" and seasonal_stat in standard_seasonStatBatting:
+            results = get_players_careerStatWAR_seasonStatBatting(career_range1, seasonal_stat, seasonal_range2)
+
+
 
 
 

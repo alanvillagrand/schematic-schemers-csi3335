@@ -4089,3 +4089,17 @@ def get_players_draftPick_negroLg():
         .group_by(People.playerID)
         .order_by(db.func.sum(Drafts.draft_round).asc())
     )
+
+
+def get_players_noHitter_negroLg():
+    negro_league_subquery = negro_league_appearance_subquery()
+
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .distinct()
+        .join(NoHitters, NoHitters.playerID == People.playerID)
+        .join(negro_league_subquery, negro_league_subquery.c.playerID == People.playerID)
+        .order_by(People.birthYear)
+        .all()
+    )
+

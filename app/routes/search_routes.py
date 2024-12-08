@@ -64,6 +64,8 @@ from app.services.immaculateGridQueries import get_players_team_team, get_player
     get_players_careerStatWAR_negroLg, get_players_seasonBattingAVG_negroLg, get_players_seasonPitchingERA_negroLg, \
     get_players_seasonStatWAR_negroLg, get_players_team_negroLg, get_players_pob_negroLg, get_players_country_negroLg, \
     get_players_position_negroLg, get_players_negroLg, get_players_3030_negroLg, get_players_draftPick_negroLg
+from app.services.immaculateGridQueries import *
+
 
 bp = Blueprint('search', __name__)
 
@@ -116,6 +118,10 @@ def search_players():
     option1_details = request.form.get('dropdown1_details')
     option2 = request.form.get('option2')
     option2_details = request.form.get('dropdown2_details')
+    print(option1)
+    print(option1_details)
+    print(option2)
+    print(option2_details)
 
     # Validate input
     if not option1 or not option2:
@@ -220,6 +226,7 @@ def search_players():
         pob= option1_details if option1 == "pob" else option2_details
         if pob == "Outside of USA":
             results = get_players_pob_team(team)
+
 
     elif option1 == "career statistic" and option2 == "career statistic":
         stat1 = option1_details
@@ -747,7 +754,7 @@ def search_players():
         elif award == "All Star" and pob == "Outside of USA":
             results = get_players_pob_allStar()
 
-        elif award in standard_awards and pob == "Outsid e of USA":
+        elif award in standard_awards and pob == "Outside of USA":
             results = get_players_pob_stdAward(award)
 
         elif award in standard_awards and pob != "Outside of USA":
@@ -782,6 +789,7 @@ def search_players():
         else:
             results = get_players_country_position(position, pob)
 
+
     elif (option1 == "dp" and option2 == "positions") or (option1 == "positions" and option2 == "dp"):
         position = option1_details if option1 == "positions" else option2_details
         results = get_players_draftPick_position(position)
@@ -814,6 +822,33 @@ def search_players():
             f'dropdown1_{career_stat}_specific')
         if career_stat != "ERA":
             stat_range = convert_to_number(stat_range)
+
+    elif (option1 == "no-hitter" and option2 == "career statistic") or (option1 == "career statistic" and option2 == "no-hitter"):
+        career_stat = option1_details if option1 == "career statistic" else option2_details
+        stat_range = request.form.get(f'dropdown2_{career_stat}_specific') if option1 == "no-hitter" else request.form.get(
+            f'dropdown1_{career_stat}_specific')
+        if career_stat != "ERA":
+            stat_range = convert_to_number(stat_range)
+        results = get_no_hitter_career_statistic(career_stat, stat_range)
+    elif (option1 == "no-hitter" and option2 == "seasonal statistic") or (option1 == "seasonal statistic" and option2 == "no-hitter"):
+        seasonal_stat = option1_details if option1 == "seasonal statistic" else option2_details
+        stat_range = request.form.get(f'dropdown2_{seasonal_stat}_specific') if option1 == "no-hitter" else request.form.get(
+            f'dropdown1_{seasonal_stat}_specific')
+        if seasonal_stat != "ERA":
+            stat_range = convert_to_number(stat_range)
+        results = get_no_hitter_seasonal_statistic(seasonal_stat, stat_range)
+
+    elif (option1 == "no-hitter" and option2 == "awards") or (option1 == "awards" and option2 == "no-hitter"):
+        award = option1_details if option1 == "awards" else option2_details
+        results = get_no_hitter_awards(award)
+
+    elif (option1 == "no-hitter" and option2 == "pob") or (option1 == "pob" and option2 == "no-hitter"):
+        pob = option1_details if option1 == "pob" else option2_details
+        results = get_no_hitter_pob(pob)
+
+    elif (option1 == "no-hitter" and option2 == "dp") or (option1 == "dp" and option2 == "no-hitter"):
+        dp = option1_details if option1 == "dp" else option2_details
+        results = get_no_hitter_dp(dp)
 
         if career_stat == "AVG":
             results = get_players_careerBattingAVG_negroLg(stat_range)

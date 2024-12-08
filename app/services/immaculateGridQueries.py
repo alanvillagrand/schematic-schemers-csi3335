@@ -3630,25 +3630,21 @@ def get_players_negroLg_allStar():
 
 
 def get_players_careerStatBatting_negroLg(stat_column, stat_range):
-    # Map the stat column to the Batting table
     batting_column = getattr(Batting, f"b_{stat_column}")
     total_stat = db.func.sum(batting_column).label("total_stat")
 
-    # Use the Negro League subquery for appearances
     negro_league_subquery = negro_league_appearance_subquery()
 
-    # Subquery for career batting stats
     career_stats = (
         db.session.query(
             Batting.playerID,
             total_stat
         )
         .group_by(Batting.playerID)
-        .having(total_stat > stat_range)  # Filter by stat range
+        .having(total_stat > stat_range)
         .subquery()
     )
 
-    # Main query: Combine career stats with Negro League appearances
     return (
         db.session.query(
             People.nameFirst,
@@ -3658,7 +3654,7 @@ def get_players_careerStatBatting_negroLg(stat_column, stat_range):
         .join(Batting, Batting.playerID == People.playerID)
         .join(negro_league_subquery, negro_league_subquery.c.playerID == Batting.playerID)
         .group_by(People.playerID)
-        .order_by(db.func.sum(Batting.b_G).asc())  # Order by least games played
+        .order_by(db.func.sum(Batting.b_G).asc())
         .distinct()
         .all()
     )
@@ -3669,17 +3665,15 @@ def get_players_careerStatPitching_negroLg(stat_column, stat_range):
     pitching_column = getattr(Pitching, f"p_{stat_column}")
     total_stat = db.func.sum(pitching_column).label("total_stat")
 
-    # Use the Negro League subquery for appearances
     negro_league_subquery = negro_league_appearance_subquery()
 
-    # Subquery for career pitching stats
     career_stats = (
         db.session.query(
             Pitching.playerID,
             total_stat
         )
         .group_by(Pitching.playerID)
-        .having(total_stat > stat_range)  # Filter by stat range
+        .having(total_stat > stat_range)
         .subquery()
     )
 
@@ -3693,7 +3687,7 @@ def get_players_careerStatPitching_negroLg(stat_column, stat_range):
         .join(Pitching, Pitching.playerID == People.playerID)
         .join(negro_league_subquery, negro_league_subquery.c.playerID == Pitching.playerID)
         .group_by(People.playerID)
-        .order_by(db.func.sum(Pitching.p_G).asc())  # Order by least games pitched
+        .order_by(db.func.sum(Pitching.p_G).asc())
         .distinct()
         .all()
     )
@@ -3739,7 +3733,7 @@ def get_players_careerStatWAR_negroLg(stat_range):
         db.session.query(People.nameFirst, People.nameLast)
         .join(AdvancedStats, AdvancedStats.playerID == People.playerID)
         .join(negro_league_subquery, negro_league_subquery.c.playerID == AdvancedStats.playerID)
-        .filter(db.func.sum(AdvancedStats.bwar162) >= stat_range)  # WAR >= stat_range
+        .filter(db.func.sum(AdvancedStats.bwar162) >= stat_range)
         .group_by(People.playerID)
         .distinct()
         .all()
@@ -3756,10 +3750,10 @@ def get_players_seasonBattingAVG_negroLg(stat_range):
             negro_league_subquery.c.playerID == Batting.playerID,
             negro_league_subquery.c.teamID == Batting.teamID
         ))
-        .filter(Batting.b_AB > 0)  # Ensure at-bats exist
-        .filter((Batting.b_H / Batting.b_AB) >= stat_range)  # AVG >= stat_range
+        .filter(Batting.b_AB > 0)
+        .filter((Batting.b_H / Batting.b_AB) >= stat_range)
         .group_by(People.playerID)
-        .order_by(db.func.sum(Batting.b_G).asc())  # Order by least games played
+        .order_by(db.func.sum(Batting.b_G).asc())
         .distinct()
         .all()
     )
@@ -3775,9 +3769,9 @@ def get_players_seasonPitchingERA_negroLg(stat_range):
             negro_league_subquery.c.playerID == Pitching.playerID,
             negro_league_subquery.c.teamID == Pitching.teamID
         ))
-        .filter(Pitching.p_ERA <= stat_range)  # ERA <= stat_range
+        .filter(Pitching.p_ERA <= stat_range)
         .group_by(People.playerID)
-        .order_by(db.func.sum(Pitching.p_G).asc())  # Order by least games pitched
+        .order_by(db.func.sum(Pitching.p_G).asc())
         .distinct()
         .all()
     )
@@ -3790,9 +3784,9 @@ def get_players_seasonStatWAR_negroLg(stat_range):
         db.session.query(People.nameFirst, People.nameLast)
         .join(AdvancedStats, AdvancedStats.playerID == People.playerID)
         .join(negro_league_subquery, negro_league_subquery.c.playerID == AdvancedStats.playerID)
-        .filter(AdvancedStats.bwar162 >= stat_range)  # WAR >= stat_range
+        .filter(AdvancedStats.bwar162 >= stat_range)
         .group_by(People.playerID)
-        .order_by(db.func.sum(AdvancedStats.bwar162).desc())  # Order by highest WAR
+        .order_by(db.func.sum(AdvancedStats.bwar162).desc())
         .distinct()
         .all()
     )
@@ -3801,7 +3795,6 @@ def get_players_seasonStatWAR_negroLg(stat_range):
 def get_players_seasonStatBatting_negroLg(stat, stat_range):
     batting_column1 = getattr(Batting, f"b_{stat}")
 
-    # Use the Negro League subquery for appearances
     negro_league_subquery = negro_league_appearance_subquery()
 
     return (
@@ -3822,7 +3815,6 @@ def get_players_seasonStatBatting_negroLg(stat, stat_range):
 def get_players_seasonStatPitching_negroLg(stat_column, stat_range):
     pitching_column = getattr(Pitching, f"p_{stat_column}")
 
-    # Use the Negro League subquery for appearances
     negro_league_subquery = negro_league_appearance_subquery()
 
     return (

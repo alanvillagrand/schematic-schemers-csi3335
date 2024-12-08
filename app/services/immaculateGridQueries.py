@@ -80,7 +80,110 @@ def get_players_seasonStatBatting_team(stat, team, stat_range):
         .all()
     )
 
-"""fix this"""
+def get_players_seasonStatBatting_onlyOneTeam(stat, stat_range):
+    batting_column1 = getattr(Batting, f"b_{stat}")
+
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Batting, Batting.playerID == People.playerID)
+        .filter(batting_column1 >= stat_range)
+        .filter(Batting.playerID.in_(
+            db.session.query(Batting.playerID)
+            .group_by(Batting.playerID)
+            .having(db.func.count(db.distinct(Batting.teamID)) == 1)
+        ))  # Inline subquery with select()
+        .order_by(db.func.sum(Batting.b_G).asc())
+        .all()
+    )
+
+def get_players_position_onlyOneTeam(position):
+    # Construct the column name for the specified position (e.g., G_ss, G_1b)
+    position_column = f'G_{position.lower()}'
+
+    # Subquery to get players who have played for only one team
+    subquery = (
+        db.session.query(Appearances.playerID)
+        .group_by(Appearances.playerID)
+        .having(db.func.count(db.distinct(Appearances.teamID)) == 1)
+    )
+
+    # Main query for players who meet the position condition and are in the subquery
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Appearances, Appearances.playerID == People.playerID)
+        .filter(getattr(Appearances, position_column) > 0)
+        .filter(Appearances.playerID.in_(subquery))  # Filter by players with one team
+        .order_by(db.func.sum(getattr(Appearances, position_column)).asc())
+        .all()
+    )
+
+
+def get_players_seasonBattingAVG_onlyOneTeam(stat_range):
+
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Batting, Batting.playerID == People.playerID)
+        .filter(Batting.b_AB > 0)
+        .filter((Batting.b_H / Batting.b_AB) >= stat_range)
+        .filter(Batting.playerID.in_(
+            db.session.query(Batting.playerID)
+            .group_by(Batting.playerID)
+            .having(db.func.count(db.distinct(Batting.teamID)) == 1)
+        ))  # Inline subquery with select()
+        .order_by(db.func.sum(Batting.b_G).asc())
+        .all()
+    )
+
+
+def get_players_seasonBatting3030_onlyOneTeam():
+
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Batting, Batting.playerID == People.playerID)
+        .filter(Batting.b_SB >= 30)
+        .filter(Batting.b_HR >= 30)
+        .filter(Batting.playerID.in_(
+            db.session.query(Batting.playerID)
+            .group_by(Batting.playerID)
+            .having(db.func.count(db.distinct(Batting.teamID)) == 1)
+        ))  # Inline subquery with select()
+        .order_by(db.func.sum(Batting.b_G).asc())
+        .all()
+    )
+
+
+def get_players_seasonStatPitching_onlyOneTeam(stat, stat_range):
+    pitching_column1 = getattr(Pitching, f"p_{stat}")
+
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Pitching, Pitching.playerID == People.playerID)
+        .filter(pitching_column1 >= stat_range)
+        .filter(Pitching.playerID.in_(
+            db.session.query(Pitching.playerID)
+            .group_by(Pitching.playerID)
+            .having(db.func.count(db.distinct(Pitching.teamID)) == 1)
+        ))  # Inline subquery with select()
+        .order_by(db.func.sum(Pitching.p_G).asc())
+        .all()
+    )
+
+
+def get_players_seasonPitchingERA_onlyOneTeam():
+
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Pitching, Pitching.playerID == People.playerID)
+        .filter(Pitching.p_ERA <= 3.00)
+        .filter(Pitching.playerID.in_(
+            db.session.query(Pitching.playerID)
+            .group_by(Pitching.playerID)
+            .having(db.func.count(db.distinct(Pitching.teamID)) == 1)
+        ))  # Inline subquery with select()
+        .order_by(db.func.sum(Pitching.p_G).asc())
+        .all()
+    )
+
 def get_players_ws_team(team):
     team_subquery = played_on_team_subquery(team)
     return (
@@ -218,6 +321,49 @@ def get_players_pob_team(team):
     )
 
 
+def get_players_pob_onlyOneTeam():
+
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Appearances, Appearances.playerID == People.playerID)
+        .join(Teams, Teams.teamID == Appearances.teamID)
+        .filter(People.birthCountry != "USA")
+        .group_by(People.playerID)
+        .having(db.func.count(db.func.distinct(Teams.teamID)) == 1)
+        .order_by(db.func.sum(Appearances.G_all).asc())
+        .distinct()
+        .all()
+    )
+
+def get_players_country_onlyOneTeam(country):
+
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Appearances, Appearances.playerID == People.playerID)
+        .join(Teams, Teams.teamID == Appearances.teamID)
+        .filter(People.birthCountry == country)
+        .group_by(People.playerID)
+        .having(db.func.count(db.func.distinct(Teams.teamID)) == 1)
+        .order_by(db.func.sum(Appearances.G_all).asc())
+        .distinct()
+        .all()
+    )
+
+def get_players_country_team(team, country):
+    team_subquery = played_on_team_subquery(team)
+
+    return (
+        db.session.query(People.nameFirst, People.nameLast)
+        .join(Appearances, Appearances.playerID == People.playerID)
+        .join(team_subquery, team_subquery.c.playerID == People.playerID)
+        .filter(People.birthCountry == country)
+        .group_by(People.playerID)
+        .order_by(db.func.sum(Appearances.G_all).asc())
+        .distinct()
+        .all()
+    )
+
+
 def get_players_position_team(position, team):
     # Construct the column name for the specified position (e.g., G_ss, G_1b)
     position_column = f'G_{position.lower()}'
@@ -236,6 +382,8 @@ def get_players_position_team(position, team):
         .distinct()
         .all()
     )
+
+
 
 
 def get_players_seasonBattingAVG_team(stat_range, team):
@@ -309,7 +457,8 @@ def get_players_allStar_onlyOneTeam():
     return (
         db.session.query(People.nameFirst, People.nameLast)
         .join(AllStarFull, AllStarFull.playerID == People.playerID)
-        .join(Teams, Teams.teamID == AllStarFull.teamID)
+        .join(Appearances, Appearances.playerID == People.playerID)
+        .join(Teams, Teams.teamID == Appearances.teamID)
         .filter(AllStarFull.GP > 0)
         .group_by(People.playerID)
         .having(db.func.count(db.func.distinct(Teams.teamID)) == 1)

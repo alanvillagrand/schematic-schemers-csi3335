@@ -60,7 +60,11 @@ from app.services.immaculateGridQueries import get_players_team_team, get_player
     get_players_pob_team, get_players_careerStatWAR_team, get_players_seasonStatWAR_team, get_players_hof_onlyOneTeam, \
     get_players_allStar_onlyOneTeam, get_players_stdAward_onlyOneTeam, get_players_careerBattingAVG_onlyOneTeam, \
     get_players_careerStatBatting_onlyOneTeam, get_players_careerStatPitching_onlyOneTeam, \
-    get_players_careerPitchingERA_onlyOneTeam, get_players_careerStatWAR_onlyOneTeam
+    get_players_careerPitchingERA_onlyOneTeam, get_players_careerStatWAR_onlyOneTeam, get_players_position_onlyOneTeam, \
+    get_players_country_team, get_players_pob_onlyOneTeam, get_players_country_onlyOneTeam, \
+    get_players_seasonStatBatting_onlyOneTeam, get_players_seasonStatPitching_onlyOneTeam, \
+    get_players_seasonBattingAVG_onlyOneTeam, get_players_seasonBatting3030_onlyOneTeam, \
+    get_players_seasonPitchingERA_onlyOneTeam
 
 bp = Blueprint('search', __name__)
 
@@ -182,24 +186,41 @@ def search_players():
         if stat != "ERA" and stat != "30+HR/30+SB":
             stat_range = convert_to_number(stat_range)
 
-        if stat in standard_seasonStatBatting:
+        if stat in standard_seasonStatBatting and team != "Only One Team":
             results = get_players_seasonStatBatting_team(stat, team, stat_range)
 
-
-        elif stat in standard_seasonStatPitching:
+        elif stat in standard_seasonStatPitching and team != "Only One Team":
             results = get_players_seasonStatPitching_team(stat, team, stat_range)
 
-        elif stat == "AVG":
+        elif stat == "AVG" and team != "Only One Team":
             results = get_players_seasonBattingAVG_team(stat_range, team)
 
-        elif stat == "30+HR/30+SB":
+        elif stat == "30+HR/30+SB" and team != "Only One Team":
             results = get_players_seasonBatting3030_team(team)
 
-        elif stat == "ERA":
+        elif stat == "ERA" and team != "Only One Team":
             results = get_players_seasonPitchingERA_team(team)
 
-        elif stat == "WAR":
+        elif stat == "WAR" and team != "Only One Team":
             results = get_players_seasonStatWAR_team(team, stat_range)
+
+        elif stat in standard_seasonStatBatting and team == "Only One Team":
+            results = get_players_seasonStatBatting_onlyOneTeam(stat, stat_range)
+
+        elif stat in standard_seasonStatPitching and team == "Only One Team":
+            results = get_players_seasonStatPitching_onlyOneTeam(stat, stat_range)
+
+        elif stat == "AVG" and team == "Only One Team":
+            results = get_players_seasonBattingAVG_onlyOneTeam(stat_range)
+
+        elif stat == "30+HR/30+SB" and team == "Only One Team":
+            results = get_players_seasonBatting3030_onlyOneTeam()
+
+        elif stat == "ERA" and team == "Only One Team":
+            results = get_players_seasonPitchingERA_onlyOneTeam()
+
+
+
 
 
     elif (option1 == "awards" and option2 == "teams") or (option1 == "teams" and option2 == "awards"):
@@ -234,13 +255,23 @@ def search_players():
         # Extract the position and team details
         position = option1_details if option1 == "positions" else option2_details
         team = option1_details if option1 == "teams" else option2_details
-        results = get_players_position_team(position, team)
+        if team != "Only One Team":
+            results = get_players_position_team(position, team)
+        else:
+            results = get_players_position_onlyOneTeam(position)
 
     elif (option1 == "pob" and option2 == "teams") or (option1 == "teams" and option2 == "pob"):
         team= option1_details if option1 == "teams" else option2_details
         pob= option1_details if option1 == "pob" else option2_details
-        if pob == "Outside of USA":
+        if pob == "Outside of USA" and team != "Only One Team":
             results = get_players_pob_team(team)
+        elif pob != "Outside of USA" and team != "Only One Team":
+            results = get_players_country_team(team, pob)
+        elif pob == "Outside of USA" and team == "Only One Team":
+            results = get_players_pob_onlyOneTeam()
+        elif pob != "Outside of USA" and team == "Only One Team":
+            results = get_players_country_onlyOneTeam(pob)
+
 
 
     elif option1 == "career statistic" and option2 == "career statistic":

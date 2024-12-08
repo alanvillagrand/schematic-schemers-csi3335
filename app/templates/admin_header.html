@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Admin - Manage Users</title>
+</head>
+<body>
+<header style="background-color: #3b7a57; color: white; padding: 10px; display: flex; align-items: center; font-size: 2em; justify-content: space-between;">
+    <div style="flex: 1; text-align: center;">Admin Panel - Schematic Schemers</div>
+    <a href="{{ url_for('auth.logout') }}" class="btn-logout" style="padding: 6px 14px; background-color: #ff4d4d; color: white; text-decoration: none; border-radius: 5px; margin-left: 15px;">Logout</a>
+</header>
+
+<style>
+    .btn-home, .btn-logout {
+        padding: 6px 14px;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        transition: background-color 0.3s, color 0.3s;
+    }
+    .btn-home {
+        background-color: #3b7a57;
+    }
+    .btn-home:hover {
+        background-color: black;
+        color: white;
+    }
+    .btn-logout {
+        background-color: #ff4d4d;
+    }
+    .btn-logout:hover {
+        background-color: #cc0000;
+    }
+</style>
+
+<div class="content">
+    {% block body %}
+    {% endblock %}
+</div>
+</body>
+</html>

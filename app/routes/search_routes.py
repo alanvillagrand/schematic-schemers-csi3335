@@ -57,8 +57,7 @@ from app.services.immaculateGridQueries import get_players_team_team, get_player
     get_players_draftPick_country, get_players_draftPick_pob, get_players_draftPick_position, \
     get_players_stdAward_position, get_players_hof_position, get_players_allstar_position, \
     get_players_careerPitchingERA_team, get_players_exclusive_to_team, get_players_seasonPitchingERA_team, \
-    get_players_pob_team, get_players_careerStatWAR_team, get_players_seasonStatWAR_team
-
+    get_players_pob_team, get_players_careerStatWAR_team, get_players_seasonStatWAR_team, get_players_draftPick_team
 
 bp = Blueprint('search', __name__)
 
@@ -202,7 +201,7 @@ def search_players():
             results = get_players_allstar_team(team)
 
         elif award == "World Series":
-            results = teamsQueries.get_players_ws_team(team)
+            results = get_players_ws_team(team)
 
     elif (option1 == "positions" and option2 == "teams") or (option1 == "teams" and option2 == "positions"):
         # Extract the position and team details
@@ -215,6 +214,10 @@ def search_players():
         pob= option1_details if option1 == "pob" else option2_details
         if pob == "Outside of USA":
             results = get_players_pob_team(team)
+
+    elif (option1 == "dp" and option2 == "teams") or (option1 == "teams" and option2 == "dp"):
+        team = option1_details if option1 == "teams" else option2_details
+        results = get_players_draftPick_team(team)
 
 
     elif option1 == "career statistic" and option2 == "career statistic":

@@ -1,0 +1,308 @@
+Rk,Name,Prfct,Gcar,Gtm,yearID,Date,teamID,playerID
+1,Blake Snell*,,202,111,2024,2-Aug,SFN,snellbl01
+2,Dylan Cease,,145,105,2024,25-Jul,SDN,ceasedy01
+3,Ronel Blanco,,25,5,2024,1-Apr,HOU,blancro01
+4,Michael Lorenzen,,333,115,2023,9-Aug,PHI,lorenmi01
+5,Framber Valdez*,,119,108,2023,1-Aug,HOU,valdefr01
+6,Domingo Germán,Y,107,80,2023,28-Jun,NYA,germado01
+7,Reid Detmers*,,11,32,2022,10-May,LAA,detmere01
+8,Tyler Gilbert*,,4,118,2021,14-Aug,ARI,gilbety01
+9,CNUey Kluber,,218,43,2021,19-May,NYA,klubeco01
+10,Spencer Turnbull,,51,42,2021,18-May,DET,turnbsp01
+11,Wade Miley*,,261,30,2021,7-May,CIN,mileywa01
+12,John Means*,,49,31,2021,5-May,BAL,meansjo01
+13,Carlos Rodón*,,99,12,2021,14-Apr,CHA,rodonca01
+14,Joe Musgrove,,110,8,2021,9-Apr,SDN,musgrjo01
+15,Alec Mills,,28,48,2020,13-Sep,CHN,millsal02
+16,Lucas Giolito,,81,30,2020,25-Aug,CHA,giolilu01
+17,Justin Verlander,,448,138,2019,1-Sep,HOU,verlaju01
+18,Mike Fiers,,181,37,2019,7-May,OAK,fiersmi01
+19,James Paxton*,,82,34,2018,8-May,SEA,paxtoja01
+20,Sean Manaea*,,59,21,2018,21-Apr,OAK,manaese01
+21,Edinson Vólquez,,270,54,2017,3-Jun,MIA,volqued01
+22,Jake Arrieta,,140,16,2016,21-Apr,CHN,arrieja01
+23,Max Scherzer,,240,161,2015,Oct 3(2),WAS,scherma01
+24,Jake Arrieta,,130,129,2015,30-Aug,CHN,arrieja01
+25,Mike Fiers,,75,123,2015,21-Aug,HOU,fiersmi01
+26,Hisashi Iwakuma,,102,115,2015,12-Aug,SEA,iwakuhi01
+27,Cole Hamels*,,295,99,2015,25-Jul,PHI,hamelco01
+28,Max Scherzer,,221,69,2015,20-Jun,WAS,scherma01
+29,Chris Heston,,15,59,2015,9-Jun,SFN,hestoch01
+30,Jordan Zimmermann,,145,162,2014,28-Sep,WAS,zimmejo02
+31,Tim Lincecum,,237,79,2014,25-Jun,SFN,linceti01
+32,Clayton Kershaw*,,194,74,2014,18-Jun,LAN,kershcl01
+33,Josh Beckett,,324,51,2014,25-May,LAN,beckejo02
+34,Henderson Alvarez III,,58,162,2013,29-Sep,MIA,alvarhe01
+35,Tim Lincecum,,208,93,2013,13-Jul,SFN,linceti01
+36,Homer Bailey,,128,84,2013,2-Jul,CIN,baileho02
+37,Homer Bailey,,110,157,2012,28-Sep,CIN,baileho02
+38,Félix Hernández,Y,230,119,2012,15-Aug,SEA,hernafe02
+39,Matt Cain,Y,217,63,2012,13-Jun,SFN,cainma01
+40,Johan Santana*,,350,52,2012,1-Jun,NYN,santajo02
+41,Jered Weaver,,183,25,2012,2-May,LAA,weaveje02
+42,Philip Humber,Y,56,14,2012,21-Apr,CHA,humbeph01
+43,Ervin Santana,,195,105,2011,27-Jul,LAA,santaer01
+44,Justin Verlander,,173,34,2011,7-May,DET,verlaju01
+45,Francisco Liriano*,,114,28,2011,3-May,MIN,liriafr01
+46,Roy HalLANay,,,,2010,6-Oct,PHI,hallaro01
+47,Matt Garza,,109,98,2010,26-Jul,TBA,garzama01
+48,Edwin Jackson,,155,74,2010,25-Jun,ARI,jacksed01
+49,Roy HalLANay,Y,324,48,2010,29-May,PHI,hallaro01
+50,Dallas Braden*,Y,68,32,2010,9-May,OAK,bradeda01
+51,Ubaldo Jiménez,,87,11,2010,17-Apr,COL,jimenub01
+52,Mark Buehrle*,Y,313,95,2009,23-Jul,CHA,buehrma01
+53,Jonathan Sánchez*,,106,86,2009,10-Jul,SFN,sanchjo01
+54,Carlos Zambrano,,229,147,2008,14-Sep,CHN,zambrca01
+55,Jon Lester*,,38,47,2008,19-May,BOS,lestejo01
+56,Clay Buchholz,,2,136,2007,1-Sep,BOS,buchhcl01
+57,Justin Verlander,,45,63,2007,12-Jun,DET,verlaju01
+58,Mark Buehrle*,,232,13,2007,18-Apr,CHA,buehrma01
+59,Aníbal Sánchez,,14,139,2006,6-Sep,FLO,sanchan01
+60,Randy Johnson*,Y,463,38,2004,18-May,ARI,johnsra05
+61,Kevin Millwood,,174,25,2003,27-Apr,PHI,millwke01
+62,Derek Lowe,,303,21,2002,27-Apr,BOS,lowede01
+63,Bud Smith*,,13,137,2001,3-Sep,SLN,smithbu02
+64,A.J. Burnett,,22,35,2001,12-May,FLO,burnea.01
+65,Hideo Nomo,,184,2,2001,4-Apr,BOS,nomohi01
+66,Eric Milton*,,62,141,1999,11-Sep,MIN,miltoer01
+67,David Cone,Y,377,90,1999,18-Jul,NYA,coneda01
+68,José Jiménez,,19,73,1999,25-Jun,SLN,jimenjo01
+69,David Wells*,Y,389,37,1998,17-May,NYA,wellsda01
+70,Kevin Brown,,259,62,1997,10-Jun,FLO,brownke01
+71,Hideo Nomo,,59,151,1996,17-Sep,LAN,nomohi01
+72,Dwight Gooden,,312,36,1996,14-May,NYA,goodedw01
+73,Al Leiter*,,121,38,1996,11-May,FLO,leiteal01
+74,Ramón Martínez,,187,71,1995,14-Jul,LAN,martira02
+75,Kenny Rogers*,Y,343,102,1994,28-Jul,TEX,rogerke01
+76,Scott Erickson,,122,22,1994,27-Apr,MIN,ericksc01
+77,Kent Mercker*,,185,5,1994,8-Apr,ATL,merckke01
+78,Darryl Kile,,87,139,1993,8-Sep,HOU,kileda01
+79,Jim Abbott*,,152,137,1993,4-Sep,NYA,abbotji01
+80,Chris Bosio,,216,15,1993,22-Apr,SEA,bosioch01
+81,Kevin Gross,,337,118,1992,17-Aug,LAN,grosske01
+82,Bret Saberhagen,,246,124,1991,26-Aug,KCA,saberbr01
+83,Wilson Álvarez*,,2,110,1991,11-Aug,CHA,alvarwi01
+84,Dennis Martínez,Y,482,98,1991,28-Jul,MON,martide01
+85,Tommy Greene,,30,40,1991,23-May,PHI,greento01
+86,Nolan Ryan,,745,17,1991,1-May,TEX,ryanno01
+87,Dave Stieb,,384,134,1990,2-Sep,TOR,stiebda01
+88,Terry Mulholland*,,73,114,1990,15-Aug,PHI,mulhote01
+89,Dave Stewart,,374,72,1990,29-Jun,OAK,stewada01
+90,Fernando Valenzuela*,,314,73,1990,29-Jun,LAN,valenfe01
+91,Nolan Ryan,,720,58,1990,11-Jun,TEX,ryanno01
+92,Randy Johnson*,,44,51,1990,2-Jun,SEA,johnsra05
+93,Tom Browning*,Y,145,146,1988,16-Sep,CIN,brownto05
+94,Juan Nieves*,,37,9,1987,15-Apr,MIL,nieveju01
+95,Mike Scott,,211,153,1986,25-Sep,HOU,scottmi03
+96,Joe Cowley,,87,147,1986,19-Sep,CHA,cowlejo01
+97,Mike Witt,Y,132,162,1984,30-Sep,CAL,wittmi01
+98,Jack Morris,,199,4,1984,7-Apr,DET,morrija02
+99,Mike Warren,,12,159,1983,29-Sep,OAK,warremi01
+100,Bob Forsch,,308,157,1983,26-Sep,SLN,forscbo01
+101,Dave Righetti*,,68,76,1983,4-Jul,NYA,righeda01
+102,Nolan Ryan,,451,102,1981,26-Sep,HOU,ryanno01
+103,Len Barker,Y,116,24,1981,15-May,CLE,barkele01
+104,Charlie Lea,,27,27,1981,May 10(2),MON,leach01
+105,Jerry Reuss*,,341,70,1980,27-Jun,LAN,reussje01
+106,Ken Forsch,,364,2,1979,7-Apr,HOU,forscke01
+107,Tom Seaver,,402,63,1978,16-Jun,CIN,seaveto01
+108,Bob Forsch,,124,9,1978,16-Apr,SLN,forscbo01
+109,Bert Blyleven,,282,153,1977,22-Sep,TEX,blylebe01
+110,Dennis Eckersley,,81,41,1977,30-May,CLE,eckerde01
+111,Jim Colborn,,245,32,1977,14-May,KCA,colboji01
+112,John Montefusco,,79,160,1976,29-Sep,SFN,montejo01
+113,John Candelaria*,,40,110,1976,9-Aug,PIT,candejo01
+114,Larry Dierker,,334,84,1976,9-Jul,HOU,dierkla01
+115,Ed Halicki,,36,129,1975,Aug 24(2),SFN,haliced01
+116,Nolan Ryan,,239,49,1975,1-Jun,CAL,ryanno01
+117,Nolan Ryan,,227,160,1974,28-Sep,CAL,ryanno01
+118,Dick Bosman,,238,91,1974,19-Jul,CLE,bosmadi01
+119,Steve Busby,,58,62,1974,19-Jun,KCA,busbyst01
+120,Phil Niekro,,346,117,1973,5-Aug,ATL,niekrph01
+121,Jim Bibby,,25,102,1973,30-Jul,TEX,bibbyji01
+122,Nolan Ryan,,168,89,1973,15-Jul,CAL,ryanno01
+123,Nolan Ryan,,154,30,1973,15-May,CAL,ryanno01
+124,Steve Busby,,10,19,1973,27-Apr,KCA,busbyst01
+125,Bill Stoneman,,203,152,1972,Oct 2(1),MON,stonebi01
+126,Milt Pappas,,485,128,1972,2-Sep,CHN,pappami01
+127,Burt Hooton,,4,2,1972,16-Apr,CHN,hootobu01
+128,Bob Gibson,,406,122,1971,14-Aug,SLN,gibsobo01
+129,Rick Wise,,198,68,1971,23-Jun,PHI,wiseri01
+130,Ken Holtzman*,,174,52,1971,3-Jun,CHN,holtzke01
+131,Vida Blue*,,16,154,1970,21-Sep,OAK,bluevi01
+132,Bill Singer,,128,92,1970,20-Jul,LAN,singebi01
+133,Clyde Wright*,,137,77,1970,3-Jul,CAL,wrighcl01
+134,Dock Ellis,,75,58,1970,Jun 12(1),PIT,ellisdo01
+135,Bob Moose,,81,152,1969,20-Sep,PIT,moosebo01
+136,Ken Holtzman*,,112,123,1969,19-Aug,CHN,holtzke01
+137,Jim Palmer,,82,116,1969,13-Aug,BAL,palmeji01
+138,Don Wilson,,71,25,1969,1-May,HOU,wilsodo01
+139,Jim Maloney,,257,20,1969,30-Apr,CIN,malonji01
+140,Bill Stoneman,,49,9,1969,17-Apr,MON,stonebi01
+141,Ray Washburn,,174,153,1968,18-Sep,SLN,washbra01
+142,Gaylord Perry,,246,153,1968,17-Sep,SFN,perryga01
+143,George Culver,,85,99,1968,Jul 29(2),CIN,culvege01
+144,Catfish Hunter,Y,103,25,1968,8-May,OAK,hunteca01
+145,Tom Phoebus,,40,13,1968,27-Apr,BAL,phoebto01
+146,Joe Horlen,,191,142,1967,Sep 10(1),CHA,horlejo01
+147,Dean Chance,,254,128,1967,Aug 25(2),MIN,chancde01
+148,Don Wilson,,15,64,1967,18-Jun,HOU,wilsodo01
+149,Sonny Siebert,,93,50,1966,10-Jun,CLE,siebeso01
+150,Dave Morehead,,93,149,1965,16-Sep,BOS,morehda01
+151,Sandy Koufax*,Y,349,141,1965,9-Sep,LAN,koufasa01
+152,Jim Maloney,,148,118,1965,Aug 19(1),CIN,malonji01
+153,Jim Bunning,Y,319,60,1964,Jun 21(1),PHI,bunniji01
+154,Sandy Koufax*,,296,48,1964,4-Jun,LAN,koufasa01
+155,Ken Johnson,,140,9,1964,23-Apr,HOU,johnske02
+156,Juan Marichal,,93,63,1963,15-Jun,SFN,maricju01
+157,Don Nottebart,,90,37,1963,17-May,HOU,nottedo01
+158,Sandy Koufax*,,250,31,1963,11-May,LAN,koufasa01
+159,Jack Kralick*,,106,134,1962,26-Aug,MIN,kralija01
+160,Bill Monbouquette,,134,103,1962,1-Aug,BOS,monbobi01
+161,Sandy Koufax*,,236,80,1962,30-Jun,LAN,koufasa01
+162,Earl Wilson,,33,71,1962,26-Jun,BOS,wilsoea01
+163,Bo Belinsky*,,4,19,1962,5-May,LAA,belinbo01
+164,Warren Spahn*,,574,10,1961,28-Apr,ML1,spahnwa01
+165,Warren Spahn*,,568,142,1960,16-Sep,ML1,spahnwa01
+166,Lew Burdette,,366,112,1960,18-Aug,ML1,burdele01
+167,Don Cardwell,,77,23,1960,May 15(2),CHN,cardwdo01
+168,Hoyt Wilhelm,,399,147,1958,20-Sep,BAL,wilheho01
+169,Jim Bunning,,95,86,1958,Jul 20(1),DET,bunniji01
+170,Bob Keegan,,114,119,1957,Aug 20(2),CHA,keegabo01
+171,Don Larsen,Y,,,1956,8-Oct,NYA,larsedo01
+172,Sal Maglie,,260,150,1956,25-Sep,BRO,maglisa01
+173,Mel Parnell*,,275,79,1956,14-Jul,BOS,parneme01
+174,Carl Erskine,,253,20,1956,12-May,BRO,erskica01
+175,Sam Jones,,29,28,1955,12-May,CHN,jonessa02
+176,Jim Wilson,,111,51,1954,12-Jun,ML1,wilsoji02
+177,Bobo Holloman,,5,19,1953,6-May,SLA,hollobo01
+178,Virgil Trucks,,287,125,1952,25-Aug,DET,truckvi01
+179,Carl Erskine,,119,56,1952,19-Jun,BRO,erskica01
+180,Virgil Trucks,,265,26,1952,15-May,DET,truckvi01
+181,Allie Reynolds,,322,150,1951,Sep 28(1),NYA,reynoal01
+182,Allie Reynolds,,304,75,1951,12-Jul,NYA,reynoal01
+183,Bob Feller,,433,68,1951,Jul 1(1),CLE,fellebo01
+184,Cliff Chambers*,,105,18,1951,May 6(2),PIT,chambcl01
+185,Vern Bickford,,98,107,1950,11-Aug,BSN,bickfve01
+186,Rex Barney,,91,132,1948,9-Sep,BRO,barnere02
+187,Bob Lemon,,88,62,1948,30-Jun,CLE,lemonbo01
+188,Bill McCahan,,29,132,1947,3-Sep,PHA,mccahbi01
+189,Don Black,,122,65,1947,Jul 10(1),CLE,blackdo01
+190,Ewell Blackwell,,49,57,1947,18-Jun,CIN,blackew01
+191,Bob Feller,,218,10,1946,30-Apr,CLE,fellebo01
+192,Ed Head,,106,7,1946,23-Apr,BRO,headed01
+193,Dick Fowler,,39,137,1945,Sep 9(2),PHA,fowledi01
+194,Clyde Shoun*,,305,22,1944,15-May,CIN,shouncl01
+195,Jim Tobin,,206,8,1944,27-Apr,BSN,tobinji01
+196,Lon Warneke,,382,126,1941,30-Aug,SLN,warnelo01
+197,Tex Carleton,,261,9,1940,30-Apr,BRO,carlete01
+198,Bob Feller,,119,1,1940,16-Apr,CLE,fellebo01
+199,Monte Pearson,,174,122,1938,Aug 27(2),NYA,pearsmo01
+200,Johnny Vander Meer*,,32,48,1938,15-Jun,CIN,vandejo01
+201,Johnny Vander Meer*,,31,45,1938,11-Jun,CIN,vandejo01
+202,Bill Dietrich,,137,36,1937,1-Jun,CHA,dietrbi01
+203,Vern Kennedy,,28,123,1935,31-Aug,CHA,kenneve01
+204,Paul Dean,,36,145,1934,Sep 21(2),SLN,deanpa01
+205,Bobby Burke*,,147,106,1931,8-Aug,WAS,burkebo01
+206,Wes Ferrell,,94,12,1931,29-Apr,CLE,ferrewe01
+207,Carl Hubbell*,,25,13,1929,8-May,NY1,hubbeca01
+208,Ted Lyons,,127,121,1926,21-Aug,CHA,lyonste01
+209,Dazzy Vance,,149,134,1925,Sep 13(1),BRO,vanceda01
+210,Jesse Haines,,173,82,1924,17-Jul,SLN,haineje01
+211,Howard Ehmke,,242,125,1923,7-Sep,BOS,ehmkeho01
+212,Sad Sam Jones,,284,125,1923,4-Sep,NYA,jonessa01
+213,Jesse Barnes,,229,20,1922,7-May,NY1,barneje01
+214,Charlie Robertson,Y,5,15,1922,30-Apr,CHA,roberch01
+215,Walter Johnson,,563,61,1920,1-Jul,WAS,johnswa01
+216,Ray Caldwell,,270,123,1919,Sep 10(1),CLE,caldwra02
+217,Hod Eller,,79,15,1919,11-May,CIN,ellerho01
+218,Dutch Leonard*,,206,42,1918,3-Jun,BOS,leonadu01
+219,Bob Groom,,323,19,1917,May 6(2),SLA,groombo01
+220,Ernie Koob*,,68,17,1917,5-May,SLA,koober01
+221,Fred Toney,,117,20,1917,2-May,CIN,toneyfr01
+222,George Mogridge*,,59,9,1917,24-Apr,NYA,mogrige01
+223,Eddie Cicotte,,339,3,1917,14-Apr,CHA,cicoted01
+224,Dutch Leonard*,,149,123,1916,30-Aug,BOS,leonadu01
+225,Bullet Joe Bush,,138,118,1916,26-Aug,PHA,bushjo01
+226,Rube Foster,,102,55,1916,21-Jun,BOS,fosteru01
+227,Tom Hughes,,120,46,1916,16-Jun,BSN,hugheto02
+228,Dave Davenport,,86,133,1915,Sep 7(1),SLF,davenda01
+229,Jimmy Lavender,,149,121,1915,Aug 31(1),CHN,lavenji01
+230,Alex Main,,62,108,1915,16-Aug,KCF,mainal01
+231,Claude Hendrix,,159,28,1915,15-May,CHF,hendrcl01
+232,Frank Allen*,,96,12,1915,24-Apr,PTF,allenfr01
+233,Rube Marquard*,,213,2,1915,15-Apr,NY1,marquru01
+234,Ed Lafitte,,70,136,1914,Sep 19(1),BRF,lafited01
+235,George Davis,,16,126,1914,Sep 9(2),BSN,davisge02
+236,Joe Benz,,99,40,1914,31-May,CHA,benzjo01
+237,Jeff Tesreau,,27,127,1912,Sep 6(1),NY1,tesreje01
+238,Earl Hamilton*,,65,125,1912,30-Aug,SLA,hamilea01
+239,George Mullin,,414,73,1912,Jul 4(2),DET,mullige01
+240,Ed Walsh,,324,121,1911,27-Aug,CHA,walshed01
+241,Smoky Joe Wood,,96,93,1911,Jul 29(1),BOS,woodjo02
+242,Charles Bender,,226,18,1910,12-May,PHA,bendech01
+243,Addie Joss,,275,5,1910,20-Apr,CLE,jossad01
+244,Addie Joss,Y,239,152,1908,2-Oct,CLE,jossad01
+245,Frank Smith,,162,143,1908,20-Sep,CHA,smithfr03
+246,Bob Rhoads,,194,141,1908,18-Sep,CLE,rhoadbo01
+247,Nap Rucker*,,71,122,1908,Sep 5(2),BRO,ruckena01
+248,Hooks Wiltse*,,146,68,1908,Jul 4(1),NY1,wiltsho01
+249,Cy Young,,813,66,1908,30-Jun,BOS,youngcy01
+250,Nick Maddox,,3,139,1907,20-Sep,PIT,maddoni01
+251,Big Jeff Pfeffer,,55,19,1907,8-May,BSN,pfeffbi01
+252,Mal Eason,,108,82,1906,20-Jul,BRO,easonma01
+253,Johnny Lush*,,15,17,1906,1-May,PHI,lushjo01
+254,Bill Dinneen,,288,141,1905,Sep 27(1),BOS,dinnebi01
+255,Frank Smith,,57,124,1905,Sep 6(2),CHA,smithfr03
+256,Weldon Henley,,77,77,1905,Jul 22(1),PHA,henlewe01
+257,Christy Mathewson,,186,51,1905,13-Jun,NY1,mathech01
+258,Jesse Tannehill*,,254,101,1904,17-Aug,BOS,tanneje01
+259,Cy Young,Y,638,16,1904,5-May,BOS,youngcy01
+260,CHFck Fraser,,271,128,1903,Sep 18(2),PHI,frasech01
+261,Jimmy Callahan,,190,129,1902,Sep 20(1),CHA,callani01
+262,Christy Mathewson,,29,64,1901,15-Jul,NY1,mathech01
+263,Pete Dowling*,,93,54,1901,30-Jun,CLE,dowlipe01
+264,Noodles Hahn*,,,,1900,12-Jul,CIN,hahnno01
+265,Vic Willis,,,,1899,7-Aug,BSN,willivi01
+266,Deacon Phillippe,,,,1899,25-May,LS2,phillde01
+267,Walter Thornton*,,,,1898,21-Aug,CHN,thornwa01
+268,Red Donahue,,,,1898,8-Jul,PHI,donahre01
+269,Theodore Breitenstein*,,,,1898,22-Apr,CIN,breitte01
+270,Jay Hughes,,,,1898,22-Apr,BLN,hugheja01
+271,Cy Young,,,,1897,18-Sep,CL4,youngcy01
+272,Bill Hawke,,,,1893,16-Aug,BLN,hawkebi01
+273,Bumpus Jones,,,,1892,15-Oct,CIN,jonesbu01
+274,Ben Sanders,,,,1892,22-Aug,LS2,sandebe01
+275,Jack Stivetts,,,,1892,6-Aug,BSN,stiveja01
+276,Theodore Breitenstein*,,,,1891,4-Oct,SLN,breitte01
+277,Amos Rusie,,,,1891,31-Jul,NY1,rusieam01
+278,Tom Lovett,,,,1891,22-Jun,BRO,lovetto01
+279,Ledell Titcomb*,,,,1890,15-Sep,RC2,titcoca01
+280,Gus Weyhing,,,,1888,31-Jul,PHA,weyhigu01
+281,Ed Seward,,,,1888,26-Jul,PHA,sewared01
+282,Henry Porter,,,,1888,6-Jun,KC2,portehe01
+283,Adonis Terry,,,,1888,27-May,BRO,terryad01
+284,Matt Kilroy*,,,,1886,6-Oct,BAL,kilroma01
+285,Adonis Terry,,,,1886,24-Jul,BRO,terryad01
+286,Al Atkinson,,,,1886,1-May,PHA,atkinal01
+287,Charlie Ferguson,,,,1885,29-Aug,PHI,ferguch01
+288,John Clarkson,,,,1885,27-Jul,CHN,clarkjo01
+289,Sam Kimber,,,,1884,4-Oct,BRO,kimbesa01
+290,Ed Cushman*,,,,1884,28-Sep,MIL,cushmed01
+291,Dick Burns*,,,,1884,26-Aug,CNU,burnsdi01
+292,Pud Galvin,,,,1884,4-Aug,BUF,galvipu01
+293,Larry CNUCNUan,,,,1884,27-Jun,CHN,CNUcola01
+294,Frank Mountain,,,,1884,5-Jun,COL,mountfr01
+295,Ed Morris*,,,,1884,29-May,COL,morried01
+296,Al Atkinson,,,,1884,24-May,PHA,atkinal01
+297,Hugh Daily,,,,1883,13-Sep,CL4,dailyhu01
+298,Old Hoss Radbourn,,,,1883,25-Jul,PRO,radboch01
+299,Larry CNUCNUan,,,,1882,20-Sep,CHN,CNUcola01
+300,Guy Hecker,,,,1882,19-Sep,LS2,heckegu01
+301,Tony Mullane,,,,1882,11-Sep,LS2,mullato01
+302,Pud Galvin,,,,1880,20-Aug,BUF,galvipu01
+303,Larry CNUCNUan,,,,1880,19-Aug,CHN,CNUcola01
+304,John Ward,Y,,,1880,17-Jun,PRO,wardjo01
+305,Lee Richmond*,Y,,,1880,12-Jun,WOR,richmle01
+306,George Bradley,,,,1876,15-Jul,SLN,bradlge01
+307,Joe Borden,,,,1875,28-Jul,PHI,bordejo01

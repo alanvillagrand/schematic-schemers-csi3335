@@ -670,6 +670,7 @@ def search_players():
             else:
                 results = get_players_seasonStatWAR_seasonBattingAVG(stat_range2, stat_range1)
 
+#era war
         elif (stat1 == "ERA" and stat2 == "WAR") or (stat1 == "WAR" and stat2 == "ERA"):
             if stat1 == "WAR":
                 results = get_players_seasonStatWAR_seasonPitchingERA(stat_range1)

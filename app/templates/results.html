@@ -104,10 +104,15 @@
                 {% for player in results %}
                     <div class="player-box">
                         <div class="button-wrapper">
-                            <button class="copy-button" onclick="copyText('{{ player[0] }}' + ' ' + '{{ player[1] }}')"><img class="copy-image" src="/static/copy.png" alt="copy"/></button>
+                            <button class="copy-button" onclick="copyText('{{ player[0] }}' + ' ' + '{{ player[1] }}' + ', Debut: ' + '{{ player[2] }}' + ', Final: ' + '{{ player[3] }}')">
                             <p class = copy-text>Copy</p>
+                            </button>
                         </div>
-                        <p class="player-text" id="player-{{ loop.index }}">{{ loop.index }}. {{ player[0] }} {{ player[1] }}</p>
+                        <p class="player-text" id="player-{{ loop.index }}">
+                        {{ loop.index }}. {{ player[0] }} {{ player[1] }}
+                        <br>
+                        <small>Debut: {{ player[2] }} Final: {{ player[3] }}</small>
+                        </p>
                     </div>
                 {% endfor %}
             </div>

@@ -485,3 +485,5 @@ class NoHitters(db.Model):
     Rk = db.Column(db.BigInteger, nullable=True)
     Name = db.Column(db.Text, nullable=True)
 
+
+

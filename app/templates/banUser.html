@@ -1,0 +1,57 @@
+{% extends "admin_header.html" %}
+
+{% block body %}
+    <h1>Manage Users</h1>
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for user in users %}
+            <tr>
+                <td>{{ user.id }}</td>
+                <td>{{ user.username }}</td>
+                <td>
+                    {% if user.username != 'admin' %}
+                        <form action="{{ url_for('auth.ban_user', user_id=user.id) }}" method="post" style="display:inline;">
+                            <button class="btn-ban" type="submit">Ban</button>
+                        </form>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #3b7a57;
+            color: white;
+        }
+        .btn-ban {
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn-ban:hover {
+            background-color: #cc0000;
+        }
+    </style>
+{% endblock %}

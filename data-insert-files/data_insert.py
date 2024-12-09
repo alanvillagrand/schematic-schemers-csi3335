@@ -2,10 +2,12 @@ import pandas as pd
 import pymysql
 import sys
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'data-insert-files')))
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.abspath(os.path.join(current_dir, ".."))
+sys.path.append(parent_dir)
 import csi3335f2024 as cfg
 
-file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'data-insert-files'))
 
 # Separate function for people table since it requires more specific parameters
 def insert_csv_to_db_people(con, csv_file_path, table_name, columns, ignoreColumns):
@@ -104,6 +106,38 @@ def insert_csv_to_db_projWL(con, csv_file_path, table_name, columns, ignoreColum
     finally:
         con.close()
 
+
+def insert_csv_to_db_update_drafts(con, csv_file_path, table_name, columns, ignoreColumns):
+    try:
+        with con.cursor() as cursor:
+            # Set columns and placeholders for prepared statement
+            cols = ', '.join(columns)
+            placeholders = ', '.join(['%s'] * len(columns))
+
+            # Read the CSV file
+            df = pd.read_csv(csv_file_path, encoding='latin-1')
+            df = df.drop(columns=ignoreColumns)
+            df = df.replace({float("NaN"): None})
+
+            # Generate SQL statement
+            sql = f"UPDATE {table_name} SET team_name = %s WHERE playerID = %s AND yearID = %s"
+
+            # Insert each row
+            count = 0
+            for index, row in df.iterrows():
+                count += 1
+                cursor.execute(sql, [row['team_name'], row['playerID'], row['draft_year']])
+
+            con.commit()
+            print("Data inserted successfully.")
+            print(count)
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        con.rollback()
+    finally:
+        con.close()
+
 def insert_csv_to_db_everything(con, csv_file_path, table_name, columns, ignoreColumns):
     try:
         with con.cursor() as cursor:
@@ -176,7 +210,7 @@ con = pymysql.connect(host=cfg.mysql['host'],
                       user=cfg.mysql['user'],
                       password=cfg.mysql['password'],
                       database=cfg.mysql['database'])
-folder = 'lahman_1871-2023_csv/'
+folder = file_path + 'lahman_1871-2023_csv/'
 
 # People
 if arg == 'People' or arg == 'all':
@@ -267,7 +301,7 @@ if arg == 'HallOfFame' or arg == 'all':
 
 # Manually added 1 new Park
 
-# HomeGames (Had to change yearID to yearkey in function)
+# HomeGames (Have to change yearID to yearkey in function)
 if arg == 'HomeGames' or arg == 'all':
     file = folder + 'HomeGames.csv'
     table = 'HomeGames'
@@ -333,6 +367,14 @@ if arg == 'Drafts' or arg == 'all':
     columns = ['playerID','draftYear','draftRound','draftPick']
     ignoreColumns = ['id','name_first','name_last','name_given','team_name','school_name','birth_date','birth_city','birth_country','birth_state','weight','birth_year','birth_month','birth_day']
     insert_csv_to_db_everything(con, file, table, columns, ignoreColumns)
+
+# UpdateDrafts
+if arg == 'UpdateDrafts' or arg == 'all':
+    file = file_path + '/additional_data/draft_data/mlb_draft_data_playerIDs.csv'
+    table = 'Drafts'
+    columns = ['playerID','draftYear','team_name']
+    ignoreColumns = ['draft_round','draft_pick','id','name_first','name_last','name_given','school_name','birth_date','birth_city','birth_country','birth_state','weight','birth_year','birth_month','birth_day']
+    insert_csv_to_db_update_drafts(con, file, table, columns, ignoreColumns)
 
 # CareerWAR
 if arg == 'CareerWar' or arg == 'all':

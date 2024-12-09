@@ -140,6 +140,8 @@ class Drafts(db.Model):
     yearID = db.Column(db.SmallInteger)
     draft_round = db.Column(db.SmallInteger)
     draft_pick = db.Column(db.SmallInteger)
+    team_name = db.Column(db.String(50))
+    teamID = db.Column(db.String(3), db.ForeignKey('teams.teamID'), nullable=False)
 
 
 class Fielding(db.Model):

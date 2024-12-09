@@ -1,8 +1,14 @@
 import pandas as pd
 import pymysql
+import os
+import sys
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.abspath(os.path.join(current_dir, ".."))
+sys.path.append(parent_dir)
 import csi3335f2024 as cfg
 import nls_teams as nls
-import sys
+
+file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'data-insert-files'))
 
 # Separate function for people table since it requires more specific parameters
 def insert_csv_to_db_people(con, csv_file_path, table_name, columns, ignoreColumns):
@@ -166,7 +172,7 @@ con = pymysql.connect(host=cfg.mysql['host'],
                       password=cfg.mysql['password'],
                       database=cfg.mysql['database'])
 
-folder = 'additional_data/NNL/'
+folder = file_path + 'additional_data/NNL/'
 
 
 # People

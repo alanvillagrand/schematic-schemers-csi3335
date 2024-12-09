@@ -199,23 +199,29 @@ def get_players_seasonPitchingERA_onlyOneTeam():
     )
 
 def get_players_ws_team(team):
-    team_subquery = played_on_team_subquery(team)
     return (
-        db.session.query(People.nameFirst, People.nameLast, People.debutDate, People.finalGameDate)
-        .join(Appearances, Appearances.playerID == People.playerID)
-        .join(team_subquery, team_subquery.c.playerID == People.playerID)
-        .join(SeriesPost, SeriesPost.teamIDwinner == team_subquery.c.teamID)
-        .filter(SeriesPost.round == 'WS')
-        .filter(Teams.yearID == SeriesPost.yearID)
-        .group_by(People.playerID)
-        .order_by(db.func.sum(Appearances.G_all).asc())
-        .distinct()
+        db.session.query(
+            People.nameFirst,
+            People.nameLast,
+            People.debutDate,
+            People.finalGameDate
+        )
+        .join(BattingPost, BattingPost.playerID == People.playerID)
+        .join(Teams, and_(Teams.teamID == BattingPost.teamID, Teams.yearID == BattingPost.yearId))
+        .join(ImmaculateGridTeams, ImmaculateGridTeams.team_name == Teams.team_name)
+        .filter(ImmaculateGridTeams.ig_team_name == team)
+        .filter(Teams.yearID >= ImmaculateGridTeams.startYear)
+        .filter(or_(ImmaculateGridTeams.endYear.is_(None), Teams.yearID <= ImmaculateGridTeams.endYear))
+        .filter(Teams.WSWin == 'Y')
+        .order_by(db.func.sum(BattingPost.b_G))
+        .group_by(BattingPost.playerID)
         .all()
-
     )
 
-"""fix this"""
+
+
 def get_players_seasonStatWAR_team(team, stat_range):
+
     team_subquery = played_on_team_subquery(team)
     return (
         db.session.query(People.nameFirst, People.nameLast, People.debutDate, People.finalGameDate)
@@ -223,10 +229,13 @@ def get_players_seasonStatWAR_team(team, stat_range):
         .join(team_subquery, and_(
             team_subquery.c.playerID == Appearances.playerID,
             team_subquery.c.teamID == Appearances.teamID,
+            team_subquery.c.yearID == Appearances.yearID,
         ))
         .join(SeasonWar, SeasonWar.playerID == team_subquery.c.playerID)
+        .join(Batting, and_(Batting.playerID == Appearances.playerID, Batting.yearID == Appearances.yearID))
         .filter(SeasonWar.war >= stat_range)
-        .filter(SeasonWar.yearID == Appearances.yearID)
+        .filter(SeasonWar.yearID == team_subquery.c.yearID)
+        .having(db.func.sum(Batting.stint) < 2)
         .group_by(People.playerID)
         .order_by(db.func.sum(Appearances.G_all).asc())
         .distinct()
@@ -4477,6 +4486,24 @@ def get_players_draftPick_allStar():
         .group_by(People.playerID)
         .order_by(db.func.sum(AllStarFull.GP).asc())
     )
+
+
+def get_players_draftPick_team(team):
+    return(
+        db.session.query(People.nameFirst, People.nameLast, People.debutDate, People.finalGameDate)
+        .join(Drafts, Drafts.playerID == People.playerID)
+        .join(Appearances, Appearances.playerID == People.playerID)
+        .join(Teams, and_(Teams.teamID == Drafts.teamID, Teams.yearID == Drafts.yearID))
+        .join(ImmaculateGridTeams, ImmaculateGridTeams.team_name == Teams.team_name)
+        .filter(ImmaculateGridTeams.ig_team_name == team)
+        .filter(Teams.yearID >= ImmaculateGridTeams.startYear)
+        .filter(or_(ImmaculateGridTeams.endYear.is_(None), Teams.yearID <= ImmaculateGridTeams.endYear))
+        .filter(Drafts.draft_round == 1)
+        .order_by(db.func.sum(Appearances.G_all))
+        .group_by(Appearances.playerID)
+        .all()
+    )
+
 
 
 def get_players_draftPick_stdAward(award):

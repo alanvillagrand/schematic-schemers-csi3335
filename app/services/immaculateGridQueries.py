@@ -14,7 +14,9 @@ def join_subqueries(subquery1, subquery2):
     return (
         db.session.query(
             People.nameFirst,
-            People.nameLast
+            People.nameLast,
+            People.debutDate,
+            People.finalGameDate
         )
         .join(main_query, main_query.c.playerID == People.playerID)
         .join(Appearances, Appearances.playerID == main_query.c.playerID)
@@ -67,7 +69,7 @@ def get_players_seasonStatBatting_team(stat, team, stat_range):
 
     team_subquery = played_on_team_subquery(team)
     return (
-        db.session.query(People.nameFirst, People.nameLast)
+        db.session.query(People.nameFirst, People.nameLast, People.debutDate, People.finalGameDate)
         .join(Batting, Batting.playerID == People.playerID)
         .join(team_subquery, and_(
             team_subquery.c.playerID == Batting.playerID,
@@ -84,7 +86,7 @@ def get_players_seasonStatBatting_team(stat, team, stat_range):
 def get_players_ws_team(team):
     team_subquery = played_on_team_subquery(team)
     return (
-        db.session.query(People.nameFirst, People.nameLast)
+        db.session.query(People.nameFirst, People.nameLast, People.debutDate, People.finalGameDate)
         .join(Appearances, Appearances.playerID == People.playerID)
         .join(team_subquery, team_subquery.c.playerID == People.playerID)
         .join(SeriesPost, SeriesPost.teamIDwinner == team_subquery.c.teamID)
@@ -102,7 +104,7 @@ def get_players_seasonStatWAR_team(team, stat_range):
 
     team_subquery = played_on_team_subquery(team)
     return (
-        db.session.query(People.nameFirst, People.nameLast)
+        db.session.query(People.nameFirst, People.nameLast, People.debutDate, People.finalGameDate)
         .join(Appearances, Appearances.playerID == People.playerID)
         .join(team_subquery, and_(
             team_subquery.c.playerID == Appearances.playerID,
@@ -122,7 +124,7 @@ def get_players_careerStatWAR_team(team, stat_range):
 
     team_subquery = played_on_team_subquery(team)
     return (
-        db.session.query(People.nameFirst, People.nameLast)
+        db.session.query(People.nameFirst, People.nameLast, People.debutDate, People.finalGameDate)
         .join(CareerWar, CareerWar.playerID == People.playerID)
         .join(team_subquery, team_subquery.c.playerID == People.playerID)
         .join(Appearances, Appearances.playerID == People.playerID)
@@ -138,7 +140,7 @@ def get_players_seasonPitchingERA_team(team):
 
     team_subquery = played_on_team_subquery(team)
     return (
-        db.session.query(People.nameFirst, People.nameLast)
+        db.session.query(People.nameFirst, People.nameLast, People.debutDate, People.finalGameDate)
         .join(Pitching, Pitching.playerID == People.playerID)
         .join(team_subquery, and_(
             team_subquery.c.playerID == Pitching.playerID,
@@ -156,7 +158,7 @@ def get_players_seasonStatPitching_team(stat_column, team, stat_range):
 
     team_subquery = played_on_team_subquery(team)
     return (
-        db.session.query(People.nameFirst, People.nameLast)
+        db.session.query(People.nameFirst, People.nameLast, People.debutDate, People.finalGameDate)
         .join(Pitching, Pitching.playerID == People.playerID)
         .join(team_subquery, and_(
             team_subquery.c.playerID == Pitching.playerID,
@@ -174,7 +176,7 @@ def get_players_hof_team(team):
     team_subquery = played_on_team_subquery(team)
 
     return (
-        db.session.query(People.nameFirst, People.nameLast)
+        db.session.query(People.nameFirst, People.nameLast, People.debutDate, People.finalGameDate)
         .join(Appearances, Appearances.playerID == People.playerID)
         .join(HallOfFame, HallOfFame.playerID == People.playerID)
         .join(team_subquery, team_subquery.c.playerID == HallOfFame.playerID)
@@ -190,7 +192,7 @@ def get_players_pob_team(team):
     team_subquery = played_on_team_subquery(team)
 
     return (
-        db.session.query(People.nameFirst, People.nameLast)
+        db.session.query(People.nameFirst, People.nameLast, People.debutDate, People.finalGameDate)
         .join(Appearances, Appearances.playerID == People.playerID)
         .join(team_subquery, team_subquery.c.playerID == People.playerID)
         .filter(People.birthCountry != "USA")
@@ -207,7 +209,7 @@ def get_players_position_team(position, team):
 
     team_subquery = played_on_team_subquery(team)
     return (
-        db.session.query(People.nameFirst, People.nameLast)
+        db.session.query(People.nameFirst, People.nameLast, People.debutDate, People.finalGameDate)
         .join(Appearances, Appearances.playerID == People.playerID)
         .join(team_subquery, and_(
             team_subquery.c.playerID == Appearances.playerID,
@@ -224,7 +226,7 @@ def get_players_position_team(position, team):
 def get_players_seasonBattingAVG_team(stat_range, team):
     team_subquery = played_on_team_subquery(team)
     return (
-        db.session.query(People.nameFirst, People.nameLast)
+        db.session.query(People.nameFirst, People.nameLast, People.debutDate, People.finalGameDate)
         .join(Batting, Batting.playerID == People.playerID)
         .join(team_subquery, and_(
             team_subquery.c.playerID == Batting.playerID,
@@ -247,7 +249,7 @@ def get_players_seasonBattingAVG_team(stat_range, team):
 def get_players_exclusive_to_team(team):
     team_subquery = played_on_team_subquery(team)
     return (
-        db.session.query(People.nameFirst, People.nameLast)
+        db.session.query(People.nameFirst, People.nameLast, People.debutDate, People.finalGameDate)
         .join(Appearances, Appearances.playerID == People.playerID)
         .join(Teams, Teams.teamID == Appearances.teamID)
         .join(team_subquery, team_subquery.c.playerID == People.playerID)
@@ -271,7 +273,7 @@ algorithm orders it by least appearances in batting b_G
 def get_players_seasonBatting3030_team(team):
     team_subquery = played_on_team_subquery(team)
     return (
-        db.session.query(People.nameFirst, People.nameLast)
+        db.session.query(People.nameFirst, People.nameLast, People.debutDate, People.finalGameDate)
         .join(Batting, Batting.playerID == People.playerID)
         .join(team_subquery, team_subquery.c.playerID == Batting.playerID)
         .filter(Batting.b_SB > 30)
@@ -308,10 +310,7 @@ def get_players_careerStatBatting_team(stat_column, team, stat_range):
     )
 
     return (
-        db.session.query(
-            People.nameFirst,
-            People.nameLast,
-        )
+        db.session.query(People.nameFirst,People.nameLast)
         .join(career_stats, career_stats.c.playerID == People.playerID)
         .join(Batting, Batting.playerID == People.playerID)
         .join(team_subquery, team_subquery.c.playerID == Batting.playerID)
@@ -347,10 +346,7 @@ def get_players_careerStatPitching_team(stat_column, team, stat_range):
     )
 
     return (
-        db.session.query(
-            People.nameFirst,
-            People.nameLast
-        )
+        db.session.query(People.nameFirst, People.nameLast)
         .join(career_stats, career_stats.c.playerID == People.playerID)
         .join(Pitching, Pitching.playerID == People.playerID)
         .join(team_subquery, team_subquery.c.playerID == Pitching.playerID)
@@ -378,10 +374,7 @@ def get_players_careerPitchingERA_team(team):
     )
 
     return (
-        db.session.query(
-            People.nameFirst,
-            People.nameLast,
-        )
+        db.session.query(People.nameFirst, People.nameLast)
         .join(career_stats, career_stats.c.playerID == People.playerID)
         .join(Pitching, Pitching.playerID == People.playerID)
         .join(team_subquery, team_subquery.c.playerID == Pitching.playerID)
@@ -3552,3 +3545,4 @@ def get_players_draftPick_country(country):
         .group_by(People.playerID)
         .order_by(db.func.sum(Appearances.G_all).asc())
     )
+

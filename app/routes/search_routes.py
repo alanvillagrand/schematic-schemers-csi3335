@@ -203,6 +203,11 @@ def search_players():
         elif pob != "Outside of USA" and team == "Only One Team":
             results = get_players_country_onlyOneTeam(pob)
 
+    elif (option1 == "teams" and option2 == "dp") or (option1 == "dp" and option2 == "teams"):
+        team = option1_details if option1 == "teams" else option2_details
+        results = get_players_draftPick_team(team)
+
+
 
     elif option1 == "career statistic" and option2 == "career statistic":
         stat1 = option1_details
